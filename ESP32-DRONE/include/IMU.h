@@ -1,4 +1,4 @@
-// include/mpu6050.h
+// include/IMU.h
 
 #ifndef MPU6050_H
 #define MPU6050_H
@@ -8,7 +8,9 @@
 
 extern Adafruit_MPU6050 mpu;
 
+void setupIMU();
 bool initializeMPU6050();
 void readMPU6050(sensors_event_t* a, sensors_event_t* g, sensors_event_t* temp);
+void printMPU6050Data(sensors_event_t* a, sensors_event_t* g, sensors_event_t* temp);
 
 #endif // MPU6050_H
