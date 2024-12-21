@@ -5,14 +5,16 @@
 #include <HardwareSerial.h>
 #include <GPS.h>
 #include <Serial.h>
+#include <Echo.h>
 
 
 void setup(void)
 {
     serialSetup();
     // setupIMU();
+    // setupGPS();
 
-    setupGPS();
+    echoSetup();
 }
 
 void loop()
@@ -23,6 +25,8 @@ void loop()
 
     // displayGPSData();
     // displaySatelliteCount();
+
+    measureDistance();
 
     delay(500);
 }
