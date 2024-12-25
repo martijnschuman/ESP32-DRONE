@@ -7,10 +7,16 @@
 #include <HardwareSerial.h>
 
 extern TinyGPSPlus gps;
-extern HardwareSerial gpsSerial;
+extern HardwareSerial GPSModule;
 
 void setupGPS();
+String getGPSTime();
+String getGPSDate();
+String getGPSLocation();
+String getGPSSpeed();
+String getGPSAltitude();
+String getGPSSatellites();
+String getGPSHDOP();
 void displayGPSData();
-void displaySatelliteCount();
 
 #endif // GPS_H

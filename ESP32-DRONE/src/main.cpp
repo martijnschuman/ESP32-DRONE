@@ -5,16 +5,17 @@
 #include <HardwareSerial.h>
 #include <GPS.h>
 #include <Serial.h>
-#include <Echo.h>
-
+#include <LIDAR.h>
 
 void setup(void)
 {
     serialSetup();
     // setupIMU();
     // setupGPS();
+    // echoSetup();
+    // setupLIDAR();
 
-    echoSetup();
+    // Serial.println("Setup done");
 }
 
 void loop()
@@ -24,9 +25,8 @@ void loop()
     // printMPU6050Data(&a, &g, &temp);
 
     // displayGPSData();
-    // displaySatelliteCount();
 
-    measureDistance();
+    // measureHight();
 
     delay(500);
 }

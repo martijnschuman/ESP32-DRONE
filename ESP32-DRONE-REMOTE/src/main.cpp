@@ -1,29 +1,29 @@
 #include <Arduino.h>
-
-#define LEFT_VRX 27
-#define LEFT_VRY 26
+#include <Serial.h>
+#include "Config.h"
+#include "Joystick.h"
 
 void setup() {
-	// put your setup code here, to run once:
-	Serial.begin(115200);
-	Serial.println("Hello World");
+	serialSetup();
 
-	pinMode(LEFT_VRX, INPUT);
-
-	analogReadResolution(12); // Set the ADC resolution to 12 bits (0-4095)
-	pinMode(LEFT_VRY, INPUT);
-	pinMode(LEFT_VRY, INPUT);
+	setupJoysticks();
 }
 
 void loop() {
-	// put your main code here, to run repeatedly:
-	int x = analogRead(LEFT_VRX);
-	int y = analogRead(LEFT_VRY);
+	if(checkStartCalibrationButton() && !getLeftCalibrated()) {
+		calibrateLeftJoystick();
+	}
 
-	Serial.print("X: ");
-	Serial.print(x);
-	Serial.print(" Y: ");
-	Serial.println(y);
+	if(getLeftCalibrated()) {
+		Serial.print("Left Joystick X: ");
+		Serial.println(transferredLeftJoystickReadX());
+		Serial.print("Left Joystick Y: ");
+		Serial.println(transferredLeftJoystickReadY());
+	}
 
-	delay(100);
+	// Serial.print("Right Joystick X: ");
+	// Serial.println(rightJoystickReadX());
+	// Serial.print("Right Joystick Y: ");
+	// Serial.println(rightJoystickReadY());
+	delay(1000);
 }
