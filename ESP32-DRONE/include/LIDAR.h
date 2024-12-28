@@ -3,13 +3,9 @@
 #ifndef LIDAR_H
 #define LIDAR_H
 
-#include <Arduino.h>
-#include <Wire.h>
-#include <DFRobot_LIDAR07.h>
-#include <Config.h>
-#include <Wire.h>
-#include "I2CMultiplexer.h"
 #include "Config.h"
+#include <DFRobot_LIDAR07.h>
+#include "I2CMultiplexer.h"
 
 extern DFRobot_LIDAR07_IIC lidar;
 

@@ -3,11 +3,10 @@
 #ifndef MPU6050_H
 #define MPU6050_H
 
+#include "Config.h"
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
-#include <Wire.h>
 #include "I2CMultiplexer.h"
-#include "Config.h"
 
 extern Adafruit_MPU6050 mpu;
 

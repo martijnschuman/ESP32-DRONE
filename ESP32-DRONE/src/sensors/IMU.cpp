@@ -1,7 +1,5 @@
 // src/sensors/IMU.cpp
 #include "IMU.h"
-#include <Wire.h>
-#include <Arduino.h>
 
 Adafruit_MPU6050 mpu;
 
@@ -19,8 +17,7 @@ void setupIMU() {
 }
 
 bool initializeMPU6050() {
-    if (!mpu.begin())
-    {
+    if (!mpu.begin()) {
         Serial.println("Failed to find MPU6050 chip");
         return false;
     }
@@ -93,6 +90,10 @@ void readMPU6050(sensors_event_t *a, sensors_event_t *g, sensors_event_t *temp) 
     mpu.getEvent(a, g, temp);
 }
 
+float getCalibratedTemperature(float temp) {
+    return temp + IMU_TEMP_CALIBRATION;
+}
+
 void printMPU6050Data(sensors_event_t *a, sensors_event_t *g, sensors_event_t *temp) {
     Serial.print("Acceleration X: ");
     Serial.print(a->acceleration.x);
@@ -111,6 +112,6 @@ void printMPU6050Data(sensors_event_t *a, sensors_event_t *g, sensors_event_t *t
     Serial.println(" rad/s");
 
     Serial.print("Temperature: ");
-    Serial.print(temp->temperature);
+    Serial.print(getCalibratedTemperature(temp->temperature));
     Serial.println(" degC");
 }
