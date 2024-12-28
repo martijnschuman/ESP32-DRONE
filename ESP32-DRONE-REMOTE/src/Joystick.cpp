@@ -4,7 +4,10 @@
 // Calibration data for left joystick
 int leftJoystickMeasuredMinX = 4095, leftJoystickMeasuredMaxX = 0, leftJoystickMeasuredCenterX = 0;
 int leftJoystickMeasuredMinY = 4095, leftJoystickMeasuredMaxY = 0, leftJoystickMeasuredCenterY = 0;
+int rightJoystickMeasuredMinX = 4095, rightJoystickMeasuredMaxX = 0, rightJoystickMeasuredCenterX = 0;
+int rightJoystickMeasuredMinY = 4095, rightJoystickMeasuredMaxY = 0, rightJoystickMeasuredCenterY = 0;
 bool leftCalibrated = false;
+bool rightCalibrated = false;
 
 // Setup function for joysticks
 void setupJoysticks() {
@@ -13,6 +16,8 @@ void setupJoysticks() {
     pinMode(RIGHT_VRX, INPUT);
     pinMode(RIGHT_VRY, INPUT);
     pinMode(START_CALIBRATION_BUTTON, INPUT_PULLUP);
+    pinMode(CALIBRATION_RED_LED, OUTPUT);
+    pinMode(CALIBRATION_GREEN_LED, OUTPUT);
 }
 
 // Generic calibration method for both joysticks
@@ -20,7 +25,7 @@ void calibrateJoystick(int &minX, int &maxX, int &centerX, int &minY, int &maxY,
     Serial.print("Calibrating "); Serial.println(joystickName);
 
     // Min X calibration
-    Serial.println("Move the joystick to the left (min X) and hold.");
+    Serial.println("Move the joystick to the left (min X) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
     delay(JOYSTICK_CALIBRATION_DELAY);
     unsigned long startTime = millis();
     long sumX = 0;
@@ -34,7 +39,7 @@ void calibrateJoystick(int &minX, int &maxX, int &centerX, int &minY, int &maxY,
     Serial.println(minX);
 
     // Max X calibration
-    Serial.println("Now move the joystick to the right (max X) and hold.");
+    Serial.println("Now move the joystick to the right (max X) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
     delay(JOYSTICK_CALIBRATION_DELAY);
     startTime = millis();
     sumX = 0;
@@ -48,7 +53,7 @@ void calibrateJoystick(int &minX, int &maxX, int &centerX, int &minY, int &maxY,
     Serial.println(maxX);
 
     // Min Y calibration
-    Serial.println("Move the joystick to the bottom (min Y) and hold.");
+    Serial.println("Move the joystick to the bottom (min Y) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
     delay(JOYSTICK_CALIBRATION_DELAY);
     startTime = millis();
     long sumY = 0;
@@ -62,7 +67,7 @@ void calibrateJoystick(int &minX, int &maxX, int &centerX, int &minY, int &maxY,
     Serial.println(minY);
 
     // Max Y calibration
-    Serial.println("Now move the joystick to the top (max Y) and hold.");
+    Serial.println("Now move the joystick to the top (max Y) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
     delay(JOYSTICK_CALIBRATION_DELAY);
     startTime = millis();
     sumY = 0;
@@ -99,11 +104,11 @@ void calibrateJoystick(int &minX, int &maxX, int &centerX, int &minY, int &maxY,
 }
 
 // Transfer function to scale joystick values with two separate mappings and dead zone
-int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue, int centerValue, bool isYAxis = false) {
+int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue, int centerValue, bool isYAxis) {
     int result;
 
-    // Define a dead zone around the center value (e.g., ±10)
-    int deadZone = 10;
+    // Define a dead zone around the center value
+    int deadZone = JOYSTICK_CENTER_TOLERANCE;
 
     // If the value is within the dead zone, return 0
     if (abs(value - centerValue) < deadZone) {
@@ -122,9 +127,7 @@ int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue,
         }
 
         // Adjust the Y-axis range slightly (correction factor)
-        // We are applying a small correction factor here to address the misalignment
         result = result + 12;  // Adjust by 12 units for now; can be fine-tuned further
-
     } else {
         // X-axis does not need special treatment
         if (value < centerValue) {
@@ -134,17 +137,30 @@ int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue,
         }
     }
 
+    if (result > 100) {
+        result = 100;
+    } else if (result < -100) {
+        result = -100;
+    }
+
     return result;
 }
 
-
 // Functions for reading joystick values
 int transferredLeftJoystickReadX() {
-    return transferJoystickValue(analogRead(LEFT_VRX), leftJoystickMeasuredMinX, leftJoystickMeasuredMaxX, leftJoystickMeasuredCenterX);
+    return transferJoystickValue(analogRead(LEFT_VRX), leftJoystickMeasuredMinX, leftJoystickMeasuredMaxX, leftJoystickMeasuredCenterX, false);
 }
 
 int transferredLeftJoystickReadY() {
-    return transferJoystickValue(analogRead(LEFT_VRY), leftJoystickMeasuredMinY, leftJoystickMeasuredMaxY, leftJoystickMeasuredCenterY);
+    return transferJoystickValue(analogRead(LEFT_VRY), leftJoystickMeasuredMinY, leftJoystickMeasuredMaxY, leftJoystickMeasuredCenterY, true);
+}
+
+int transferredRightJoystickReadX() {
+    return transferJoystickValue(analogRead(RIGHT_VRX), rightJoystickMeasuredMinX, rightJoystickMeasuredMaxX, rightJoystickMeasuredCenterX, false);
+}
+
+int transferredRightJoystickReadY() {
+    return transferJoystickValue(analogRead(RIGHT_VRY), rightJoystickMeasuredMinY, rightJoystickMeasuredMaxY, rightJoystickMeasuredCenterY, true);
 }
 
 // Calibration trigger for the left joystick
@@ -153,9 +169,18 @@ void calibrateLeftJoystick() {
     leftCalibrated = true;
 }
 
-// Function to check if the left joystick is calibrated
 bool getLeftCalibrated() {
     return leftCalibrated;
+}
+
+// Calibration trigger for the right joystick
+void calibrateRightJoystick() {
+    calibrateJoystick(rightJoystickMeasuredMinX, rightJoystickMeasuredMaxX, rightJoystickMeasuredCenterX, rightJoystickMeasuredMinY, rightJoystickMeasuredMaxY, rightJoystickMeasuredCenterY, RIGHT_VRX, RIGHT_VRY, "Right joystick");
+    rightCalibrated = true;
+}
+
+bool getRightCalibrated() {
+    return rightCalibrated;
 }
 
 // Function to check the start calibration button

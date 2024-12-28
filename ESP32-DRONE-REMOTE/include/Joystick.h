@@ -10,10 +10,14 @@ void setupJoysticks();
 
 bool checkStartCalibrationButton();
 void calibrateLeftJoystick();
+void calibrateRightJoystick();
 
 int transferredLeftJoystickReadX();
 int transferredLeftJoystickReadY();
+int transferredRightJoystickReadX();
+int transferredRightJoystickReadY();
 
 bool getLeftCalibrated();
+bool getRightCalibrated();
 
 #endif // Joystick_H
