@@ -1,7 +1,7 @@
 // src/serial.cpp
 #include <Arduino.h>
 
-bool serialSetup()
+bool setupSerial()
 {
 	Serial.begin(115200);
 	unsigned long startTime = millis();

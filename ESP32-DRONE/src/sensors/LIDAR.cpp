@@ -1,3 +1,4 @@
+// src/sensors/LIDAR.cpp
 #include <Arduino.h>
 #include <LIDAR.h>
 
@@ -18,7 +19,7 @@ void measureHight(){
     static uint16_t distance = 0;
     static int measurementsCount = 0;
 
-    lidar.startMeasure(); // Start measurement
+    lidar.startMeasure();
 
     if (lidar.getValue()) { // Get distance data
         distance += lidar.getDistanceMM(); // Get distance in mm

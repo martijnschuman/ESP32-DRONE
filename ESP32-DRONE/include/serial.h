@@ -3,6 +3,6 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
-bool serialSetup();
+bool setupSerial();
 
 #endif // SERIAL_H

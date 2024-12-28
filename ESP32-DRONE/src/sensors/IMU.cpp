@@ -1,4 +1,4 @@
-// src/sensors/mpu6050.cpp
+// src/sensors/IMU.cpp
 #include "IMU.h"
 #include <Wire.h>
 #include <Arduino.h>
@@ -6,24 +6,19 @@
 Adafruit_MPU6050 mpu;
 
 // Initialize MPU6050
-void setupIMU()
-{
-    if (!initializeMPU6050())
-    {
+void setupIMU() {
+    if (!initializeMPU6050()) {
         Serial.println("MPU6050 initialization failed!");
-        while (1)
-        {
+        while (1) {
             delay(10);
         }
     }
-    else
-    {
+    else {
         Serial.println("MPU6050 initialization successful!");
     }
 }
 
-bool initializeMPU6050()
-{
+bool initializeMPU6050() {
     if (!mpu.begin())
     {
         Serial.println("Failed to find MPU6050 chip");
@@ -33,8 +28,7 @@ bool initializeMPU6050()
 
     mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
     Serial.print("Accelerometer range set to: ");
-    switch (mpu.getAccelerometerRange())
-    {
+    switch (mpu.getAccelerometerRange()) {
     case MPU6050_RANGE_2_G:
         Serial.println("+-2G");
         break;
@@ -51,8 +45,7 @@ bool initializeMPU6050()
 
     mpu.setGyroRange(MPU6050_RANGE_500_DEG);
     Serial.print("Gyro range set to: ");
-    switch (mpu.getGyroRange())
-    {
+    switch (mpu.getGyroRange()) {
     case MPU6050_RANGE_250_DEG:
         Serial.println("+- 250 deg/s");
         break;
@@ -69,8 +62,7 @@ bool initializeMPU6050()
 
     mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
     Serial.print("Filter bandwidth set to: ");
-    switch (mpu.getFilterBandwidth())
-    {
+    switch (mpu.getFilterBandwidth()) {
     case MPU6050_BAND_260_HZ:
         Serial.println("260 Hz");
         break;
@@ -97,13 +89,11 @@ bool initializeMPU6050()
     return true;
 }
 
-void readMPU6050(sensors_event_t *a, sensors_event_t *g, sensors_event_t *temp)
-{
+void readMPU6050(sensors_event_t *a, sensors_event_t *g, sensors_event_t *temp) {
     mpu.getEvent(a, g, temp);
 }
 
-void printMPU6050Data(sensors_event_t *a, sensors_event_t *g, sensors_event_t *temp)
-{
+void printMPU6050Data(sensors_event_t *a, sensors_event_t *g, sensors_event_t *temp) {
     Serial.print("Acceleration X: ");
     Serial.print(a->acceleration.x);
     Serial.print(", Y: ");
@@ -123,6 +113,4 @@ void printMPU6050Data(sensors_event_t *a, sensors_event_t *g, sensors_event_t *t
     Serial.print("Temperature: ");
     Serial.print(temp->temperature);
     Serial.println(" degC");
-
-    Serial.println("");
 }

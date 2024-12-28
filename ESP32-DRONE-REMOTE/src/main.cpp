@@ -1,7 +1,16 @@
 #include <Arduino.h>
 #include <Serial.h>
-#include "Config.h"
-#include "Joystick.h"
+#include <Config.h>
+#include <Joystick.h>
+
+typedef struct message {
+	int leftX;
+	int leftY;
+	int rightX;
+	int rightY;
+} message;
+
+message handControllerData;
 
 void setup() {
 	serialSetup();
@@ -35,10 +44,6 @@ void loop() {
 	if(getLeftCalibrated() && getRightCalibrated()) {
 		Serial.println();
 	}
-
-	// Serial.print("Right Joystick X: ");
-	// Serial.println(rightJoystickReadX());
-	// Serial.print("Right Joystick Y: ");
-	// Serial.println(rightJoystickReadY());
+	
 	delay(1000);
 }

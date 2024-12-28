@@ -1,32 +1,35 @@
 // src/main.cpp
-
 #include <Arduino.h>
-#include <TinyGPS++.h>
-#include <HardwareSerial.h>
-#include <GPS.h>
-#include <Serial.h>
-#include <LIDAR.h>
+#include "TinyGPS++.h"
+#include "HardwareSerial.h"
+#include "GPS.h"
+#include "Serial.h"
+#include "LIDAR.h"
+#include "IMU.h"
+#include "I2CMultiplexer.h"
 
-void setup(void)
-{
-    serialSetup();
-    // setupIMU();
+void setup(void) {
+    setupSerial();
+    setupI2CMultiplexer();
+
+    enableI2CChannel(MPU6050_CHANNEL);
+    enableI2CChannel(LIDAR_CHANNEL);
+
+    setupIMU();
     // setupGPS();
-    // echoSetup();
-    // setupLIDAR();
+    setupLIDAR();
 
-    // Serial.println("Setup done");
+    Serial.println("Setup done");
 }
 
-void loop()
-{
-    // sensors_event_t a, g, temp;
-    // readMPU6050(&a, &g, &temp);
-    // printMPU6050Data(&a, &g, &temp);
+void loop() {
+    sensors_event_t a, g, temp;
+    readMPU6050(&a, &g, &temp);
+    printMPU6050Data(&a, &g, &temp);
 
     // displayGPSData();
 
-    // measureHight();
+    measureHight();
 
-    delay(500);
+    delay(1000);
 }
