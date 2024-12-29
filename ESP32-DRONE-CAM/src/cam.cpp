@@ -1,3 +1,4 @@
+//cam.cpp
 #include "Cam.h"
 
 unsigned int pictureNumber = 0;

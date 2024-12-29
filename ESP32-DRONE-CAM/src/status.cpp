@@ -1,3 +1,4 @@
+// status.cpp
 #include "Status.h"
 
 StatusEnum status;                          // Set initial status

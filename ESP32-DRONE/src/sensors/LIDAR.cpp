@@ -29,7 +29,7 @@ void measureHight(){
     }
 
     unsigned long currentTime = millis();
-    if (currentTime - lastDisplayTime >= LIDARMeasurementInterval) {
+    if (currentTime - lastDisplayTime >= LIDAR_MEASUREMENT_INTERVAL) {
         Serial.print("Distance: ");
         Serial.print(distance / measurementsCount);
         Serial.println(" mm");
