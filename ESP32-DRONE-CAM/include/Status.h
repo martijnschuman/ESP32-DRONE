@@ -2,18 +2,18 @@
 #ifndef STATUS_H
 #define STATUS_H
 
-#include "Config.h"
+#include "config.h"
+#include "ESPNow.h"
 
-enum StatusEnum {
-    SYSTEM_READY,
-    SYSTEM_FILE_SAVED,
-    SYSTEM_ERROR
+enum LEDStatusEnum {
+    LED_READY,
+    LED_SYSTEM_ERROR,
+    LED_ESP_NOW_ERROR,
+    LED_FILE_SAVED,
 };
 
-extern StatusEnum status;
-
-void reportStatus(StatusEnum newStatus);
-void showLEDStatus(StatusEnum ledStatus);
-void sendStatusToMaster(StatusEnum status);
+void setStatus(CommandStatusEnum newStatus);
+void reportStatus();
+void showLEDStatus(LEDStatusEnum ledStatus);
 
 #endif

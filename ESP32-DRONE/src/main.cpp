@@ -7,7 +7,7 @@
 #include "LIDAR.h"
 #include "IMU.h"
 #include "I2CMultiplexer.h"
-#include "Camera.h"
+#include "ESPNow.h"
 
 
 void setup(void) {
@@ -21,7 +21,7 @@ void setup(void) {
     // setupGPS();
     // setupLIDAR();
 
-    setupCamera();
+    setupESPNow();
     
     Serial.println("Setup done");
 }
@@ -37,19 +37,12 @@ void loop() {
 
     // delay(1000);
 
-    if (Serial.available() > 0) {
-        String command = Serial.readStringUntil('\n');
-        command.trim(); // Remove any whitespace or newline characters
+    sendKeepAlive();
 
-        if (command.equalsIgnoreCase("go")) {
-            sendTrigger();
+    static bool pictureTriggered = false;
 
-            // Wait for confirmation after sending trigger
-            if (!waitForConfirmation()) {
-                Serial.println("Error: Picture saved confirmation not received.");
-            }
-        }
+    if (!pictureTriggered && keepAliveAckReceived) {
+        sendTakePictureCommand();
+        pictureTriggered = true; // To avoid repeatedly sending the command
     }
-
-    isCameraAlive();
 }

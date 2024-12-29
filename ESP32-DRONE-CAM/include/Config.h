@@ -1,17 +1,45 @@
-// include/Config.h
+// include/config.h
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include "status.h"
 
-#define triggerPin 1                        // Pin used to trigger the camera
-#define reportPin 3                         // Pin used to report back to main controller
-#define statusLEDPin 33                     // Pin used to show the status of the system
-#define fileSaveBlinkCount 4                // Number of times the LED blinks after saving a file
+// ESPNow
+#define MAIN_MAC_ADDRESS {0xD0, 0xEF, 0x76, 0x34, 0x97, 0x44}
+#define CAMERA_MAC_ADDRESS {0xA0, 0xA3, 0xB3, 0xEC, 0xEC, 0x54}
+
+enum CommandStatusEnum { // Remove the typedef
+    KEEP_ALIVE = 0x01,
+    TAKE_PICTURE = 0x02,
+    READY = 0x03,
+    FILE_SAVED = 0x04,
+    SD_INIT_ERROR = 0x05,
+    SD_SAVE_ERROR = 0x06,
+    CAMERA_INIT_ERROR = 0x07,
+    CAMERA_TAKE_ERROR = 0x08,
+    ESP_NOW_INIT_ERROR = 0x09,
+    ESP_NOW_ADD_PEER_ERROR = 0x0A,
+    ESP_NOW_SEND_ERROR = 0x0B,
+};
+
+// Ensure CommandType is consistent
+struct CommandPacket {
+    CommandStatusEnum command;
+};
+
+extern CommandStatusEnum status;
+
+// Status LED
+#define STATUS_LED_PIN 33                       // Pin used to show the status of the system
+#define FILE_SAVE_BLINK_COUNT 4                 // Number of times the LED blinks after saving a file
 
 // Time intervals for blinking patterns
-#define errorOnDuration 500               // 500 ms for "Error" LED on
-#define errorOffDuration 50               // 50 ms for "Error" LED off
+#define SYSTEM_ERROR_LED_ON_DURATION 150
+#define SYSTEM_ERROR_LED_OFF_DURATION 50
+
+#define ESP_NOW_ERROR_LED_ON_DURATION 500
+#define ESP_NOW_ERROR_LED_OFF_DURATION 50
 
 // Pin definition for CAMERA_MODEL_AI_THINKER
 #define PWDN_GPIO_NUM     32

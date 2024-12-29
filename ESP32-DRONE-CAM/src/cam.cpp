@@ -42,7 +42,7 @@ void setupCamera(){
     // Initialize the Camera
     esp_err_t err = esp_camera_init(&config);
     if (err != ESP_OK) {
-        status = SYSTEM_ERROR;
+        setStatus(CAMERA_INIT_ERROR);
         return;
     }
 
@@ -73,23 +73,15 @@ void setupCamera(){
 
 void setupSDCard(){
     if (!SD_MMC.begin()) {
-        status = SYSTEM_ERROR;
+        setStatus(SD_INIT_ERROR);
         return;
     }
 
     uint8_t cardType = SD_MMC.cardType();
     if(cardType == CARD_NONE){
-        status = SYSTEM_ERROR;
+        setStatus(SD_INIT_ERROR);
         return;
     }
-}
-
-bool validateSDCard(){
-    uint8_t cardType = SD_MMC.cardType();
-    if (cardType == CARD_NONE){
-        return false;
-    }
-    return true;
 }
 
 void takePicture(){
@@ -100,7 +92,7 @@ void takePicture(){
     camera_fb_t  * fb = esp_camera_fb_get();
 
     if(!fb) {
-        status = SYSTEM_ERROR;
+        setStatus(CAMERA_TAKE_ERROR);
         return;
     }
 
@@ -108,11 +100,11 @@ void takePicture(){
     fs::FS &fs = SD_MMC; 
     File file = fs.open(path.c_str(), FILE_WRITE);
     if(!file){
-        status = SYSTEM_ERROR;
+        setStatus(SD_SAVE_ERROR);
     } 
     else {
         file.write(fb->buf, fb->len); // payload (image), payload length
-        status = SYSTEM_FILE_SAVED;
+        setStatus(FILE_SAVED);
     }
     file.close();
 
