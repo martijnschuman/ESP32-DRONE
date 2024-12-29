@@ -35,7 +35,7 @@ void setupESPNow() {
 void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     if (dataLen == sizeof(CommandPacket)) {
         CommandPacket command = *reinterpret_cast<const CommandPacket*>(data);
-        switch (command.command) {
+        switch (command.body) {
             case KEEP_ALIVE: {
                 Serial.println("Keep-alive packet received from master.");
                 
@@ -49,7 +49,7 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
                 takePicture();
 
                 // Send status back to master
-                sendStatusToMaster();
+                sendCommandToMaster();
                 break;
             }
             default: {
@@ -60,10 +60,13 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     }
 }
 
-// Function to send status to the master
-void sendStatusToMaster() {
-    if (esp_now_send(mainMAC, (uint8_t*)&status, sizeof(status)) != ESP_OK) {
-        Serial.println("Error sending status to master.");
+// Function to send a CommandPacket with status to the master
+void sendCommandToMaster() {
+    CommandPacket packet;
+    packet.body = status;  // Set the status in the CommandPacket
+
+    if (esp_now_send(mainMAC, (uint8_t*)&packet, sizeof(packet)) != ESP_OK) {
+        Serial.println("Error sending command to master.");
         setStatus(ESP_NOW_SEND_ERROR);
     }
 }

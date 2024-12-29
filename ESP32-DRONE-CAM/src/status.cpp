@@ -14,7 +14,7 @@ int blinkStep = 0;                          // Step for blink pattern (0 for on,
 void setStatus(CommandStatusEnum newStatus) {
     status = newStatus;
     reportStatus();
-    sendStatusToMaster();
+    sendCommandToMaster();
 }
 
 // Function to report status

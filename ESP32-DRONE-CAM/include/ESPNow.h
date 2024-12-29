@@ -13,6 +13,6 @@ extern uint8_t mainMAC[];
 
 void setupESPNow();
 void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen);
-void sendStatusToMaster();
+void sendCommandToMaster();
 
 #endif
