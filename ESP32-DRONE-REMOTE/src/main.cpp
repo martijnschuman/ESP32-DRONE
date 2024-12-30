@@ -1,7 +1,11 @@
-#include <Arduino.h>
-#include <Serial.h>
-#include <Config.h>
-#include <Joystick.h>
+// main.cpp
+#include "config.h"
+#include "serial.h"
+#include "joystick.h"
+#include "LCD.h"
+#include "buttons.h"
+
+bool isDroneConnected = false;
 
 typedef struct message {
 	int leftX;
@@ -15,35 +19,28 @@ message handControllerData;
 void setup() {
 	serialSetup();
 
+	setupLCD();
+	setupButtons();
 	setupJoysticks();
+
+	Serial.println("Setup complete.");
+	displayLCD("Setup complete.", 0, 0);
+	delay(1500);
 }
 
 void loop() {
-	if(checkStartCalibrationButton() && !getLeftCalibrated() && !getRightCalibrated()) {
-		digitalWrite(CALIBRATION_RED_LED, HIGH);
-    	digitalWrite(CALIBRATION_GREEN_LED, LOW);
-
-		calibrateLeftJoystick();
-		calibrateRightJoystick();
-
-		digitalWrite(CALIBRATION_RED_LED, LOW);
-		digitalWrite(CALIBRATION_GREEN_LED, HIGH);
-
-		delay(2000);
-
-		digitalWrite(CALIBRATION_RED_LED, LOW);
-		digitalWrite(CALIBRATION_GREEN_LED, LOW);
+	if (!leftCalibrated || !rightCalibrated) {
+		calibrationMenu();
 	}
 
-	if(getLeftCalibrated()) {
-		Serial.print("L (X, Y): ( " + String(transferredLeftJoystickReadX()) + ", " + String(transferredLeftJoystickReadY()) + " )");
+	if (!isDroneConnected) {
+		connectToDroneDisplay();
+
+		if (checkOKButton()) {
+			isDroneConnected = true;
+			connectedToDroneDisplay();
+		}
+	} else {
+		joystickDebugDisplay();
 	}
-	if(getRightCalibrated()) {
-		Serial.print("R (X, Y): ( " + String(transferredRightJoystickReadX()) + ", " + String(transferredRightJoystickReadY()) + " )");
-	}
-	if(getLeftCalibrated() && getRightCalibrated()) {
-		Serial.println();
-	}
-	
-	delay(1000);
 }

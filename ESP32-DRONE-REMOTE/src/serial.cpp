@@ -1,5 +1,5 @@
 // src/serial.cpp
-#include <Arduino.h>
+#include "config.h"
 
 bool serialSetup()
 {

@@ -1,106 +1,42 @@
-#include <Joystick.h>
-#include <Config.h>
+#include <joystick.h>
 
 // Calibration data for left joystick
-int leftJoystickMeasuredMinX = 4095, leftJoystickMeasuredMaxX = 0, leftJoystickMeasuredCenterX = 0;
-int leftJoystickMeasuredMinY = 4095, leftJoystickMeasuredMaxY = 0, leftJoystickMeasuredCenterY = 0;
-int rightJoystickMeasuredMinX = 4095, rightJoystickMeasuredMaxX = 0, rightJoystickMeasuredCenterX = 0;
-int rightJoystickMeasuredMinY = 4095, rightJoystickMeasuredMaxY = 0, rightJoystickMeasuredCenterY = 0;
+int leftMeasuredMinX = 4095, leftMeasuredMaxX = 0, leftMeasuredCenterX = 0;
+int leftMeasuredMinY = 4095, leftMeasuredMaxY = 0, leftMeasuredCenterY = 0;
 bool leftCalibrated = false;
+
+// Calibration data for right joystick
+int rightMeasuredMinX = 4095, rightMeasuredMaxX = 0, rightMeasuredCenterX = 0;
+int rightMeasuredMinY = 4095, rightMeasuredMaxY = 0, rightMeasuredCenterY = 0;
 bool rightCalibrated = false;
 
 // Setup function for joysticks
 void setupJoysticks() {
     pinMode(LEFT_VRX, INPUT);
     pinMode(LEFT_VRY, INPUT);
+
     pinMode(RIGHT_VRX, INPUT);
     pinMode(RIGHT_VRY, INPUT);
-    pinMode(START_CALIBRATION_BUTTON, INPUT_PULLUP);
+
     pinMode(CALIBRATION_RED_LED, OUTPUT);
     pinMode(CALIBRATION_GREEN_LED, OUTPUT);
 }
 
-// Generic calibration method for both joysticks
-void calibrateJoystick(int &minX, int &maxX, int &centerX, int &minY, int &maxY, int &centerY, int pinX, int pinY, const char* joystickName) {
-    Serial.print("Calibrating "); Serial.println(joystickName);
+// Functions for reading joystick values
+int getLeftJoystickX() {
+    return transferJoystickValue(analogRead(LEFT_VRX), leftMeasuredMinX, leftMeasuredMaxX, leftMeasuredCenterX, false);
+}
 
-    // Min X calibration
-    Serial.println("Move the joystick to the left (min X) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
-    delay(JOYSTICK_CALIBRATION_DELAY);
-    unsigned long startTime = millis();
-    long sumX = 0;
-    int countX = 0;
-    while (millis() - startTime < JOYSTICK_CALIBRATION_DELAY) {
-        sumX += analogRead(pinX);
-        countX++;
-    }
-    minX = sumX / countX;
-    Serial.print("Min X: ");
-    Serial.println(minX);
+int getLeftJoystickY() {
+    return transferJoystickValue(analogRead(LEFT_VRY), leftMeasuredMinY, leftMeasuredMaxY, leftMeasuredCenterY, true);
+}
 
-    // Max X calibration
-    Serial.println("Now move the joystick to the right (max X) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
-    delay(JOYSTICK_CALIBRATION_DELAY);
-    startTime = millis();
-    sumX = 0;
-    countX = 0;
-    while (millis() - startTime < JOYSTICK_CALIBRATION_DELAY) {
-        sumX += analogRead(pinX);
-        countX++;
-    }
-    maxX = sumX / countX;
-    Serial.print("Max X: ");
-    Serial.println(maxX);
+int getRightJoystickX() {
+    return transferJoystickValue(analogRead(RIGHT_VRX), rightMeasuredMinX, rightMeasuredMaxX, rightMeasuredCenterX, false);
+}
 
-    // Min Y calibration
-    Serial.println("Move the joystick to the bottom (min Y) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
-    delay(JOYSTICK_CALIBRATION_DELAY);
-    startTime = millis();
-    long sumY = 0;
-    int countY = 0;
-    while (millis() - startTime < JOYSTICK_CALIBRATION_DELAY) {
-        sumY += analogRead(pinY);
-        countY++;
-    }
-    minY = sumY / countY;
-    Serial.print("Min Y: ");
-    Serial.println(minY);
-
-    // Max Y calibration
-    Serial.println("Now move the joystick to the top (max Y) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
-    delay(JOYSTICK_CALIBRATION_DELAY);
-    startTime = millis();
-    sumY = 0;
-    countY = 0;
-    while (millis() - startTime < JOYSTICK_CALIBRATION_DELAY) {
-        sumY += analogRead(pinY);
-        countY++;
-    }
-    maxY = sumY / countY;
-    Serial.print("Max Y: ");
-    Serial.println(maxY);
-
-    // Center calibration
-    Serial.println("Release the joystick to its center position.");
-    delay(JOYSTICK_CALIBRATION_DELAY);  // Wait for the joystick to settle
-    long centerSumX = 0, centerSumY = 0;
-    int count = 0;
-    for (int i = 0; i < 1000; i++) {  // Taking 100 samples for center
-        centerSumX += analogRead(pinX);
-        centerSumY += analogRead(pinY);
-        delay(10);  // Small delay to prevent reading too fast
-        count++;
-    }
-    centerX = centerSumX / count;
-    centerY = centerSumY / count;
-
-    Serial.print(joystickName); Serial.println(" calibration complete!");
-    Serial.print("Min X: "); Serial.println(minX);
-    Serial.print("Max X: "); Serial.println(maxX);
-    Serial.print("Min Y: "); Serial.println(minY);
-    Serial.print("Max Y: "); Serial.println(maxY);
-    Serial.print("Center X: "); Serial.println(centerX);
-    Serial.print("Center Y: "); Serial.println(centerY);
+int getRightJoystickY() {
+    return transferJoystickValue(analogRead(RIGHT_VRY), rightMeasuredMinY, rightMeasuredMaxY, rightMeasuredCenterY, true);
 }
 
 // Transfer function to scale joystick values with two separate mappings and dead zone
@@ -127,7 +63,7 @@ int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue,
         }
 
         // Adjust the Y-axis range slightly (correction factor)
-        result = result + 12;  // Adjust by 12 units for now; can be fine-tuned further
+        result = result + 12;
     } else {
         // X-axis does not need special treatment
         if (value < centerValue) {
@@ -146,51 +82,129 @@ int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue,
     return result;
 }
 
-// Functions for reading joystick values
-int transferredLeftJoystickReadX() {
-    return transferJoystickValue(analogRead(LEFT_VRX), leftJoystickMeasuredMinX, leftJoystickMeasuredMaxX, leftJoystickMeasuredCenterX, false);
+void startCalibrateJoysticks() {
+    digitalWrite(CALIBRATION_RED_LED, HIGH);
+    digitalWrite(CALIBRATION_GREEN_LED, LOW);
+
+    leftCalibrated = calibrateSingleJoystick(leftMeasuredMinX, leftMeasuredMaxX, leftMeasuredMinY, leftMeasuredMaxY, leftMeasuredCenterX, leftMeasuredCenterY, LEFT_VRX, LEFT_VRY, "Left joystick");
+    rightCalibrated = calibrateSingleJoystick(rightMeasuredMinX, rightMeasuredMaxX, rightMeasuredMinY, rightMeasuredMaxY, rightMeasuredCenterX, rightMeasuredCenterY, RIGHT_VRX, RIGHT_VRY, "Right joystick");
+
+    digitalWrite(CALIBRATION_RED_LED, LOW);
+    digitalWrite(CALIBRATION_GREEN_LED, HIGH);
+    displayLCD("Calibration", 0, 0);
+    displayLCD("complete!", 1, 0);
+
+    delay(LCD_REFRESH_INTERVAL * 2); // Keep the green LED on for a short duration
+
+    digitalWrite(CALIBRATION_RED_LED, LOW);
+    digitalWrite(CALIBRATION_GREEN_LED, LOW);
+    clearLCD();
 }
 
-int transferredLeftJoystickReadY() {
-    return transferJoystickValue(analogRead(LEFT_VRY), leftJoystickMeasuredMinY, leftJoystickMeasuredMaxY, leftJoystickMeasuredCenterY, true);
-}
+// Generic calibration method for both joysticks
+bool calibrateSingleJoystick(int &minX, int &maxX, int &minY, int &maxY, int &centerX, int &centerY, int pinX, int pinY, const char* joystickName) {
+    Serial.print("Calibrating "); Serial.println(joystickName);
+    displayLCD("Calibrating", 0, 0);
+    displayLCD(joystickName, 1, 0);
 
-int transferredRightJoystickReadX() {
-    return transferJoystickValue(analogRead(RIGHT_VRX), rightJoystickMeasuredMinX, rightJoystickMeasuredMaxX, rightJoystickMeasuredCenterX, false);
-}
+    delay(LCD_REFRESH_INTERVAL);
 
-int transferredRightJoystickReadY() {
-    return transferJoystickValue(analogRead(RIGHT_VRY), rightJoystickMeasuredMinY, rightJoystickMeasuredMaxY, rightJoystickMeasuredCenterY, true);
-}
+    // Min X calibration
+    Serial.println("Move the joystick to the left (min X) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
+    displayLCD("Move left", 0, 0);
+    displayLCD(("for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds").c_str(), 1, 0);
 
-// Calibration trigger for the left joystick
-void calibrateLeftJoystick() {
-    calibrateJoystick(leftJoystickMeasuredMinX, leftJoystickMeasuredMaxX, leftJoystickMeasuredCenterX, leftJoystickMeasuredMinY, leftJoystickMeasuredMaxY, leftJoystickMeasuredCenterY, LEFT_VRX, LEFT_VRY, "Left joystick");
-    leftCalibrated = true;
-}
-
-bool getLeftCalibrated() {
-    return leftCalibrated;
-}
-
-// Calibration trigger for the right joystick
-void calibrateRightJoystick() {
-    calibrateJoystick(rightJoystickMeasuredMinX, rightJoystickMeasuredMaxX, rightJoystickMeasuredCenterX, rightJoystickMeasuredMinY, rightJoystickMeasuredMaxY, rightJoystickMeasuredCenterY, RIGHT_VRX, RIGHT_VRY, "Right joystick");
-    rightCalibrated = true;
-}
-
-bool getRightCalibrated() {
-    return rightCalibrated;
-}
-
-// Function to check the start calibration button
-bool checkStartCalibrationButton() {
-    static unsigned long lastPressTime = 0;
-    unsigned long currentTime = millis();
-
-    if (digitalRead(START_CALIBRATION_BUTTON) == LOW && (currentTime - lastPressTime) > DEBOUNCE_DELAY) {
-        lastPressTime = currentTime;
-        return true;
+    delay(JOYSTICK_CALIBRATION_DELAY);
+    unsigned long startTime = millis();
+    long sumX = 0;
+    int countX = 0;
+    while (millis() - startTime < JOYSTICK_CALIBRATION_DELAY) {
+        sumX += analogRead(pinX);
+        countX++;
     }
-    return false;
+    minX = sumX / countX;
+    Serial.print("Min X: ");
+    Serial.println(minX);
+
+    // Max X calibration
+    Serial.println("Now move the joystick to the right (max X) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
+    displayLCD("Move right", 0, 0);
+    displayLCD(("for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds").c_str(), 1, 0);
+
+    delay(JOYSTICK_CALIBRATION_DELAY);
+    startTime = millis();
+    sumX = 0;
+    countX = 0;
+    while (millis() - startTime < JOYSTICK_CALIBRATION_DELAY) {
+        sumX += analogRead(pinX);
+        countX++;
+    }
+    maxX = sumX / countX;
+    Serial.print("Max X: ");
+    Serial.println(maxX);
+
+    // Min Y calibration
+    Serial.println("Move the joystick to the bottom (min Y) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
+    displayLCD("Move to bottom", 0, 0);
+    displayLCD(("for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds").c_str(), 1, 0);
+
+    delay(JOYSTICK_CALIBRATION_DELAY);
+    startTime = millis();
+    long sumY = 0;
+    int countY = 0;
+    while (millis() - startTime < JOYSTICK_CALIBRATION_DELAY) {
+        sumY += analogRead(pinY);
+        countY++;
+    }
+    minY = sumY / countY;
+    Serial.print("Min Y: ");
+    Serial.println(minY);
+
+    // Max Y calibration
+    Serial.println("Now move the joystick to the top (max Y) and hold for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds.");
+    displayLCD("Move to top", 0, 0);
+    displayLCD(("for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds").c_str(), 1, 0);
+
+    delay(JOYSTICK_CALIBRATION_DELAY);
+    startTime = millis();
+    sumY = 0;
+    countY = 0;
+    while (millis() - startTime < JOYSTICK_CALIBRATION_DELAY) {
+        sumY += analogRead(pinY);
+        countY++;
+    }
+    maxY = sumY / countY;
+    Serial.print("Max Y: ");
+    Serial.println(maxY);
+
+    // Center calibration
+    Serial.println("Release the joystick to its center position.");
+    displayLCD("Move to center", 0, 0);
+    displayLCD(("for " + String(JOYSTICK_CALIBRATION_DELAY / 1000 * 2) + " seconds").c_str(), 1, 0);
+
+    delay(JOYSTICK_CALIBRATION_DELAY);  // Wait for the joystick to settle
+    long centerSumX = 0, centerSumY = 0;
+    int count = 0;
+    for (int i = 0; i < 1000; i++) {  // Taking 100 samples for center
+        centerSumX += analogRead(pinX);
+        centerSumY += analogRead(pinY);
+        delay(10);  // Small delay to prevent reading too fast
+        count++;
+    }
+    centerX = centerSumX / count;
+    centerY = centerSumY / count;
+
+    Serial.print(joystickName); Serial.println(" calibration complete!");
+    Serial.print("Min X: "); Serial.println(minX);
+    Serial.print("Max X: "); Serial.println(maxX);
+    Serial.print("Min Y: "); Serial.println(minY);
+    Serial.print("Max Y: "); Serial.println(maxY);
+    Serial.print("Center X: "); Serial.println(centerX);
+    Serial.print("Center Y: "); Serial.println(centerY);
+
+    displayLCD(joystickName, 0, 0);
+    displayLCD("complete", 1, 0);
+    delay(LCD_REFRESH_INTERVAL);
+
+    return true;
 }

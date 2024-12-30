@@ -5,7 +5,7 @@ uint8_t cameraMAC[] = CAMERA_MAC_ADDRESS;
 
 // Variables
 unsigned long lastKeepAlive = 0;
-bool keepAliveAckReceived = false;
+bool isAliveAckReceived = false;
 
 void setupESPNow() {
     // Set device as a Wi-Fi Station
@@ -38,37 +38,78 @@ void setupESPNow() {
 // Callback when data is sent
 void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
     if (status == ESP_NOW_SEND_SUCCESS) {
-        Serial.println("Keep-alive packet sent successfully.");
+        Serial.println("Message sent successfully.");
     } else {
-        Serial.println("Error sending keep-alive packet.");
+        Serial.println("Error sending packet.");
     }
 }
 
 // Callback when data is received
 void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
-    if (dataLen == sizeof(StatusEnum)) {
-        StatusEnum receivedStatus = *reinterpret_cast<const StatusEnum*>(data);
-        Serial.print("Status received from slave: ");
-        Serial.println(receivedStatus); // Print or process the status
-    }
-    // Existing keep-alive handling
-    else if (dataLen == 1 && data[0] == 1) {
-        keepAliveAckReceived = true;
-        Serial.println("Keep-alive acknowledgment received from slave.");
+    if (dataLen == sizeof(CommandPacket)) {
+        CommandPacket receivedPacket = *reinterpret_cast<const CommandPacket*>(data);
+        Serial.print("Packet received from slave: ");
+        // Serial.println(receivedPacket.body); // Print or process the packet body
+
+        // Handle specific packet types
+        switch (receivedPacket.body) {
+            case IS_ALIVE:
+                isAliveAckReceived = true;
+                Serial.println("Is-alive acknowledgment");
+                break;
+            case READY:
+                Serial.println("Ready status");
+                break;
+            case FILE_SAVED:
+                Serial.println("File saved status");
+                break;
+            case SD_INIT_ERROR:
+                Serial.println("SD initialization error");
+                break;
+            case SD_SAVE_ERROR:
+                Serial.println("SD save error");
+                break;
+            case CAMERA_INIT_ERROR:
+                Serial.println("Camera initialization error");
+                break;
+            case CAMERA_TAKE_ERROR:
+                Serial.println("Camera take error");
+                break;
+            case ESP_NOW_INIT_ERROR:
+                Serial.println("ESP-NOW initialization error");
+                break;
+            case ESP_NOW_ADD_PEER_ERROR:
+                Serial.println("ESP-NOW add peer error");
+                break;
+            case ESP_NOW_SEND_ERROR:
+                Serial.println("ESP-NOW send error");
+                break;
+            default:
+                Serial.println("Unknown status");
+                Serial.println(receivedPacket.body);
+                break;
+        }
+    } else {
+        Serial.println("Received unknown packet.");
+        for (int i = 0; i < dataLen; i++) {
+            Serial.print(data[i], HEX);
+            Serial.print(" ");
+        }
+        Serial.println();
     }
 }
 
-void sendKeepAlive() {
+void sendIsCamAlive() {
     unsigned long currentMillis = millis();
 
     // Send keep-alive packet every 5 seconds
     if (currentMillis - lastKeepAlive >= CAMERA_KEEP_ALIVE_INTERVAL) {
         lastKeepAlive = currentMillis;
-        keepAliveAckReceived = false;
+        isAliveAckReceived = false;
 
         // Prepare keep-alive packet
         CommandPacket keepAlivePacket;
-        keepAlivePacket.command = KEEP_ALIVE;
+        keepAlivePacket.body = KEEP_ALIVE;
 
         // Send keep-alive packet
         esp_err_t result = esp_now_send(cameraMAC, (uint8_t*)&keepAlivePacket, sizeof(keepAlivePacket));
@@ -83,7 +124,7 @@ void sendKeepAlive() {
 
 void sendTakePictureCommand() {
     CommandPacket command;
-    command.command = TAKE_PICTURE;
+    command.body = TAKE_PICTURE;
 
     esp_err_t result = esp_now_send(cameraMAC, (uint8_t*)&command, sizeof(command));
     if (result == ESP_OK) {

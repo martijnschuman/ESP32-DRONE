@@ -3,21 +3,22 @@
 #ifndef Joystick_H
 #define Joystick_H
 
-#include <Arduino.h>
-#include "Config.h"
+#include "config.h"
+#include "LCD.h"
+#include "buttons.h"
+
+extern bool leftCalibrated;
+extern bool rightCalibrated;
 
 void setupJoysticks();
 
-bool checkStartCalibrationButton();
-void calibrateLeftJoystick();
-void calibrateRightJoystick();
+int getLeftJoystickX();
+int getLeftJoystickY();
+int getRightJoystickX();
+int getRightJoystickY();
+int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue, int centerValue, bool isYAxis);
 
-int transferredLeftJoystickReadX();
-int transferredLeftJoystickReadY();
-int transferredRightJoystickReadX();
-int transferredRightJoystickReadY();
+void startCalibrateJoysticks();
+bool calibrateSingleJoystick(int &minX, int &maxX, int &minY, int &maxY, int &centerX, int &centerY, int pinX, int pinY, const char* joystickName);
 
-bool getLeftCalibrated();
-bool getRightCalibrated();
-
-#endif // Joystick_H
+#endif

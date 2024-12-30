@@ -8,41 +8,45 @@
 #include "IMU.h"
 #include "I2CMultiplexer.h"
 #include "ESPNow.h"
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
 
 
 void setup(void) {
+    WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+
     setupSerial();
-    // setupI2CMultiplexer();
+    setupI2CMultiplexer();
 
-    // enableI2CChannel(MPU6050_CHANNEL);
-    // enableI2CChannel(LIDAR_CHANNEL);
+    enableI2CChannel(MPU6050_CHANNEL);
+    enableI2CChannel(LIDAR_CHANNEL);
 
-    // setupIMU();
+    setupIMU();
     // setupGPS();
-    // setupLIDAR();
+    setupLIDAR();
 
-    setupESPNow();
-    
-    Serial.println("Setup done");
+    // setupESPNow();
+
+    Serial.println("Setup complete.");
 }
 
 void loop() {
-    // sensors_event_t a, g, temp;
-    // readMPU6050(&a, &g, &temp);
-    // printMPU6050Data(&a, &g, &temp);
+    sensors_event_t a, g, temp;
+    readMPU6050(&a, &g, &temp);
+    printMPU6050Data(&a, &g, &temp);
 
     // displayGPSData();
 
-    // measureHight();
+    measureHight();
 
-    // delay(1000);
+    delay(1000);
 
-    sendKeepAlive();
+    // sendIsCamAlive();
 
-    static bool pictureTriggered = false;
+    // static bool pictureTriggered = false;
 
-    if (!pictureTriggered && keepAliveAckReceived) {
-        sendTakePictureCommand();
-        pictureTriggered = true; // To avoid repeatedly sending the command
-    }
+    // if (!pictureTriggered && isAliveAckReceived) {
+    //     sendTakePictureCommand();
+    //     pictureTriggered = true; // To avoid repeatedly sending the command
+    // }
 }

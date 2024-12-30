@@ -38,10 +38,13 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         switch (command.body) {
             case KEEP_ALIVE: {
                 Serial.println("Keep-alive packet received from master.");
-                
-                // Respond with acknowledgment
-                uint8_t ackMessage = 1;
-                esp_now_send(macAddr, &ackMessage, sizeof(ackMessage));
+
+                // Prepare is-alive packet
+                CommandPacket isAlivePacket;
+                isAlivePacket.body = IS_ALIVE;
+
+                // Send is-alive packet
+                esp_err_t result = esp_now_send(macAddr, (uint8_t*)&isAlivePacket, sizeof(isAlivePacket));
                 break;
             }
             case TAKE_PICTURE: {

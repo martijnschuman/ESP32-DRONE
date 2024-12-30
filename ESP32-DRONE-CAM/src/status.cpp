@@ -1,7 +1,7 @@
 // status.cpp
 #include "status.h"
 
-CommandStatusEnum status;                   // Set initial status
+CommandStatusEnum status = READY;                   // Set initial status
 unsigned long currentMillis = 0;            // Stores the current time
 unsigned long previousMillis = 0;           // Stores the last time the LED was updated
 
