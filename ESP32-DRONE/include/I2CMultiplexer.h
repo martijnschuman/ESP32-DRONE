@@ -4,9 +4,10 @@
 #define I2CMULTIPLEXER_H
 
 #include "config.h"
-#include "TCA9548.h"
+#include <TCA9548.h>
+#include "status.h"
 
 void setupI2CMultiplexer();
 void enableI2CChannel(uint8_t channel);
 
-#endif // I2CMULTIPLEXER_H
+#endif

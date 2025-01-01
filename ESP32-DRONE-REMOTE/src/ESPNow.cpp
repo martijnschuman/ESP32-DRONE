@@ -6,10 +6,6 @@
 uint8_t droneMAC[] = REMOTE_MAC_ADDRESS;
 uint8_t cameraMAC[] = CAMERA_MAC_ADDRESS;
 
-// Variables
-unsigned long lastKeepAlive = 0;
-bool isAliveAckReceived = false;
-
 void setupESPNow() {
     // Set device as a Wi-Fi Station
     WiFi.mode(WIFI_STA);
@@ -30,37 +26,27 @@ void setupESPNow() {
     addPeer(cameraMAC);
 }
 
-// void sendIsCamAlive() {
-//     unsigned long currentMillis = millis();
+void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
+    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Message sent." : "Error sending packet.");
+}
 
-//     // Send keep-alive packet every 5 seconds
-//     if (currentMillis - lastKeepAlive >= CAMERA_KEEP_ALIVE_INTERVAL) {
-//         lastKeepAlive = currentMillis;
-//         isAliveAckReceived = false;
-
-//         // Prepare keep-alive packet
-//         CommandPacket keepAlivePacket;
-//         keepAlivePacket.body = KEEP_ALIVE;
-
-//         // Send keep-alive packet
-//         esp_err_t result = esp_now_send(cameraMAC, (uint8_t*)&keepAlivePacket, sizeof(keepAlivePacket));
-
-//         if (result == ESP_OK) {
-//             Serial.println("Keep-alive packet sent, waiting for acknowledgment...");
-//         } else {
-//             Serial.println("Error sending keep-alive packet.");
-//         }
-//     }
-// }
-
-void sendTakePictureCommand() {
-    CommandPacket command;
-    command.body = TAKE_PICTURE;
-
-    esp_err_t result = esp_now_send(cameraMAC, (uint8_t*)&command, sizeof(command));
-    if (result == ESP_OK) {
-        Serial.println("Take picture command sent.");
+void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
+    if (dataLen == sizeof(TelemetryPacket)) {
+        telemetry = *reinterpret_cast<const TelemetryPacket*>(data);
     } else {
-        Serial.println("Error sending take picture command.");
+        Serial.println("Unknown packet received.");
     }
 }
+
+
+// void sendTakePictureCommand() {
+//     CommandPacket command;
+//     command.body = TAKE_PICTURE;
+
+//     esp_err_t result = esp_now_send(cameraMAC, (uint8_t*)&command, sizeof(command));
+//     if (result == ESP_OK) {
+//         Serial.println("Take picture command sent.");
+//     } else {
+//         Serial.println("Error sending take picture command.");
+//     }
+// }

@@ -63,3 +63,23 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         Serial.println("Unknown packet received.");
     }
 }
+
+bool testRemoteConnection() {
+    // Send test packet to drone to check connection
+    ControlPacket testPacket;
+    testPacket.joystickX = 0;
+    testPacket.joystickY = 0;
+    testPacket.throttle = 0;
+    testPacket.yaw = 0;
+
+    esp_err_t result = esp_now_send(remoteMAC, reinterpret_cast<uint8_t*>(&testPacket), sizeof(testPacket));
+    if (result == ESP_OK) {
+        Serial.println("Test packet sent.");
+        setStatus(READY);
+        return true;
+    } else {
+        Serial.println("Error sending test packet. Retrying in " + String(CONNECTION_TEST_INTERVAL) + "ms.");
+        setStatus(ESP_NOW_SEND_ERROR);
+        return false;
+    }
+}

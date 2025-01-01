@@ -6,6 +6,10 @@
 #include "config.h"
 #include <esp_now.h>
 #include <WiFi.h>
+#include "telemetry.h"
+
+extern uint8_t droneMAC[];
+extern uint8_t cameraMAC[];
 
 void setupESPNow();
 void addPeer(uint8_t *peerMAC);

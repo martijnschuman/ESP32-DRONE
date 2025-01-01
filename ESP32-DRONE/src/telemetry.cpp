@@ -44,5 +44,11 @@ void transmitTelemetry() {
     telemetry.gpsTime = gpsTime;
     telemetry.gpsDate = gpsDate;
 
-    esp_now_send(remoteMAC, reinterpret_cast<uint8_t*>(&telemetry), sizeof(telemetry));
+    esp_err_t result = esp_now_send(remoteMAC, reinterpret_cast<uint8_t*>(&telemetry), sizeof(telemetry));
+    if (result == ESP_OK) {
+        Serial.println("Telemetry sent.");
+    } else {
+        Serial.println("Error sending telemetry.");
+        throwError(ESP_NOW_SEND_ERROR);
+    }
 }

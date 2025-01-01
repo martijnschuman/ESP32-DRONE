@@ -1,5 +1,6 @@
 // main.cpp
 #include "config.h"
+#include "status.h"
 #include "serial.h"
 #include "joystick.h"
 #include "LCD.h"
@@ -19,8 +20,9 @@ message handControllerData;
 
 void setup() {
 	serialSetup();
+	setupStatusLEDs();
 
-	setupLCD();
+	// setupLCD();
 	setupButtons();
 	setupJoysticks();
 
@@ -51,4 +53,13 @@ void loop() {
     //     sendTakePictureCommand();
     //     pictureTriggered = true; // To avoid repeatedly sending the command
     // }
+
+	static unsigned long lastControlTime = 0;
+    unsigned long currentTime = millis();
+
+    // Send control every 50ms
+    if (currentTime - lastControlTime >= TRANSMISSION_INTERVAL) {
+        lastControlTime = currentTime;
+        sendControl();
+    }
 }

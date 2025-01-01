@@ -1,6 +1,8 @@
-// command.h
-#ifndef COMMAND_H
-#define COMMAND_H
+// include/status.h
+#ifndef STATUS_H
+#define STATUS_H
+
+#include "config.h"
 
 enum StatusEnum {
     READY = 0x00,
@@ -13,13 +15,9 @@ enum StatusEnum {
     ESP_NOW_SEND_ERROR = 0x07,
 };
 
-enum IsAliveEnum {
-    IS_ALIVE_ACK = 0x01,
-    IS_ALIVE_NACK = 0x02,
-};
+void setupStatusLEDs();
+void displayOKStatus();
+void displayErrorStatus();
+void displayBlankStatus();
 
-struct CommandPacket {
-    StatusEnum body;
-};
-
-#endif // COMMAND_H
+#endif

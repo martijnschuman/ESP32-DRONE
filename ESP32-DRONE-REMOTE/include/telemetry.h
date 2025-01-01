@@ -1,14 +1,12 @@
 // include/telemetry.h
 
-#ifndef TELEMETRY_H
-#define TELEMETRY_H
+#ifndef TELEMTRY_H
+#define TELEMTRY_H
 
 #include "config.h"
 #include "ESPNow.h"
 #include "status.h"
-#include "IMU.h"
-#include "LIDAR.h"
-#include "GPS.h"
+#include "joystick.h"
 
 // Struct for telemetry packet
 struct TelemetryPacket {
@@ -36,6 +34,6 @@ extern TelemetryPacket telemetry;
 extern ControlPacket control;
 
 void printTelemetry();
-void transmitTelemetry();
+void sendControl();
 
-#endif // telemetry
+#endif // TELEMTRY_H

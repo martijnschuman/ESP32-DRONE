@@ -7,6 +7,9 @@
 
 extern bool isDroneConnected;
 
+// Transmission interval
+#define TRANSMISSION_INTERVAL 50
+
 // Joystick pins
 #define LEFT_VRX 34
 #define LEFT_VRY 35
@@ -22,9 +25,9 @@ extern bool isDroneConnected;
 #define JOYSTICK_CALIBRATION_DELAY 3000
 #define JOYSTICK_CENTER_TOLERANCE 5
 
-// Calibration LEDs
-#define CALIBRATION_RED_LED 19
-#define CALIBRATION_GREEN_LED 18
+// Status LEDs
+#define STATUS_RED_LED 19
+#define STATUS_GREEN_LED 18
 
 // ESPNow
 #define DRONE_MAC_ADDRESS {0xD0, 0xEF, 0x76, 0x34, 0x97, 0x44}

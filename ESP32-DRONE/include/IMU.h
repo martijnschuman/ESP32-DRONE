@@ -7,6 +7,7 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include "I2CMultiplexer.h"
+#include "status.h"
 
 extern Adafruit_MPU6050 mpu;
 

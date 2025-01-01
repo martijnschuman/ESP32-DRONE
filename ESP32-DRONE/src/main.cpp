@@ -1,12 +1,13 @@
 // src/main.cpp
 #include <Arduino.h>
-#include "GPS.h"
+#include "config.h"
+#include "status.h"
 #include "serial.h"
+#include "I2CMultiplexer.h"
+#include "GPS.h"
 #include "LIDAR.h"
 #include "IMU.h"
-#include "I2CMultiplexer.h"
 #include "ESPNow.h"
-#include "status.h"
 #include "telemetry.h"
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
@@ -16,6 +17,8 @@ unsigned long lastIMUUpdate = 0;
 unsigned long lastLIDARUpdate = 0;
 unsigned long lastDisplayUpdate = 0;
 unsigned long lastTransmitUpdate = 0;
+
+bool remoteConnected = false;
 
 void setup(void) {
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
@@ -38,9 +41,30 @@ void setup(void) {
 }
 
 void loop() {
-    reportStatus();
+    static unsigned long lastStatusReport = 0;
+    static unsigned long lastConnectionTest = 0;
 
     currentMillis = millis();
+
+    // Report status
+    if (currentMillis - lastStatusReport >= STATUS_REPORT_INTERVAL) {
+        lastStatusReport = currentMillis;
+        reportStatus();
+    }
+
+    // Test remote connection
+    if (currentMillis - lastConnectionTest >= CONNECTION_TEST_INTERVAL) {
+        lastConnectionTest = currentMillis;
+        if (testRemoteConnection()) {
+            remoteConnected = true;
+        } else {
+            remoteConnected = false;
+        }
+    }
+
+    if (!remoteConnected) {
+        return;
+    }
 
     // Update IMU
     if (currentMillis - lastIMUUpdate >= IMU_INTERVAL) {

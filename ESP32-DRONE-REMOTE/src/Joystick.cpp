@@ -1,13 +1,13 @@
 #include <joystick.h>
 
 // Calibration data for left joystick
-int leftMeasuredMinX = 4095, leftMeasuredMaxX = 0, leftMeasuredCenterX = 0;
-int leftMeasuredMinY = 4095, leftMeasuredMaxY = 0, leftMeasuredCenterY = 0;
+int leftMeasuredMinX = 4095, leftMeasuredMaxX = 0, leftMeasuredCenterX = leftMeasuredMinX / 2;
+int leftMeasuredMinY = 4095, leftMeasuredMaxY = 0, leftMeasuredCenterY = leftMeasuredMinY / 2;
 bool leftCalibrated = false;
 
 // Calibration data for right joystick
-int rightMeasuredMinX = 4095, rightMeasuredMaxX = 0, rightMeasuredCenterX = 0;
-int rightMeasuredMinY = 4095, rightMeasuredMaxY = 0, rightMeasuredCenterY = 0;
+int rightMeasuredMinX = 4095, rightMeasuredMaxX = 0, rightMeasuredCenterX = rightMeasuredMinX / 2;
+int rightMeasuredMinY = 4095, rightMeasuredMaxY = 0, rightMeasuredCenterY = rightMeasuredMinY / 2;
 bool rightCalibrated = false;
 
 // Setup function for joysticks
@@ -17,9 +17,6 @@ void setupJoysticks() {
 
     pinMode(RIGHT_VRX, INPUT);
     pinMode(RIGHT_VRY, INPUT);
-
-    pinMode(CALIBRATION_RED_LED, OUTPUT);
-    pinMode(CALIBRATION_GREEN_LED, OUTPUT);
 }
 
 // Functions for reading joystick values
@@ -83,21 +80,18 @@ int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue,
 }
 
 void startCalibrateJoysticks() {
-    digitalWrite(CALIBRATION_RED_LED, HIGH);
-    digitalWrite(CALIBRATION_GREEN_LED, LOW);
+    displayErrorStatus();
 
     leftCalibrated = calibrateSingleJoystick(leftMeasuredMinX, leftMeasuredMaxX, leftMeasuredMinY, leftMeasuredMaxY, leftMeasuredCenterX, leftMeasuredCenterY, LEFT_VRX, LEFT_VRY, "Left joystick");
     rightCalibrated = calibrateSingleJoystick(rightMeasuredMinX, rightMeasuredMaxX, rightMeasuredMinY, rightMeasuredMaxY, rightMeasuredCenterX, rightMeasuredCenterY, RIGHT_VRX, RIGHT_VRY, "Right joystick");
 
-    digitalWrite(CALIBRATION_RED_LED, LOW);
-    digitalWrite(CALIBRATION_GREEN_LED, HIGH);
+    displayOKStatus();
     displayLCD("Calibration", 0, 0);
     displayLCD("complete!", 1, 0);
 
     delay(LCD_REFRESH_INTERVAL * 2); // Keep the green LED on for a short duration
 
-    digitalWrite(CALIBRATION_RED_LED, LOW);
-    digitalWrite(CALIBRATION_GREEN_LED, LOW);
+    displayBlankStatus();
     clearLCD();
 }
 

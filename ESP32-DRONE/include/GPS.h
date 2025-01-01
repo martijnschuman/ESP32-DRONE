@@ -6,6 +6,7 @@
 #include "config.h"
 #include <TinyGPS++.h>
 #include <HardwareSerial.h>
+#include "status.h"
 
 extern TinyGPSPlus gps;
 extern HardwareSerial GPSModule;

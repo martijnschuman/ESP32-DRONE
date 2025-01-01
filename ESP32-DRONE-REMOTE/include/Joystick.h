@@ -6,6 +6,7 @@
 #include "config.h"
 #include "LCD.h"
 #include "buttons.h"
+#include "status.h"
 
 extern bool leftCalibrated;
 extern bool rightCalibrated;

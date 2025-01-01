@@ -5,9 +5,6 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "command.h"
-#include "status.h"
-#include "ESPNow.h"
 
 // Sensor measurement intervals in milliseconds
 #define BUFFER_SIZE 10
@@ -20,6 +17,7 @@
 // ESPNow
 #define DRONE_MAC_ADDRESS {0xD0, 0xEF, 0x76, 0x34, 0x97, 0x44}
 #define REMOTE_MAC_ADDRESS {0xCC, 0xDB, 0xA7, 0x3E, 0x66, 0x84}
+#define CONNECTION_TEST_INTERVAL 5000
 
 // I2C Multiplexer
 #define TCA9548A_ADDRESS 0x75                       // I2C address of the multiplexer
@@ -48,5 +46,6 @@
 #define SHIFT_REGISTER_DS_PIN 14                    // Serial data out pin for the shift register
 #define SHIFT_REGISTER_SHCP_PIN 13                  // Shift register clock - SRCLK pin
 #define SHIFT_REGISTER_STCP_PIN 12                  // Storage register clock - RCLK pin
+#define STATUS_REPORT_INTERVAL 1000                 // Interval to report status in milliseconds
 
 #endif // CONFIG_H
