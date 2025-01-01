@@ -4,37 +4,50 @@
 
 DFRobot_LIDAR07_IIC lidar;
 
+float lidarBuffer[BUFFER_SIZE];         // Circular buffer for distance readings
+int lidarIndex = 0;                     // Current index in the buffer
+float lidarSum = 0;                     // Sum of the buffer values for averaging
+
+float lidarHeight = 0.0f;
+
 void setupLIDAR(){
-    Wire.begin(); // Initialize I2C
+    Wire.begin();
 
     if (!lidar.begin()) {
         Serial.println("LIDAR initialization failed!");
-        while (1); // Halt if initialization fails
+        throwError(LIDAR_ERROR);
+        while (1);
     }
     Serial.println("LIDAR initialized successfully.");
 }
 
-void measureHight(){
-    static unsigned long lastDisplayTime = 0;
-    static uint16_t distance = 0;
-    static int measurementsCount = 0;
-
+void updateLIDAR() {
     lidar.startMeasure();
 
-    if (lidar.getValue()) { // Get distance data
-        distance += lidar.getDistanceMM(); // Get distance in mm
-        measurementsCount++;
-    } else {
-        Serial.println("Failed to get distance data.");
-    }
+    static int failCount = 0;
 
-    unsigned long currentTime = millis();
-    if (currentTime - lastDisplayTime >= LIDAR_MEASUREMENT_INTERVAL) {
-        Serial.print("Distance: ");
-        Serial.print(distance / measurementsCount);
-        Serial.println(" mm");
-        lastDisplayTime = currentTime;
-        distance = 0;
-        measurementsCount = 0;
+    if (lidar.getValue()) { // Get valid distance data
+        failCount = 0;
+
+        // Get the latest distance reading
+        float newDistance = lidar.getDistanceMM();
+
+        // Update the rolling buffer
+        lidarSum -= lidarBuffer[lidarIndex];       // Remove the old value from the sum
+        lidarBuffer[lidarIndex] = newDistance;     // Store the new value in the buffer
+        lidarSum += lidarBuffer[lidarIndex];       // Add the new value to the sum
+
+        // Move to the next index (circular buffer)
+        lidarIndex = (lidarIndex + 1) % BUFFER_SIZE;
+
+        // Calculate and return the rolling average
+        lidarHeight = lidarSum / BUFFER_SIZE;
+    } else {
+        Serial.println("Failed to get distance data. Failed attempts: " + String(failCount));
+        failCount++;
+
+        if (failCount >= LIDAR_ALLOWED_FAIL_COUNT) {
+            throwError(LIDAR_ERROR);
+        }
     }
 }

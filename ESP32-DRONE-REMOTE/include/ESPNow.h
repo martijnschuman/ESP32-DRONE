@@ -6,9 +6,6 @@
 #include "config.h"
 #include <esp_now.h>
 #include <WiFi.h>
-#include "telemetry.h"
-
-extern uint8_t remoteMAC[];
 
 void setupESPNow();
 void addPeer(uint8_t *peerMAC);

@@ -3,10 +3,27 @@
 
 Adafruit_MPU6050 mpu;
 
+// Circular buffer for IMU data
+float accXBuffer[BUFFER_SIZE], accYBuffer[BUFFER_SIZE], accZBuffer[BUFFER_SIZE];
+float gyroXBuffer[BUFFER_SIZE], gyroYBuffer[BUFFER_SIZE], gyroZBuffer[BUFFER_SIZE];
+float tempBuffer[BUFFER_SIZE];
+
+// Index for circular buffer
+int imuIndex = 0;
+float accXSum = 0, accYSum = 0, accZSum = 0;
+float gyroXSum = 0, gyroYSum = 0, gyroZSum = 0;
+float tempSum = 0;
+
+// Global variables for IMU data
+float accX = 0.0f, accY = 0.0f, accZ = 0.0f;
+float gyroX = 0.0f, gyroY = 0.0f, gyroZ = 0.0f;
+float temp = 0.0f;
+
 // Initialize MPU6050
 void setupIMU() {
     if (!initializeMPU6050()) {
         Serial.println("MPU6050 initialization failed!");
+        throwError(IMU_ERROR);
         while (1) {
             delay(10);
         }
@@ -19,6 +36,7 @@ void setupIMU() {
 bool initializeMPU6050() {
     if (!mpu.begin()) {
         Serial.println("Failed to find MPU6050 chip");
+        throwError(IMU_ERROR);
         return false;
     }
     Serial.println("MPU6050 Found!");
@@ -94,24 +112,51 @@ float getCalibratedTemperature(float temp) {
     return temp + IMU_TEMP_CALIBRATION;
 }
 
-void printMPU6050Data(sensors_event_t *a, sensors_event_t *g, sensors_event_t *temp) {
-    Serial.print("Acceleration X: ");
-    Serial.print(a->acceleration.x);
-    Serial.print(", Y: ");
-    Serial.print(a->acceleration.y);
-    Serial.print(", Z: ");
-    Serial.print(a->acceleration.z);
-    Serial.println(" m/s^2");
+void updateIMU() {
+    sensors_event_t a, g, tempEvent;
+    readMPU6050(&a, &g, &tempEvent);
 
-    Serial.print("Rotation X: ");
-    Serial.print(g->gyro.x);
-    Serial.print(", Y: ");
-    Serial.print(g->gyro.y);
-    Serial.print(", Z: ");
-    Serial.print(g->gyro.z);
-    Serial.println(" rad/s");
+    // Update acceleration rolling averages
+    accXSum -= accXBuffer[imuIndex];
+    accXBuffer[imuIndex] = a.acceleration.x;
+    accXSum += accXBuffer[imuIndex];
 
-    Serial.print("Temperature: ");
-    Serial.print(getCalibratedTemperature(temp->temperature));
-    Serial.println(" degC");
+    accYSum -= accYBuffer[imuIndex];
+    accYBuffer[imuIndex] = a.acceleration.y;
+    accYSum += accYBuffer[imuIndex];
+
+    accZSum -= accZBuffer[imuIndex];
+    accZBuffer[imuIndex] = a.acceleration.z;
+    accZSum += accZBuffer[imuIndex];
+
+    accX = accXSum / BUFFER_SIZE;
+    accY = accYSum / BUFFER_SIZE;
+    accZ = accZSum / BUFFER_SIZE;
+
+    // Update gyro rolling averages
+    gyroXSum -= gyroXBuffer[imuIndex];
+    gyroXBuffer[imuIndex] = g.gyro.x;
+    gyroXSum += gyroXBuffer[imuIndex];
+
+    gyroYSum -= gyroYBuffer[imuIndex];
+    gyroYBuffer[imuIndex] = g.gyro.y;
+    gyroYSum += gyroYBuffer[imuIndex];
+
+    gyroZSum -= gyroZBuffer[imuIndex];
+    gyroZBuffer[imuIndex] = g.gyro.z;
+    gyroZSum += gyroZBuffer[imuIndex];
+
+    gyroX = gyroXSum / BUFFER_SIZE;
+    gyroY = gyroYSum / BUFFER_SIZE;
+    gyroZ = gyroZSum / BUFFER_SIZE;
+
+    // Update temperature rolling average
+    tempSum -= tempBuffer[imuIndex];
+    tempBuffer[imuIndex] = getCalibratedTemperature(tempEvent.temperature);
+    tempSum += tempBuffer[imuIndex];
+
+    temp = tempSum / BUFFER_SIZE;
+
+    // Advance index for circular buffer
+    imuIndex = (imuIndex + 1) % BUFFER_SIZE;
 }

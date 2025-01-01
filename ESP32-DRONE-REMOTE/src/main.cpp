@@ -4,6 +4,7 @@
 #include "joystick.h"
 #include "LCD.h"
 #include "buttons.h"
+#include "ESPNow.h"
 
 bool isDroneConnected = false;
 
@@ -24,23 +25,30 @@ void setup() {
 	setupJoysticks();
 
 	Serial.println("Setup complete.");
-	displayLCD("Setup complete.", 0, 0);
-	delay(1500);
 }
 
 void loop() {
-	if (!leftCalibrated || !rightCalibrated) {
-		calibrationMenu();
-	}
+	// if (!leftCalibrated || !rightCalibrated) {
+	// 	calibrationMenu();
+	// }
 
-	if (!isDroneConnected) {
-		connectToDroneDisplay();
+	// if (!isDroneConnected) {
+	// 	connectToDroneDisplay();
 
-		if (checkOKButton()) {
-			isDroneConnected = true;
-			connectedToDroneDisplay();
-		}
-	} else {
-		joystickDebugDisplay();
-	}
+	// 	if (checkOKButton()) {
+	// 		isDroneConnected = true;
+	// 		connectedToDroneDisplay();
+	// 	}
+	// } else {
+	// 	joystickDebugDisplay();
+	// }
+	
+	// sendIsCamAlive();
+
+    // static bool pictureTriggered = false;
+
+    // if (!pictureTriggered && isAliveAckReceived) {
+    //     sendTakePictureCommand();
+    //     pictureTriggered = true; // To avoid repeatedly sending the command
+    // }
 }

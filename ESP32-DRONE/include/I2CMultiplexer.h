@@ -3,7 +3,7 @@
 #ifndef I2CMULTIPLEXER_H
 #define I2CMULTIPLEXER_H
 
-#include "Config.h"
+#include "config.h"
 #include "TCA9548.h"
 
 void setupI2CMultiplexer();

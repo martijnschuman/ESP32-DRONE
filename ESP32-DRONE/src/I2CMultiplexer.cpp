@@ -1,5 +1,4 @@
 //src/I2CMultiplexer
-
 #include "I2CMultiplexer.h"
 
 TCA9548 MP(TCA9548A_ADDRESS);
@@ -32,6 +31,7 @@ void setupI2CMultiplexer() {
     Wire.begin();
     if (!MP.begin()) {
         Serial.println("Multiplexer not connected!");
+        throwError(I2C_MULTIPLEXER_ERROR);
         while (1);
     }
     Serial.println("Multiplexer connected!");
@@ -42,6 +42,6 @@ void setupI2CMultiplexer() {
 }
 
 void enableI2CChannel(uint8_t channel) {
-    Serial.print("Enabling channel " + String(channel) + "...");
+    Serial.println("Enabling channel " + String(channel) + "...");
     MP.enableChannel(channel);
 }

@@ -1,129 +1,101 @@
 // src/gps.cpp
 #include <GPS.h>
-#include <Config.h>
 
 TinyGPSPlus gps;
 HardwareSerial GPSModule(2);
 
-void setupGPS(){
+float gpsLat, gpsLng, gpsAlt;
+float gpsSpeed;
+int gpsSatellites;
+String gpsTime, gpsDate;
+
+void setupGPS() {
     GPSModule.begin(9600, SERIAL_8N1, GPS_RXD2, GPS_TXD2); // GPS module at 9600 baud, RX2 = GPIO16, TX2 = GPIO17
 
-    if (!GPSModule){
+    if (!GPSModule) {
         Serial.println("Failed to initialize GPS Serial communication!");
-        while (true); // Halt the program
+        throwError(GPS_ERROR);
+        while (true);
     }
 
     Serial.println("GPS Module Initialized");
 }
 
-String getGPSTime(){
-    String time = "";
-    if (gps.time.isUpdated()){
-        time += gps.time.hour();
-        time += ":";
-        time += gps.time.minute();
-        time += ":";
-        time += gps.time.second();
-        time += ":";
-        time += gps.time.centisecond();
-    }
-    
-    return time;
+String formatTime(TinyGPSTime& time) {
+    if (!time.isUpdated()) return "";
+    return String(time.hour()) + ":" + String(time.minute()) + ":" + String(time.second()) + ":" + String(time.centisecond());
 }
 
-String getGPSDate(){
-    String date = "";
-    if (gps.date.isUpdated()){
-        date += gps.date.month();
-        date += "/";
-        date += gps.date.day();
-        date += "/";
-        date += gps.date.year();
-    }
-    
-    return date;
+String formatDate(TinyGPSDate& date) {
+    if (!date.isUpdated()) return "";
+    return String(date.month()) + "/" + String(date.day()) + "/" + String(date.year());
 }
 
-String getGPSLocation(){
-    String location = "";
-    if (gps.location.isUpdated()){
-        location += gps.location.lat();
-        location += ", ";
-        location += gps.location.lng();
-    }
-    
-    return location;
+String formatLocation(double value, bool valid) {
+    return valid ? String(value, 6) : ""; // Format to 6 decimal places if valid
 }
 
-String getGPSSpeed(){
-    String speed = "";
-    if (gps.speed.isUpdated()){
-        speed += gps.speed.kmph();
-    }
-    
-    return speed;
+double formatValue(double value, bool valid) {
+    return valid ? double(value) : 0; // Return the value as 0 if valid
 }
 
-String getGPSSatellites(){
-    String satellites = "";
-    if (gps.satellites.isUpdated()){
-        satellites += gps.satellites.value();
-    }
-    
-    return satellites;
+int formatSatellites(int value, bool valid) {
+    return valid ? value : 0; // Return the satellite count if valid
 }
 
-String getGPSAltitude(){
-    String altitude = "";
-    if (gps.altitude.isUpdated()){
-        altitude += gps.altitude.meters();
+String getGPSTime() {
+    if (gps.time.isValid()) {
+        return String(gps.time.hour()) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second());
     }
-    
-    return altitude;
+    return "";
 }
 
-String getGPSHDOP(){
-    String hdop = "";
-    if (gps.hdop.isUpdated()){
-        hdop += gps.hdop.hdop();
+String getGPSDate() {
+    if (gps.date.isValid()) {
+        return String(gps.date.month()) + "/" + String(gps.date.day()) + "/" + String(gps.date.year());
     }
-    
-    return hdop;
+    return "";
+}
+String getGPSLocationLat() {
+    return formatLocation(gps.location.lat(), gps.location.isValid());
 }
 
-void displayGPSData(){
-    // Print out GPS data if available
-    if (gps.location.isUpdated()){
-        Serial.print(getGPSLocation());
-    }
+String getGPSLocationLng() {
+    return formatLocation(gps.location.lng(), gps.location.isValid());
+}
 
-    if (gps.satellites.isUpdated()){
-        Serial.print("Satellites: ");
-        Serial.println(getGPSSatellites());
-    }
+int getGPSSpeed() {
+    return formatValue(gps.speed.kmph(), gps.speed.isValid());
+}
 
-    if (gps.altitude.isUpdated()){
-        Serial.print("Altitude (m): ");
-        Serial.println(gps.altitude.meters());
-    }
-    
-    if (gps.speed.isUpdated()){
-        Serial.print("Speed (km/h): ");
-        Serial.println(getGPSSpeed());
-    }
+int getGPSSatellites() {
+    return formatSatellites(gps.satellites.value(), gps.satellites.isValid());
+}
 
-    if (gps.time.isUpdated()){
-        Serial.print("Time: ");
-        Serial.println(getGPSTime());
-    }
+float  getGPSAltitude() {
+    return formatValue(gps.altitude.meters(), gps.altitude.isValid());
+}
 
-    if (gps.date.isUpdated()){
-        Serial.print("Date: ");
-        Serial.println(getGPSDate());
-    }
+int getGPSHDOP() {
+    return formatValue(gps.hdop.hdop(), gps.hdop.isValid());
+}
 
-    if (gps.hdop.isUpdated()){
-        Serial.print("HDOP: ");
-        Serial.println(getGPSHDOP());
+void updateGPS() {
+    while (GPSModule.available() > 0) {
+        gps.encode(GPSModule.read());
+
+        if (gps.location.isValid()) {
+            gpsLat = gps.location.lat();
+            gpsLng = gps.location.lng();
+        } else {
+            gpsLat = 0.0f;
+            gpsLng = 0.0f;
+        }
+
+        gpsAlt = gps.altitude.isValid() ? gps.altitude.meters() : 0.0f;
+        gpsSpeed = gps.speed.isValid() ? gps.speed.kmph() : 0.0f;
+        gpsSatellites = gps.satellites.isValid() ? gps.satellites.value() : 0;
+        gpsTime = gps.time.isValid() ? getGPSTime() : "";
+        gpsDate = gps.date.isValid() ? getGPSDate() : "";
     }
 }
