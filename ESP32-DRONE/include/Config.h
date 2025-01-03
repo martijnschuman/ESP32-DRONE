@@ -5,14 +5,16 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include "global.h"
 
-// Sensor measurement intervals in milliseconds
+// Loop intervals in milliseconds
 #define BUFFER_SIZE 10
 #define IMU_INTERVAL 100
 #define LIDAR_INTERVAL 250
 #define LIDAR_ALLOWED_FAIL_COUNT 5
 #define TRANSMIT_INTERVAL 100
 #define SERIAL_DEBUG_INTERVAL 500
+#define CONNECTION_CHECK_INTERVAL 1000
 
 // ESPNow
 #define DRONE_MAC_ADDRESS {0xD0, 0xEF, 0x76, 0x34, 0x97, 0x44}

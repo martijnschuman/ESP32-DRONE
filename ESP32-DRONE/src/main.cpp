@@ -1,6 +1,7 @@
 // src/main.cpp
 #include <Arduino.h>
 #include "config.h"
+#include "global.h"
 #include "status.h"
 #include "serial.h"
 #include "I2CMultiplexer.h"
@@ -17,8 +18,14 @@ unsigned long lastIMUUpdate = 0;
 unsigned long lastLIDARUpdate = 0;
 unsigned long lastDisplayUpdate = 0;
 unsigned long lastTransmitUpdate = 0;
+unsigned long lastConnectionCheck = 0;
 
 bool remoteConnected = false;
+
+// Define global variables
+TelemetryPacket telemetry;
+ControlPacket control;
+DroneState droneState;
 
 void setup(void) {
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
@@ -38,6 +45,7 @@ void setup(void) {
     setupESPNow();
 
     Serial.println("Setup complete.");
+    setStatus(START_CONNECTION);
 }
 
 void loop() {
@@ -52,41 +60,34 @@ void loop() {
         reportStatus();
     }
 
-    // Test remote connection
-    if (currentMillis - lastConnectionTest >= CONNECTION_TEST_INTERVAL) {
-        lastConnectionTest = currentMillis;
-        if (testRemoteConnection()) {
-            remoteConnected = true;
-        } else {
-            remoteConnected = false;
-        }
-    }
-
+    // Check if the remote is connected
     if (!remoteConnected) {
         return;
     }
 
-    // Update IMU
-    if (currentMillis - lastIMUUpdate >= IMU_INTERVAL) {
-        lastIMUUpdate = currentMillis;
-        updateIMU(); // Function for averaging IMU data
-    }
+    if (droneState.status == READY && droneState.flightMode == GROUND) {
+        // Update IMU
+        if (currentMillis - lastIMUUpdate >= IMU_INTERVAL) {
+            lastIMUUpdate = currentMillis;
+            updateIMU(); // Function for averaging IMU data
+        }
 
-    // Update LIDAR
-    if (currentMillis - lastLIDARUpdate >= LIDAR_INTERVAL) {
-        lastLIDARUpdate = currentMillis;
-        updateLIDAR(); // Function for averaging LIDAR data
-    }
+        // Update LIDAR
+        if (currentMillis - lastLIDARUpdate >= LIDAR_INTERVAL) {
+            lastLIDARUpdate = currentMillis;
+            updateLIDAR(); // Function for averaging LIDAR data
+        }
 
-    // Update Display
-    if (currentMillis - lastDisplayUpdate >= SERIAL_DEBUG_INTERVAL) {
-        lastDisplayUpdate = currentMillis;
-        printTelemetry(); // Display the averaged sensor data
-    }
+        // Update Display
+        if (currentMillis - lastDisplayUpdate >= SERIAL_DEBUG_INTERVAL) {
+            lastDisplayUpdate = currentMillis;
+            printTelemetry(); // Display the averaged sensor data
+        }
 
-    // Transmit telemetry via ESP-NOW
-    if (currentMillis - lastTransmitUpdate >= TRANSMIT_INTERVAL) {
-        lastTransmitUpdate = currentMillis;
-        transmitTelemetry(); // Send data to remote controller
+        // Transmit telemetry via ESP-NOW
+        if (currentMillis - lastTransmitUpdate >= TRANSMIT_INTERVAL) {
+            lastTransmitUpdate = currentMillis;
+            transmitTelemetry(); // Send data to remote controller
+        }
     }
 }

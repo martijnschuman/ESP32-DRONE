@@ -2,10 +2,6 @@
 
 #include "telemetry.h"
 
-// Define telemetry packet
-TelemetryPacket telemetry;
-ControlPacket control;
-
 void printTelemetry() {
     Serial.print("IMU: ");
     Serial.print(accX);
@@ -27,7 +23,8 @@ void printTelemetry() {
 }
 
 void transmitTelemetry() {
-    telemetry.status = status;
+    telemetry.status = droneState.status;
+    telemetry.flightMode = droneState.flightMode;
     telemetry.accX = accX;
     telemetry.accY = accY;
     telemetry.accZ = accZ;

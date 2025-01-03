@@ -2,11 +2,9 @@
 
 #include "telemetry.h"
 
-TelemetryPacket telemetry;
-ControlPacket control;
-
 void printTelemetry(){
     Serial.print("Status: "); Serial.println(telemetry.status);
+    Serial.print("Flight Mode: "); Serial.println(telemetry.flightMode);
     Serial.print("Acc X: "); Serial.println(telemetry.accX);
     Serial.print("Acc Y: "); Serial.println(telemetry.accY);
     Serial.print("Acc Z: "); Serial.println(telemetry.accZ);

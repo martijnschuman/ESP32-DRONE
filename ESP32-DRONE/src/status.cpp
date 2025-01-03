@@ -1,10 +1,7 @@
 // status.cpp
 #include "status.h"
 
-// Set initial status
-StatusEnum status = READY;
-
-int dec_digits[11] = {
+int dec_digits[15] = {
     0b00111111, // 0: Segments A, B, C, D, E, F
     0b00000110, // 1: Segments B, C
     0b01011011, // 2: Segments A, B, D, E, G
@@ -15,7 +12,11 @@ int dec_digits[11] = {
     0b00000111, // 7: Segments A, B, C
     0b01111111, // 8: Segments A, B, C, D, E, F, G
     0b01101111, // 9: Segments A, B, C, D, F, G
-    0b10000000  // 10: Decimal Point
+    0b10000000, // 10: Decimal Point
+    0b01110111, // A: Segments A, B, C, E, F, G
+    0b01111100, // B: Segments C, D, E, F, G
+    0b00111001, // C: Segments A, D, E, F
+    0b01011110  // D: Segments B, C, D, E, G
 };
 
 // Function to setup the status LED
@@ -26,10 +27,6 @@ void setupStatusDisplay() {
 }
 
 // Function to set the status
-void setStatus(StatusEnum newStatus) {
-    status = newStatus;
-}
-
 void throwError(StatusEnum error) {
     setStatus(error);
     while (1) {
@@ -37,11 +34,27 @@ void throwError(StatusEnum error) {
     }
 }
 
+void setStatus(StatusEnum newStatus) {
+    if (droneState.status != newStatus) {
+        droneState.status = newStatus;
+        Serial.print("Status changed to: ");
+        Serial.println(newStatus);
+    }
+}
+
+void setFlightMode(FlightMode newMode) {
+    if (droneState.flightMode != newMode) {
+        droneState.flightMode = newMode;
+        Serial.print("Flight mode changed to: ");
+        Serial.println(newMode);
+    }
+}
+
 void reportStatus() {
-    if (status == READY) {
+    if (droneState.status == READY) {
         displayDecimalPoint();
     } else {
-        displayNumber(status);
+        displayNumber(droneState.status);
     }
 }
 

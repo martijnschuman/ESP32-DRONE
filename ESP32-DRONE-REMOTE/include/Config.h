@@ -4,11 +4,11 @@
 #define CONFIG_H
 
 #include <Arduino.h>
-
-extern bool isDroneConnected;
+#include "global.h"
 
 // Transmission interval
 #define TRANSMISSION_INTERVAL 50
+#define FIRST_CONNECTION_INTERVAL 1000
 
 // Joystick pins
 #define LEFT_VRX 34

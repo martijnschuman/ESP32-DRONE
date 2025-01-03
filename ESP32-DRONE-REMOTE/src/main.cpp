@@ -7,16 +7,10 @@
 #include "buttons.h"
 #include "ESPNow.h"
 
-bool isDroneConnected = false;
-
-typedef struct message {
-	int leftX;
-	int leftY;
-	int rightX;
-	int rightY;
-} message;
-
-message handControllerData;
+DroneState droneState = {CALIBRATING, BOOT}; 	// Explicit initialization
+TelemetryPacket telemetry = {};             	// Zero-initialized
+ControlPacket control = {};
+bool isConnectedToDrone = false;
 
 void setup() {
 	serialSetup();
@@ -27,39 +21,60 @@ void setup() {
 	setupJoysticks();
 
 	Serial.println("Setup complete.");
+	setStatus(CALIBRATING);
 }
 
 void loop() {
-	// if (!leftCalibrated || !rightCalibrated) {
-	// 	calibrationMenu();
-	// }
-
-	// if (!isDroneConnected) {
-	// 	connectToDroneDisplay();
-
-	// 	if (checkOKButton()) {
-	// 		isDroneConnected = true;
-	// 		connectedToDroneDisplay();
-	// 	}
-	// } else {
-	// 	joystickDebugDisplay();
-	// }
-	
-	// sendIsCamAlive();
-
-    // static bool pictureTriggered = false;
-
-    // if (!pictureTriggered && isAliveAckReceived) {
-    //     sendTakePictureCommand();
-    //     pictureTriggered = true; // To avoid repeatedly sending the command
-    // }
-
-	static unsigned long lastControlTime = 0;
     unsigned long currentTime = millis();
 
-    // Send control every 50ms
-    if (currentTime - lastControlTime >= TRANSMISSION_INTERVAL) {
-        lastControlTime = currentTime;
-        sendControl();
+    if (getStatus() == CALIBRATING) {
+        if (!leftCalibrated || !rightCalibrated) {
+            // calibrationMenu();
+			startCalibrateJoysticks();
+        }
+
+		if (leftCalibrated && rightCalibrated) {
+			setStatus(START_CONNECTION);
+			setFlightMode(BOOT);
+		}
     }
+
+    if (getStatus() == START_CONNECTION && getFlightMode() == BOOT) {
+		Serial.println("Starting connection.");
+
+        static unsigned long lastConnectionAttempt = 0;
+
+        if (currentTime - lastConnectionAttempt >= FIRST_CONNECTION_INTERVAL) {
+            lastConnectionAttempt = currentTime;
+			Serial.println("Attempting to connect to drone.");
+
+            connectToDrone();
+        }
+
+		if (isConnectedToDrone) {
+			Serial.println("Connected to drone in loop.");
+
+			setStatus(READY);
+			setFlightMode(GROUND);	
+		}
+    }
+
+    // if (getStatus() == READY && getFlightMode() == GROUND) {
+    //     Serial.println("Ready to take off.");
+	// 	Serial.println("Press OK to enable manual flight.");
+	// 	displayOKStatus();
+
+    //     if (checkOKButton()) {
+    //         setFlightMode(MANUAL);
+    //     }
+    // }
+
+    // if (getStatus() == READY && getFlightMode() == MANUAL) {
+    //     static unsigned long lastControlTime = 0;
+
+    //     if (currentTime - lastControlTime >= TRANSMISSION_INTERVAL) {
+    //         lastControlTime = currentTime;
+    //         sendControl();
+    //     }
+    // }
 }

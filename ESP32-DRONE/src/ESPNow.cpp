@@ -3,12 +3,10 @@
 // Slave MAC address
 uint8_t remoteMAC[] = REMOTE_MAC_ADDRESS;
 
-// Variables
-unsigned long lastKeepAlive = 0;
-bool isAliveAckReceived = false;
+FirstConnectionRequestPacket firstConnection;
 
+// Set up ESP-NOW
 void setupESPNow() {
-    // Set device as a Wi-Fi Station
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
 
@@ -23,12 +21,10 @@ void setupESPNow() {
     esp_now_register_send_cb(onDataSent);
     esp_now_register_recv_cb(onDataReceived);
 
-    // Register peer
     addPeer(remoteMAC);
 }
 
 void addPeer(uint8_t *peerMAC) {
-    // Register peer
     esp_now_peer_info_t slaveInfo;
     memset(&slaveInfo, 0, sizeof(slaveInfo));
     memcpy(slaveInfo.peer_addr, peerMAC, 6);
@@ -37,7 +33,6 @@ void addPeer(uint8_t *peerMAC) {
 
     if (esp_now_add_peer(&slaveInfo) != ESP_OK) {
         Serial.println("Failed to add peer");
-        setStatus(ESP_NOW_ADD_PEER_ERROR);
         return;
     }
 }
@@ -59,27 +54,29 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         Serial.print("Joystick Y: "); Serial.println(control.joystickY);
         Serial.print("Throttle: "); Serial.println(control.throttle);
         Serial.print("Yaw: "); Serial.println(control.yaw);
-    } else {
+    } 
+    else if (dataLen == sizeof(FirstConnectionRequestPacket)) {
+        firstConnection = *reinterpret_cast<const FirstConnectionRequestPacket*>(data);
+        Serial.println("First connection packet received.");
+        if (firstConnection.status == READY) {
+            Serial.println("Remote is ready.");
+            sendDroneReady();
+        }
+    }
+    else {
         Serial.println("Unknown packet received.");
     }
 }
 
-bool testRemoteConnection() {
-    // Send test packet to drone to check connection
-    ControlPacket testPacket;
-    testPacket.joystickX = 0;
-    testPacket.joystickY = 0;
-    testPacket.throttle = 0;
-    testPacket.yaw = 0;
+void sendDroneReady() {
+    FirstConnectionRequestPacket packet;
+    packet.status = READY;
 
-    esp_err_t result = esp_now_send(remoteMAC, reinterpret_cast<uint8_t*>(&testPacket), sizeof(testPacket));
+    esp_err_t result = esp_now_send(remoteMAC, reinterpret_cast<uint8_t*>(&packet), sizeof(packet));
     if (result == ESP_OK) {
-        Serial.println("Test packet sent.");
-        setStatus(READY);
-        return true;
+        Serial.println("Drone ready sent.");
     } else {
-        Serial.println("Error sending test packet. Retrying in " + String(CONNECTION_TEST_INTERVAL) + "ms.");
-        setStatus(ESP_NOW_SEND_ERROR);
-        return false;
+        Serial.println("Error sending drone ready.");
+        throwError(ESP_NOW_SEND_ERROR);
     }
 }

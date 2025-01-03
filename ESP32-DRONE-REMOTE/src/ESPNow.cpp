@@ -1,52 +1,83 @@
-// ESPNOW.cpp
-
 #include "ESPNow.h"
 
-// Slave MAC address
 uint8_t droneMAC[] = REMOTE_MAC_ADDRESS;
-uint8_t cameraMAC[] = CAMERA_MAC_ADDRESS;
+FirstConnectionRequestPacket firstConnection = {};
 
 void setupESPNow() {
-    // Set device as a Wi-Fi Station
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
 
-    // Init ESP-NOW
     if (esp_now_init() != ESP_OK) {
         Serial.println("Error initializing ESP-NOW");
+        setStatus(ESP_NOW_INIT_ERROR);
         return;
     }
 
-    // Set up callbacks
     esp_now_register_send_cb(onDataSent);
     esp_now_register_recv_cb(onDataReceived);
 
-    // Register peer
     addPeer(droneMAC);
-    addPeer(cameraMAC);
 }
 
-void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
-    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Message sent." : "Error sending packet.");
-}
+void addPeer(uint8_t *peerMAC) {
+    esp_now_peer_info_t peerInfo = {};
+    memcpy(peerInfo.peer_addr, peerMAC, 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
 
-void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
-    if (dataLen == sizeof(TelemetryPacket)) {
-        telemetry = *reinterpret_cast<const TelemetryPacket*>(data);
-    } else {
-        Serial.println("Unknown packet received.");
+    if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+        Serial.println("Error adding peer.");
     }
 }
 
+void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
+    if (status == ESP_NOW_SEND_SUCCESS) {
+        Serial.println("Message sent.");
+    } else {
+        Serial.println("Error sending packet.");
+    }
+}
 
-// void sendTakePictureCommand() {
-//     CommandPacket command;
-//     command.body = TAKE_PICTURE;
+void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
+    if (data == nullptr || dataLen <= 0) {
+        Serial.println("Received invalid data.");
+        return;
+    }
 
-//     esp_err_t result = esp_now_send(cameraMAC, (uint8_t*)&command, sizeof(command));
-//     if (result == ESP_OK) {
-//         Serial.println("Take picture command sent.");
-//     } else {
-//         Serial.println("Error sending take picture command.");
-//     }
-// }
+    if (dataLen == sizeof(TelemetryPacket)) {
+        telemetry = *reinterpret_cast<const TelemetryPacket *>(data);
+    } else if (dataLen == sizeof(FirstConnectionRequestPacket)) {
+        firstConnection = *reinterpret_cast<const FirstConnectionRequestPacket *>(data);
+        if (firstConnection.status == READY) {
+            Serial.println("Drone is ready.");
+            isConnectedToDrone = true;
+            setStatus(READY);
+        }
+    } else {
+        Serial.println("Unknown packet received.");
+        Serial.print("Data length: ");
+        Serial.println(dataLen);
+    }
+}
+
+void connectToDrone() {
+    Serial.println("Sending connection request.");
+
+    FirstConnectionRequestPacket command;
+    command.status = START_CONNECTION;
+
+    Serial.println(command.status);
+
+    esp_err_t result = esp_now_send(droneMAC, (uint8_t*)&command, sizeof(command));
+
+    Serial.print("Result: ");
+    Serial.println(result);
+
+    if (result == ESP_OK) {
+        Serial.println("Connection request sent.");
+    } else {
+        Serial.println("Error sending connection request.");
+    }
+
+    // Errors, see chat
+}
