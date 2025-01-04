@@ -16,6 +16,8 @@ void setup() {
 	serialSetup();
 	setupStatusLEDs();
 
+	setupESPNow();
+
 	// setupLCD();
 	setupButtons();
 	setupJoysticks();
@@ -40,8 +42,6 @@ void loop() {
     }
 
     if (getStatus() == START_CONNECTION && getFlightMode() == BOOT) {
-		Serial.println("Starting connection.");
-
         static unsigned long lastConnectionAttempt = 0;
 
         if (currentTime - lastConnectionAttempt >= FIRST_CONNECTION_INTERVAL) {

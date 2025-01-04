@@ -13,8 +13,8 @@
 // Joystick pins
 #define LEFT_VRX 34
 #define LEFT_VRY 35
-#define RIGHT_VRX 27
-#define RIGHT_VRY 26
+#define RIGHT_VRX 33
+#define RIGHT_VRY 32
 
 // Button pins  
 #define BUTTON_OK 23

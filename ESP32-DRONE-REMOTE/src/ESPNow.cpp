@@ -32,9 +32,16 @@ void addPeer(uint8_t *peerMAC) {
 
 void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
     if (status == ESP_NOW_SEND_SUCCESS) {
-        Serial.println("Message sent.");
+        Serial.print("Message sent to: ");
+        for (int i = 0; i < 6; i++) {
+            Serial.print(macAddr[i], HEX);
+            if (i < 5) {
+                Serial.print(":");
+            }
+        }
     } else {
-        Serial.println("Error sending packet.");
+        Serial.print("Error sending packet: ");
+        Serial.println(status);
     }
 }
 
@@ -61,23 +68,13 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
 }
 
 void connectToDrone() {
-    Serial.println("Sending connection request.");
-
     FirstConnectionRequestPacket command;
     command.status = START_CONNECTION;
 
-    Serial.println(command.status);
-
     esp_err_t result = esp_now_send(droneMAC, (uint8_t*)&command, sizeof(command));
-
-    Serial.print("Result: ");
-    Serial.println(result);
-
     if (result == ESP_OK) {
         Serial.println("Connection request sent.");
     } else {
         Serial.println("Error sending connection request.");
     }
-
-    // Errors, see chat
 }
