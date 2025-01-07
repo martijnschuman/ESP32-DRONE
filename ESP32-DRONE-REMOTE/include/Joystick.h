@@ -7,11 +7,10 @@
 #include "LCD.h"
 #include "buttons.h"
 #include "status.h"
+#include "ADC.h"
 
 extern bool leftCalibrated;
 extern bool rightCalibrated;
-
-void setupJoysticks();
 
 int getLeftJoystickX();
 int getLeftJoystickY();
@@ -20,6 +19,6 @@ int getRightJoystickY();
 int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue, int centerValue, bool isYAxis);
 
 void startCalibrateJoysticks();
-bool calibrateSingleJoystick(int &minX, int &maxX, int &minY, int &maxY, int &centerX, int &centerY, int pinX, int pinY, const char* joystickName);
+bool calibrateSingleJoystick(float &minX, float &maxX, float &minY, float &maxY, float &centerX, float &centerY, int pinX, int pinY, const char* joystickName);
 
 #endif

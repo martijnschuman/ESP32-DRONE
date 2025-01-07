@@ -40,7 +40,14 @@ void addPeer(uint8_t *peerMAC) {
 // Callback when data is sent
 void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
     if (status == ESP_NOW_SEND_SUCCESS) {
-        Serial.println("Message sent successfully.");
+         Serial.print("Message sent to: ");
+        for (int i = 0; i < 6; i++) {
+            Serial.print(macAddr[i], HEX);
+            if (i < 5) {
+                Serial.print(":");
+            }
+        }
+        Serial.println();
     } else {
         Serial.println("Error sending packet.");
     }
@@ -58,10 +65,17 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     else if (dataLen == sizeof(FirstConnectionRequestPacket)) {
         firstConnection = *reinterpret_cast<const FirstConnectionRequestPacket*>(data);
         Serial.println("First connection packet received.");
-        if (firstConnection.status == READY) {
+        Serial.print("Status: "); Serial.println(firstConnection.status);
+        if (firstConnection.status == START_CONNECTION) {
             Serial.println("Remote is ready.");
             sendDroneReady();
         }
+    }
+    else if (dataLen == sizeof(FlightModeChangePacket)) {
+        FlightModeChangePacket packet = *reinterpret_cast<const FlightModeChangePacket*>(data);
+        Serial.print("Flight mode change packet received. New mode: ");
+        Serial.println(packet.mode);
+        setFlightMode(packet.mode);
     }
     else {
         Serial.println("Unknown packet received.");
@@ -75,6 +89,7 @@ void sendDroneReady() {
     esp_err_t result = esp_now_send(remoteMAC, reinterpret_cast<uint8_t*>(&packet), sizeof(packet));
     if (result == ESP_OK) {
         Serial.println("Drone ready sent.");
+        setStatus(READY);
     } else {
         Serial.println("Error sending drone ready.");
         throwError(ESP_NOW_SEND_ERROR);

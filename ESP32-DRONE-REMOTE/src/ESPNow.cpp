@@ -1,6 +1,6 @@
 #include "ESPNow.h"
 
-uint8_t droneMAC[] = REMOTE_MAC_ADDRESS;
+uint8_t droneMAC[] = DRONE_MAC_ADDRESS;
 FirstConnectionRequestPacket firstConnection = {};
 
 void setupESPNow() {
@@ -39,6 +39,7 @@ void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
                 Serial.print(":");
             }
         }
+        Serial.println();
     } else {
         Serial.print("Error sending packet: ");
         Serial.println(status);
@@ -51,14 +52,24 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         return;
     }
 
+    Serial.print("Data received: ");
+    for (int i = 0; i < dataLen; i++) {
+        Serial.print(data[i], HEX);
+        Serial.print(" ");
+    }
+    Serial.println();
+
     if (dataLen == sizeof(TelemetryPacket)) {
         telemetry = *reinterpret_cast<const TelemetryPacket *>(data);
+        Serial.println("Telemetry packet received.");
     } else if (dataLen == sizeof(FirstConnectionRequestPacket)) {
         firstConnection = *reinterpret_cast<const FirstConnectionRequestPacket *>(data);
+        Serial.println("First connection packet received.");
         if (firstConnection.status == READY) {
             Serial.println("Drone is ready.");
             isConnectedToDrone = true;
             setStatus(READY);
+            setFlightMode(GROUND);	
         }
     } else {
         Serial.println("Unknown packet received.");
@@ -76,5 +87,17 @@ void connectToDrone() {
         Serial.println("Connection request sent.");
     } else {
         Serial.println("Error sending connection request.");
+    }
+}
+
+void sendFlightModeToDrone(FlightMode mode) {
+    FlightModeChangePacket command;
+    command.mode = mode;
+
+    esp_err_t result = esp_now_send(droneMAC, (uint8_t*)&command, sizeof(command));
+    if (result == ESP_OK) {
+        Serial.println("Mode change request sent.");
+    } else {
+        Serial.println("Error sending mode change request.");
     }
 }

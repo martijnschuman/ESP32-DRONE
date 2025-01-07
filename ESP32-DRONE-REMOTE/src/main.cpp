@@ -2,6 +2,8 @@
 #include "config.h"
 #include "status.h"
 #include "serial.h"
+#include "I2CMultiplexer.h"
+#include "ADC.h"
 #include "joystick.h"
 #include "LCD.h"
 #include "buttons.h"
@@ -18,20 +20,31 @@ void setup() {
 
 	setupESPNow();
 
+    setupI2CMultiplexer();
+    enableI2CChannel(ADC_CHANNEL);
+
+    setupADC();
+
 	// setupLCD();
 	setupButtons();
-	setupJoysticks();
 
 	Serial.println("Setup complete.");
 	setStatus(CALIBRATING);
 }
+
+// void loop() {
+//     Serial.println(readADCChannel(0));
+//     Serial.println(readADCChannel(1));
+//     Serial.println(readADCChannel(2));
+//     Serial.println(readADCChannel(3));
+//     delay(1000);
+// }
 
 void loop() {
     unsigned long currentTime = millis();
 
     if (getStatus() == CALIBRATING) {
         if (!leftCalibrated || !rightCalibrated) {
-            // calibrationMenu();
 			startCalibrateJoysticks();
         }
 
@@ -50,31 +63,26 @@ void loop() {
 
             connectToDrone();
         }
-
-		if (isConnectedToDrone) {
-			Serial.println("Connected to drone in loop.");
-
-			setStatus(READY);
-			setFlightMode(GROUND);	
-		}
     }
 
-    // if (getStatus() == READY && getFlightMode() == GROUND) {
-    //     Serial.println("Ready to take off.");
-	// 	Serial.println("Press OK to enable manual flight.");
-	// 	displayOKStatus();
+    if (isConnectedToDrone) {
+        if (getStatus() == READY && getFlightMode() == GROUND) {
+            Serial.println("Press OK to enable manual flight.");
+            displayOKStatus();
 
-    //     if (checkOKButton()) {
-    //         setFlightMode(MANUAL);
-    //     }
-    // }
+            if (checkOKButton()) {
+                setFlightMode(MANUAL);
+                sendFlightModeToDrone(MANUAL);
+            }
+        }
 
-    // if (getStatus() == READY && getFlightMode() == MANUAL) {
-    //     static unsigned long lastControlTime = 0;
+        if (getStatus() == READY && getFlightMode() == MANUAL) {
+            static unsigned long lastControlTime = 0;
 
-    //     if (currentTime - lastControlTime >= TRANSMISSION_INTERVAL) {
-    //         lastControlTime = currentTime;
-    //         sendControl();
-    //     }
-    // }
+            if (currentTime - lastControlTime >= TRANSMISSION_INTERVAL) {
+                lastControlTime = currentTime;
+                sendControl();
+            }
+        }
+    }
 }

@@ -65,7 +65,7 @@ void loop() {
         return;
     }
 
-    if (droneState.status == READY && droneState.flightMode == GROUND) {
+    if (droneState.status == READY && (droneState.flightMode == GROUND || droneState.flightMode == MANUAL)) {
         // Update IMU
         if (currentMillis - lastIMUUpdate >= IMU_INTERVAL) {
             lastIMUUpdate = currentMillis;

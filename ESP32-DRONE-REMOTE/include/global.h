@@ -62,6 +62,10 @@ struct FirstConnectionRequestPacket {
     StatusEnum status;
 };
 
+struct FlightModeChangePacket {
+    FlightMode mode;
+};
+
 extern DroneState droneState;
 
 extern TelemetryPacket telemetry;

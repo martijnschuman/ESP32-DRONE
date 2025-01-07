@@ -1,39 +1,30 @@
 #include <joystick.h>
 
 // Calibration data for left joystick
-int leftMeasuredMinX = 4095, leftMeasuredMaxX = 0, leftMeasuredCenterX = leftMeasuredMinX / 2;
-int leftMeasuredMinY = 4095, leftMeasuredMaxY = 0, leftMeasuredCenterY = leftMeasuredMinY / 2;
+float leftMeasuredMinX = 3300.00, leftMeasuredMaxX = 0, leftMeasuredCenterX = leftMeasuredMinX / 2;
+float leftMeasuredMinY = 3300.00, leftMeasuredMaxY = 0, leftMeasuredCenterY = leftMeasuredMinY / 2;
 bool leftCalibrated = false;
 
 // Calibration data for right joystick
-int rightMeasuredMinX = 4095, rightMeasuredMaxX = 0, rightMeasuredCenterX = rightMeasuredMinX / 2;
-int rightMeasuredMinY = 4095, rightMeasuredMaxY = 0, rightMeasuredCenterY = rightMeasuredMinY / 2;
+float rightMeasuredMinX = 3300.00, rightMeasuredMaxX = 0, rightMeasuredCenterX = rightMeasuredMinX / 2;
+float rightMeasuredMinY = 3300.00, rightMeasuredMaxY = 0, rightMeasuredCenterY = rightMeasuredMinY / 2;
 bool rightCalibrated = false;
-
-// Setup function for joysticks
-void setupJoysticks() {
-    pinMode(LEFT_VRX, INPUT);
-    pinMode(LEFT_VRY, INPUT);
-
-    pinMode(RIGHT_VRX, INPUT);
-    pinMode(RIGHT_VRY, INPUT);
-}
 
 // Functions for reading joystick values
 int getLeftJoystickX() {
-    return transferJoystickValue(analogRead(LEFT_VRX), leftMeasuredMinX, leftMeasuredMaxX, leftMeasuredCenterX, false);
+    return transferJoystickValue(readADCChannel(JOYSTICK_LEFT_X_CHANNEL), leftMeasuredMinX, leftMeasuredMaxX, leftMeasuredCenterX, false);
 }
 
 int getLeftJoystickY() {
-    return transferJoystickValue(analogRead(LEFT_VRY), leftMeasuredMinY, leftMeasuredMaxY, leftMeasuredCenterY, true);
+    return transferJoystickValue(readADCChannel(JOYSTICK_LEFT_Y_CHANNEL), leftMeasuredMinY, leftMeasuredMaxY, leftMeasuredCenterY, true);
 }
 
 int getRightJoystickX() {
-    return transferJoystickValue(analogRead(RIGHT_VRX), rightMeasuredMinX, rightMeasuredMaxX, rightMeasuredCenterX, false);
+    return transferJoystickValue(readADCChannel(JOYSTICK_RIGHT_X_CHANNEL), rightMeasuredMinX, rightMeasuredMaxX, rightMeasuredCenterX, false);
 }
 
 int getRightJoystickY() {
-    return transferJoystickValue(analogRead(RIGHT_VRY), rightMeasuredMinY, rightMeasuredMaxY, rightMeasuredCenterY, true);
+    return transferJoystickValue(readADCChannel(JOYSTICK_RIGHT_Y_CHANNEL), rightMeasuredMinY, rightMeasuredMaxY, rightMeasuredCenterY, true);
 }
 
 // Transfer function to scale joystick values with two separate mappings and dead zone
@@ -82,8 +73,8 @@ int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue,
 void startCalibrateJoysticks() {
     displayErrorStatus();
 
-    leftCalibrated = calibrateSingleJoystick(leftMeasuredMinX, leftMeasuredMaxX, leftMeasuredMinY, leftMeasuredMaxY, leftMeasuredCenterX, leftMeasuredCenterY, LEFT_VRX, LEFT_VRY, "Left joystick");
-    rightCalibrated = calibrateSingleJoystick(rightMeasuredMinX, rightMeasuredMaxX, rightMeasuredMinY, rightMeasuredMaxY, rightMeasuredCenterX, rightMeasuredCenterY, RIGHT_VRX, RIGHT_VRY, "Right joystick");
+    leftCalibrated = calibrateSingleJoystick(leftMeasuredMinX, leftMeasuredMaxX, leftMeasuredMinY, leftMeasuredMaxY, leftMeasuredCenterX, leftMeasuredCenterY, JOYSTICK_LEFT_X_CHANNEL, JOYSTICK_LEFT_Y_CHANNEL, "left");
+    rightCalibrated = calibrateSingleJoystick(rightMeasuredMinX, rightMeasuredMaxX, rightMeasuredMinY, rightMeasuredMaxY, rightMeasuredCenterX, rightMeasuredCenterY, JOYSTICK_RIGHT_X_CHANNEL, JOYSTICK_RIGHT_Y_CHANNEL, "right");
 
     displayOKStatus();
     displayLCD("Calibration", 0, 0);
@@ -96,7 +87,7 @@ void startCalibrateJoysticks() {
 }
 
 // Function to calibrate a single joystick
-bool calibrateSingleJoystick(int &minX, int &maxX, int &minY, int &maxY, int &centerX, int &centerY, int pinX, int pinY, const char* joystickName) {
+bool calibrateSingleJoystick(float &minX, float &maxX, float &minY, float &maxY, float &centerX, float &centerY, int channelX, int channelY, const char* joystickName) {
     Serial.print("Calibrating "); Serial.println(joystickName);
     displayLCD("Calibrating", 0, 0);
     displayLCD(joystickName, 1, 0);
@@ -110,12 +101,12 @@ bool calibrateSingleJoystick(int &minX, int &maxX, int &minY, int &maxY, int &ce
 
     delay(JOYSTICK_CALIBRATION_DELAY); // Wait for user action
     unsigned long startTime = millis();
-    long sumX = 0, sumY = 0;
+    float sumX = 0, sumY = 0;
     int count = 0;
 
     while (millis() - startTime < JOYSTICK_CALIBRATION_DELAY) {
-        sumX += analogRead(pinX);
-        sumY += analogRead(pinY);
+        sumX += readADCChannel(channelX);
+        sumY += readADCChannel(channelY);
         count++;
     }
 
@@ -134,8 +125,8 @@ bool calibrateSingleJoystick(int &minX, int &maxX, int &minY, int &maxY, int &ce
     sumX = 0; sumY = 0; count = 0;
 
     while (millis() - startTime < JOYSTICK_CALIBRATION_DELAY) {
-        sumX += analogRead(pinX);
-        sumY += analogRead(pinY);
+        sumX += readADCChannel(channelX);
+        sumY += readADCChannel(channelY);
         count++;
     }
 
@@ -151,12 +142,12 @@ bool calibrateSingleJoystick(int &minX, int &maxX, int &minY, int &maxY, int &ce
 
     delay(JOYSTICK_CALIBRATION_DELAY); // Wait for joystick to settle
     startTime = millis();
-    long centerSumX = 0, centerSumY = 0;
+    float centerSumX = 0, centerSumY = 0;
     count = 0;
 
     while (millis() - startTime < JOYSTICK_CALIBRATION_DELAY) {
-        centerSumX += analogRead(pinX);
-        centerSumY += analogRead(pinY);
+        centerSumX += readADCChannel(channelX);
+        centerSumY += readADCChannel(channelY);
         count++;
     }
 
