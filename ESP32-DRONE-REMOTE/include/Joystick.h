@@ -4,13 +4,18 @@
 #define Joystick_H
 
 #include "config.h"
-#include "LCD.h"
+#include "display.h"
 #include "buttons.h"
 #include "status.h"
 #include "ADC.h"
 
 extern bool leftCalibrated;
 extern bool rightCalibrated;
+
+void setupJoysticks();
+
+bool getLeftJoystickButton();
+bool getRightJoystickButton();
 
 int getLeftJoystickX();
 int getLeftJoystickY();

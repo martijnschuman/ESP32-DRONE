@@ -29,10 +29,16 @@
 #define JOYSTICK_LEFT_Y_CHANNEL 1						// Left joystick Y-axis channel
 #define JOYSTICK_RIGHT_X_CHANNEL 2						// Right joystick X-axis channel
 #define JOYSTICK_RIGHT_Y_CHANNEL 3						// Right joystick Y-axis channel
+#define JOYSTICK_LEFT_BUTTON 12							// Left joystick button pin
+#define JOYSTICK_RIGHT_BUTTON 13						// Right joystick button pin
 
 // Joystick calibration
 #define JOYSTICK_CALIBRATION_DELAY 3000
 #define JOYSTICK_CENTER_TOLERANCE 5
+
+// LCD
+#define X_PIXELS 128								    // Number of pixels in the X-axis
+#define Y_PIXELS 64										// Number of pixels in the Y-axis
 
 // Status LEDs
 #define STATUS_RED_LED 19
