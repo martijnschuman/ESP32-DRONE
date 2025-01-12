@@ -8,7 +8,7 @@
 
 // Transmission interval
 #define TRANSMISSION_INTERVAL 500						// Interval for sending telemetry data
-#define FIRST_CONNECTION_INTERVAL 2500					// Interval for first connection attempt
+#define FIRST_CONNECTION_INTERVAL 5000					// Interval for first connection attempt
 
 // Button pins  
 #define BUTTON_OK 23									// 

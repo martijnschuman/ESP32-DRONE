@@ -59,10 +59,11 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
 
     if (dataLen == sizeof(ControlPacket)) {
         controlPacket = *reinterpret_cast<const ControlPacket*>(data);
+        Serial.println("Control packet received");
     } 
     else if (dataLen == sizeof(DroneStatePacket)) {
         droneStatePacket = *reinterpret_cast<const DroneStatePacket*>(data);
-        Serial.print("Drone status packet received: ");
+        Serial.println("Drone status packet received");
 
         if (droneStatePacket.droneState.status == START_CONNECTION) {
             sendDroneReady();
@@ -97,6 +98,7 @@ void sendTelemetry() {
     TelemetryPacket telemetryPacket;
 
     telemetryPacket.status = droneState.status;
+    telemetryPacket.flightMode = droneState.flightMode;
     telemetryPacket.accX = accX;
     telemetryPacket.accY = accY;
     telemetryPacket.accZ = accZ;
@@ -109,8 +111,8 @@ void sendTelemetry() {
     telemetryPacket.gpsAlt = gpsAlt;
     telemetryPacket.gpsSpeed = gpsSpeed;
     telemetryPacket.gpsSatellites = gpsSatellites;
-    telemetryPacket.gpsTime = gpsTime;
-    telemetryPacket.gpsDate = gpsDate;
+    telemetryPacket.batteryVoltage = 12.12;
+    // telemetryPacket.batteryVoltage = batteryVoltage;
 
     esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&telemetryPacket, sizeof(telemetryPacket));
     if (result == ESP_OK) {

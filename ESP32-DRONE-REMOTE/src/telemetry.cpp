@@ -3,11 +3,15 @@
 #include "telemetry.h"
 
 int getThrottleValue() {
+    int throttleValue = 0;
+
     if (getRightJoystickY() > 0) {
-        controlPacket.throttle = getRightJoystickY();
+        throttleValue = getRightJoystickY();
     } else {
-        controlPacket.throttle = 0;
+        throttleValue = 0;
     }
+
+    return throttleValue;
 }
 
 void sendControl() {
@@ -18,9 +22,9 @@ void sendControl() {
 
     esp_err_t result = esp_now_send(droneMAC, reinterpret_cast<uint8_t*>(&controlPacket), sizeof(controlPacket));
     if (result == ESP_OK) {
-        Serial.println("Telemetry sent.");
+        Serial.println("Control package sent.");
     } else {
-        Serial.println("Error sending telemetry.");
+        Serial.println("Error sending control packet.");
         displayLEDErrorStatus();
     }
 }

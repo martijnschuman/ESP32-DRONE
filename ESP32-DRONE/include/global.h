@@ -33,13 +33,14 @@ struct DroneState {
 // Struct for telemetry packet
 struct TelemetryPacket {
     StatusEnum status;
+    FlightMode flightMode;
     float accX, accY, accZ;
     float gyroX, gyroY, gyroZ;
     float height;
     float gpsLat, gpsLng, gpsAlt;
     float gpsSpeed;
     int gpsSatellites;
-    String gpsTime, gpsDate;
+    float batteryVoltage;
 };
 
 // Struct for control packet

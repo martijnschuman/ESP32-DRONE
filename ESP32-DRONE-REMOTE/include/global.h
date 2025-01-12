@@ -41,7 +41,6 @@ struct TelemetryPacket {
     float gpsLat, gpsLng, gpsAlt;
     float gpsSpeed;
     int gpsSatellites;
-    String gpsTime, gpsDate;
     float batteryVoltage;
 };
 

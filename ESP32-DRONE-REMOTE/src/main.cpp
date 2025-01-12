@@ -40,7 +40,29 @@ void setup() {
 void loop() {
     unsigned long currentTime = millis();
 
-    if (!isConnectedToDrone) {
+    if (isConnectedToDrone) {
+        if (getStatus() == READY) {
+            if (getFlightMode() == GROUND) {
+                if (checkOKButton()) {
+                    sendFlightModeToDrone(MANUAL);
+                }
+
+                displayLEDOKStatus();
+                displayReadyToFly();
+            }
+            else if (getFlightMode() == MANUAL) {
+                displayLEDErrorStatus();
+                static unsigned long lastControlTime = 0;
+
+                if (currentTime - lastControlTime >= TRANSMISSION_INTERVAL) {
+                    lastControlTime = currentTime;
+                    sendControl();
+                    displayTelemetry();
+                }
+            }
+        }
+    }
+    else {
         if (getStatus() == CALIBRATING) {
             displayStartCalibration();
 
@@ -52,37 +74,16 @@ void loop() {
                 setStatus(START_CONNECTION);
             }
         }
-
-        if (getStatus() == START_CONNECTION) {
+        else if (getStatus() == START_CONNECTION) {
             static unsigned long lastConnectionAttempt = 0;
 
             if (currentTime - lastConnectionAttempt >= FIRST_CONNECTION_INTERVAL) {
-                lastConnectionAttempt = currentTime;
                 displayStartDroneConnection();
 
+                Serial.println("Attempting to connect to drone.");
+
                 connectToDrone();
-            }
-        }
-    }
-
-    else if (isConnectedToDrone && getStatus() == READY) {
-        if (getFlightMode() == GROUND) {
-            displayLEDOKStatus();
-            displayReadyToFly();
-
-            if (checkOKButton()) {
-                setFlightMode(MANUAL);
-                sendFlightModeToDrone(MANUAL);
-            }
-        }
-        else if (getFlightMode() == MANUAL) {
-            displayLEDErrorStatus();
-            static unsigned long lastControlTime = 0;
-
-            if (currentTime - lastControlTime >= TRANSMISSION_INTERVAL) {
-                lastControlTime = currentTime;
-                sendControl();
-                displayTelemetry();
+                lastConnectionAttempt = currentTime;
             }
         }
     }

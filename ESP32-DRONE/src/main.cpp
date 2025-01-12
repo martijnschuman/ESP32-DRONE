@@ -85,9 +85,9 @@ void loop() {
         // }
 
         // Transmit telemetry to the remote
-        // if (currentMillis - lastTransmitUpdate >= TRANSMIT_INTERVAL) {
-        //     lastTransmitUpdate = currentMillis;
-        //     sendTelemetry();
-        // }
+        if (currentMillis - lastTransmitUpdate >= TRANSMIT_INTERVAL) {
+            lastTransmitUpdate = currentMillis;
+            sendTelemetry();
+        }
     }
 }

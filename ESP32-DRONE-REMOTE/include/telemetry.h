@@ -8,6 +8,7 @@
 #include "status.h"
 #include "joystick.h"
 
+int getThrottleValue();
 void sendControl();
 
 #endif // TELEMTRY_H

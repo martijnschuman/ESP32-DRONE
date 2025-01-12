@@ -89,5 +89,6 @@ void sendFlightModeToDrone(FlightMode mode) {
     if (result == ESP_OK) {
         Serial.print("Mode change request sent, mode: ");
         Serial.println(mode);
+        setFlightMode(mode);
     }
 }
