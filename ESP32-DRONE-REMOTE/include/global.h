@@ -14,21 +14,16 @@ enum StatusEnum {
     LIDAR_ERROR = 0x05,
     GPS_ERROR = 0x06,
     ESP_NOW_INIT_ERROR = 0x07,
-    ESP_NOW_SEND_ERROR = 0x08,
-    BATTERY_LOW = 0x09,
-    BATTERY_CRITICAL = 0x0A,
+    ADC_ERROR = 0x08,
+    DISPLAY_ERROR = 0x09,
+    BATTERY_LOW = 0x0A,
+    BATTERY_CRITICAL = 0x0B,
 };
 
 enum FlightMode {
     BOOT = 0x00,
     GROUND = 0x01,
     MANUAL = 0x02,
-    STABILIZE = 0x03,
-    ALT_HOLD = 0x04,
-    LOITER = 0x05,
-    AUTO = 0x06,
-    RTL = 0x07,
-    LANDING = 0x08,
 };
 
 struct DroneState {
@@ -42,12 +37,12 @@ struct TelemetryPacket {
     FlightMode flightMode;
     float accX, accY, accZ;
     float gyroX, gyroY, gyroZ;
-    float temp;
     float height;
     float gpsLat, gpsLng, gpsAlt;
     float gpsSpeed;
     int gpsSatellites;
     String gpsTime, gpsDate;
+    float batteryVoltage;
 };
 
 // Struct for control packet
@@ -58,20 +53,19 @@ struct ControlPacket {
     float yaw;
 };
 
-struct FirstConnectionRequestPacket {
-    StatusEnum status;
-};
-
-struct FlightModeChangePacket {
-    FlightMode mode;
+struct DroneStatePacket {
+    DroneState droneState;
 };
 
 extern DroneState droneState;
 
-extern TelemetryPacket telemetry;
-extern ControlPacket control;
-extern FirstConnectionRequestPacket firstConnection;
+extern TelemetryPacket telemetryPacket;
+extern ControlPacket controlPacket;
+extern DroneStatePacket droneStatePacket;
 
 extern bool isConnectedToDrone;
+
+void hold();
+void handleSetupError(StatusEnum errorStatus, const char* errorMessage);
 
 #endif // MAIN_H

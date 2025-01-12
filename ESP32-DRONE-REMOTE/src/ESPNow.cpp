@@ -1,16 +1,13 @@
 #include "ESPNow.h"
 
 uint8_t droneMAC[] = DRONE_MAC_ADDRESS;
-FirstConnectionRequestPacket firstConnection = {};
 
 void setupESPNow() {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
 
     if (esp_now_init() != ESP_OK) {
-        Serial.println("Error initializing ESP-NOW");
-        setStatus(ESP_NOW_INIT_ERROR);
-        return;
+        handleSetupError(ESP_NOW_INIT_ERROR, "Error initializing ESP-NOW");
     }
 
     esp_now_register_send_cb(onDataSent);
@@ -52,20 +49,14 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         return;
     }
 
-    Serial.print("Data received: ");
-    for (int i = 0; i < dataLen; i++) {
-        Serial.print(data[i], HEX);
-        Serial.print(" ");
-    }
-    Serial.println();
-
     if (dataLen == sizeof(TelemetryPacket)) {
-        telemetry = *reinterpret_cast<const TelemetryPacket *>(data);
+        telemetryPacket = *reinterpret_cast<const TelemetryPacket *>(data);
         Serial.println("Telemetry packet received.");
-    } else if (dataLen == sizeof(FirstConnectionRequestPacket)) {
-        firstConnection = *reinterpret_cast<const FirstConnectionRequestPacket *>(data);
-        Serial.println("First connection packet received.");
-        if (firstConnection.status == READY) {
+    } else if (dataLen == sizeof(DroneStatePacket)) {
+        droneStatePacket = *reinterpret_cast<const DroneStatePacket *>(data);
+        Serial.println("Drone state packet received.");
+
+        if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == GROUND) {
             Serial.println("Drone is ready.");
             isConnectedToDrone = true;
             setStatus(READY);
@@ -79,25 +70,24 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
 }
 
 void connectToDrone() {
-    FirstConnectionRequestPacket command;
-    command.status = START_CONNECTION;
+    DroneStatePacket packet;
+    packet.droneState.status = START_CONNECTION;
+    packet.droneState.flightMode = BOOT;
 
-    esp_err_t result = esp_now_send(droneMAC, (uint8_t*)&command, sizeof(command));
+    esp_err_t result = esp_now_send(droneMAC, (uint8_t*)&packet, sizeof(packet));
     if (result == ESP_OK) {
         Serial.println("Connection request sent.");
-    } else {
-        Serial.println("Error sending connection request.");
     }
 }
 
 void sendFlightModeToDrone(FlightMode mode) {
-    FlightModeChangePacket command;
-    command.mode = mode;
+    DroneStatePacket packet;
+    packet.droneState.status = READY;
+    packet.droneState.flightMode = mode;
 
-    esp_err_t result = esp_now_send(droneMAC, (uint8_t*)&command, sizeof(command));
+    esp_err_t result = esp_now_send(droneMAC, (uint8_t*)&packet, sizeof(packet));
     if (result == ESP_OK) {
-        Serial.println("Mode change request sent.");
-    } else {
-        Serial.println("Error sending mode change request.");
+        Serial.print("Mode change request sent, mode: ");
+        Serial.println(mode);
     }
 }

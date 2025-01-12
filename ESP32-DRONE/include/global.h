@@ -23,12 +23,6 @@ enum FlightMode {
     BOOT = 0x00,
     GROUND = 0x01,
     MANUAL = 0x02,
-    STABILIZE = 0x03,
-    ALT_HOLD = 0x04,
-    LOITER = 0x05,
-    AUTO = 0x06,
-    RTL = 0x07,
-    LANDING = 0x08,
 };
 
 struct DroneState {
@@ -39,10 +33,8 @@ struct DroneState {
 // Struct for telemetry packet
 struct TelemetryPacket {
     StatusEnum status;
-    FlightMode flightMode;
     float accX, accY, accZ;
     float gyroX, gyroY, gyroZ;
-    float temp;
     float height;
     float gpsLat, gpsLng, gpsAlt;
     float gpsSpeed;
@@ -58,18 +50,15 @@ struct ControlPacket {
     float yaw;
 };
 
-struct FirstConnectionRequestPacket {
-    StatusEnum status;
-};
-
-struct FlightModeChangePacket {
-    FlightMode mode;
+struct DroneStatePacket {
+    DroneState droneState;
 };
 
 extern DroneState droneState;
 
-extern TelemetryPacket telemetry;
-extern ControlPacket control;
-extern FirstConnectionRequestPacket firstConnection;
+extern ControlPacket controlPacket;
+extern DroneStatePacket droneStatePacket;
+
+extern bool isConnectedToRemote;
 
 #endif // MAIN_H

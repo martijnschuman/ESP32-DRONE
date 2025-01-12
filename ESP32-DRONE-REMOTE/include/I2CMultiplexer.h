@@ -9,5 +9,6 @@
 
 void setupI2CMultiplexer();
 void enableI2CChannel(uint8_t channel);
+void scanI2CDevices(uint8_t channel);
 
 #endif

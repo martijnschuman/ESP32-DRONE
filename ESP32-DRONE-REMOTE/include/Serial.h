@@ -3,6 +3,7 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
-bool serialSetup();
+void serialSetup();
+void printTelemetry();
 
 #endif // SERIAL_H

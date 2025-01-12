@@ -33,9 +33,6 @@
 #define GPS_RXD2 16                                 // GPS module RX pin
 #define GPS_TXD2 17                                 // GPS module TX pin
 
-// IMU
-#define IMU_TEMP_CALIBRATION -2.5                   // Temperature calibration value for the IMU in degrees Celsius
-
 // Camera
 #define CAMERA_TRIGGER_PIN 18                       // Pin to send the trigger signal to the slave
 #define CAMERA_RECEIVE_STATUS_PIN 5                 // Pin to receive the status signal from the slave

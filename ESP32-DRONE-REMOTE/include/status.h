@@ -5,9 +5,9 @@
 #include "config.h"
 
 void setupStatusLEDs();
-void displayOKStatus();
-void displayErrorStatus();
-void displayBlankStatus();
+void displayLEDOKStatus();
+void displayLEDErrorStatus();
+void displayLEDBlankStatus();
 
 void setStatus(StatusEnum newStatus);
 void setFlightMode(FlightMode newMode);

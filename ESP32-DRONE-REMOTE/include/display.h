@@ -12,5 +12,10 @@
 extern Adafruit_SSD1305 display;
 
 void setupDisplay();
+void displayStartCalibration();
+void displayCalibration(int stage, const char* joystickName);
+void displayStartDroneConnection();
+void displayReadyToFly();
+void displayTelemetry();
 
 #endif

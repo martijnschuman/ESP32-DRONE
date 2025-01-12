@@ -1,12 +1,12 @@
 #include <joystick.h>
 
 // Calibration data for left joystick
-float leftMeasuredMinX = 3300.00, leftMeasuredMaxX = 0, leftMeasuredCenterX = leftMeasuredMinX / 2;
+float leftMeasuredMinX = 0, leftMeasuredMaxX = 3300.00, leftMeasuredCenterX = leftMeasuredMinX / 2;
 float leftMeasuredMinY = 3300.00, leftMeasuredMaxY = 0, leftMeasuredCenterY = leftMeasuredMinY / 2;
 bool leftCalibrated = false;
 
 // Calibration data for right joystick
-float rightMeasuredMinX = 3300.00, rightMeasuredMaxX = 0, rightMeasuredCenterX = rightMeasuredMinX / 2;
+float rightMeasuredMinX = 0, rightMeasuredMaxX = 3300.00, rightMeasuredCenterX = rightMeasuredMinX / 2;
 float rightMeasuredMinY = 3300.00, rightMeasuredMaxY = 0, rightMeasuredCenterY = rightMeasuredMinY / 2;
 bool rightCalibrated = false;
 
@@ -77,9 +77,6 @@ int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue,
         else {
             result = map(value, centerValue, measuredMaxValue, 0, 100);
         }
-
-        // Adjust the Y-axis range slightly (correction factor)
-        result = result + 12;
     } else {
         // X-axis does not need special treatment
         if (value < centerValue) {
@@ -99,14 +96,12 @@ int transferJoystickValue(int value, int measuredMinValue, int measuredMaxValue,
 }
 
 void startCalibrateJoysticks() {
-    displayErrorStatus();
+    displayLEDErrorStatus();
 
     leftCalibrated = calibrateSingleJoystick(leftMeasuredMinX, leftMeasuredMaxX, leftMeasuredMinY, leftMeasuredMaxY, leftMeasuredCenterX, leftMeasuredCenterY, JOYSTICK_LEFT_X_CHANNEL, JOYSTICK_LEFT_Y_CHANNEL, "left");
     rightCalibrated = calibrateSingleJoystick(rightMeasuredMinX, rightMeasuredMaxX, rightMeasuredMinY, rightMeasuredMaxY, rightMeasuredCenterX, rightMeasuredCenterY, JOYSTICK_RIGHT_X_CHANNEL, JOYSTICK_RIGHT_Y_CHANNEL, "right");
 
-    displayOKStatus();
-
-    displayBlankStatus();
+    displayLEDBlankStatus();
 }
 
 // Function to calibrate a single joystick
@@ -115,8 +110,9 @@ bool calibrateSingleJoystick(float &minX, float &maxX, float &minY, float &maxY,
 
     // Bottom-Left Calibration
     Serial.println("Move the joystick to the bottom-left corner and hold.");
+    displayCalibration(0, joystickName);
 
-    delay(JOYSTICK_CALIBRATION_DELAY); // Wait for user action
+    delay(JOYSTICK_CALIBRATION_DELAY*(5/3)); // Wait for user action
     unsigned long startTime = millis();
     float sumX = 0, sumY = 0;
     int count = 0;
@@ -134,8 +130,9 @@ bool calibrateSingleJoystick(float &minX, float &maxX, float &minY, float &maxY,
 
     // Top-Right Calibration
     Serial.println("Move the joystick to the top-right corner and hold.");
+    displayCalibration(1, joystickName);
 
-    delay(JOYSTICK_CALIBRATION_DELAY); // Wait for user action
+    delay(JOYSTICK_CALIBRATION_DELAY*(5/3)); // Wait for user action
     startTime = millis();
     sumX = 0; sumY = 0; count = 0;
 
@@ -152,8 +149,9 @@ bool calibrateSingleJoystick(float &minX, float &maxX, float &minY, float &maxY,
 
     // Center Calibration
     Serial.println("Release the joystick to its center position.");
+    displayCalibration(2, joystickName);
 
-    delay(JOYSTICK_CALIBRATION_DELAY); // Wait for joystick to settle
+    delay(JOYSTICK_CALIBRATION_DELAY*(5/3)); // Wait for user action
     startTime = millis();
     float centerSumX = 0, centerSumY = 0;
     count = 0;
@@ -175,6 +173,8 @@ bool calibrateSingleJoystick(float &minX, float &maxX, float &minY, float &maxY,
     Serial.print("Max Y: "); Serial.println(maxY);
     Serial.print("Center X: "); Serial.println(centerX);
     Serial.print("Center Y: "); Serial.println(centerY);
+
+    displayCalibration(3, joystickName);
 
     return true;
 }

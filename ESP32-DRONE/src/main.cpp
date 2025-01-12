@@ -20,12 +20,12 @@ unsigned long lastDisplayUpdate = 0;
 unsigned long lastTransmitUpdate = 0;
 unsigned long lastConnectionCheck = 0;
 
-bool remoteConnected = false;
+bool isConnectedToRemote = false;
 
-// Define global variables
-TelemetryPacket telemetry;
-ControlPacket control;
 DroneState droneState;
+
+ControlPacket controlPacket = {};
+DroneStatePacket droneStatePacket = {};
 
 void setup(void) {
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
@@ -61,11 +61,11 @@ void loop() {
     }
 
     // Check if the remote is connected
-    if (!remoteConnected) {
+    if (!isConnectedToRemote) {
         return;
     }
 
-    if (droneState.status == READY && (droneState.flightMode == GROUND || droneState.flightMode == MANUAL)) {
+    if (getStatus() == READY && getFlightMode() == MANUAL) {
         // Update IMU
         if (currentMillis - lastIMUUpdate >= IMU_INTERVAL) {
             lastIMUUpdate = currentMillis;
@@ -79,15 +79,15 @@ void loop() {
         }
 
         // Update Display
-        if (currentMillis - lastDisplayUpdate >= SERIAL_DEBUG_INTERVAL) {
-            lastDisplayUpdate = currentMillis;
-            printTelemetry(); // Display the averaged sensor data
-        }
+        // if (currentMillis - lastDisplayUpdate >= SERIAL_DEBUG_INTERVAL) {
+        //     lastDisplayUpdate = currentMillis;
+        //     printTelemetry(); // Display the averaged sensor data
+        // }
 
-        // Transmit telemetry via ESP-NOW
-        if (currentMillis - lastTransmitUpdate >= TRANSMIT_INTERVAL) {
-            lastTransmitUpdate = currentMillis;
-            transmitTelemetry(); // Send data to remote controller
-        }
+        // Transmit telemetry to the remote
+        // if (currentMillis - lastTransmitUpdate >= TRANSMIT_INTERVAL) {
+        //     lastTransmitUpdate = currentMillis;
+        //     sendTelemetry();
+        // }
     }
 }

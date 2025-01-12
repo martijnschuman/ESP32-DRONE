@@ -8,7 +8,6 @@
 #include "status.h"
 #include "joystick.h"
 
-void printTelemetry();
 void sendControl();
 
 #endif // TELEMTRY_H

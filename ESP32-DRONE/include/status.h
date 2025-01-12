@@ -13,4 +13,7 @@ void displayNumber(int number);
 void displayDecimalPoint();
 void displayClear();
 
+StatusEnum getStatus();
+FlightMode getFlightMode();
+
 #endif

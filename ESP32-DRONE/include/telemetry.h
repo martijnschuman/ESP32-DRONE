@@ -10,8 +10,6 @@
 #include "LIDAR.h"
 #include "GPS.h"
 
-
 void printTelemetry();
-void transmitTelemetry();
 
 #endif // telemetry

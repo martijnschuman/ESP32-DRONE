@@ -7,7 +7,7 @@
 #include "global.h"
 
 // Transmission interval
-#define TRANSMISSION_INTERVAL 50						// Interval for sending telemetry data
+#define TRANSMISSION_INTERVAL 500						// Interval for sending telemetry data
 #define FIRST_CONNECTION_INTERVAL 2500					// Interval for first connection attempt
 
 // Button pins  

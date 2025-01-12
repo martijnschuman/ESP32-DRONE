@@ -7,17 +7,17 @@ void setupStatusLEDs() {
     pinMode(STATUS_GREEN_LED, OUTPUT);
 }
 
-void displayOKStatus() {
+void displayLEDOKStatus() {
     digitalWrite(STATUS_RED_LED, LOW);
     digitalWrite(STATUS_GREEN_LED, HIGH);
 }
 
-void displayErrorStatus() {
+void displayLEDErrorStatus() {
     digitalWrite(STATUS_RED_LED, HIGH);
     digitalWrite(STATUS_GREEN_LED, LOW);
 }
 
-void displayBlankStatus() {
+void displayLEDBlankStatus() {
     digitalWrite(STATUS_RED_LED, LOW);
     digitalWrite(STATUS_GREEN_LED, LOW);
 }

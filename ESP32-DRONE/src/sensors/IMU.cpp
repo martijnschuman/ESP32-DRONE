@@ -6,18 +6,15 @@ Adafruit_MPU6050 mpu;
 // Circular buffer for IMU data
 float accXBuffer[BUFFER_SIZE], accYBuffer[BUFFER_SIZE], accZBuffer[BUFFER_SIZE];
 float gyroXBuffer[BUFFER_SIZE], gyroYBuffer[BUFFER_SIZE], gyroZBuffer[BUFFER_SIZE];
-float tempBuffer[BUFFER_SIZE];
 
 // Index for circular buffer
 int imuIndex = 0;
 float accXSum = 0, accYSum = 0, accZSum = 0;
 float gyroXSum = 0, gyroYSum = 0, gyroZSum = 0;
-float tempSum = 0;
 
 // Global variables for IMU data
 float accX = 0.0f, accY = 0.0f, accZ = 0.0f;
 float gyroX = 0.0f, gyroY = 0.0f, gyroZ = 0.0f;
-float temp = 0.0f;
 
 // Initialize MPU6050
 void setupIMU() {
@@ -108,10 +105,6 @@ void readMPU6050(sensors_event_t *a, sensors_event_t *g, sensors_event_t *temp) 
     mpu.getEvent(a, g, temp);
 }
 
-float getCalibratedTemperature(float temp) {
-    return temp + IMU_TEMP_CALIBRATION;
-}
-
 void updateIMU() {
     sensors_event_t a, g, tempEvent;
     readMPU6050(&a, &g, &tempEvent);
@@ -149,13 +142,6 @@ void updateIMU() {
     gyroX = gyroXSum / BUFFER_SIZE;
     gyroY = gyroYSum / BUFFER_SIZE;
     gyroZ = gyroZSum / BUFFER_SIZE;
-
-    // Update temperature rolling average
-    tempSum -= tempBuffer[imuIndex];
-    tempBuffer[imuIndex] = getCalibratedTemperature(tempEvent.temperature);
-    tempSum += tempBuffer[imuIndex];
-
-    temp = tempSum / BUFFER_SIZE;
 
     // Advance index for circular buffer
     imuIndex = (imuIndex + 1) % BUFFER_SIZE;

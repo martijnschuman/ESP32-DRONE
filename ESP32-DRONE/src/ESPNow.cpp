@@ -1,9 +1,6 @@
 #include "ESPNow.h"
 
-// Slave MAC address
 uint8_t remoteMAC[] = REMOTE_MAC_ADDRESS;
-
-FirstConnectionRequestPacket firstConnection;
 
 // Set up ESP-NOW
 void setupESPNow() {
@@ -13,8 +10,7 @@ void setupESPNow() {
     // Init ESP-NOW
     if (esp_now_init() != ESP_OK) {
         Serial.println("Error initializing ESP-NOW");
-        setStatus(ESP_NOW_INIT_ERROR);
-        return;
+        throwError(ESP_NOW_INIT_ERROR);
     }
 
     // Set up callbacks
@@ -50,48 +46,74 @@ void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
         Serial.println();
     } else {
         Serial.println("Error sending packet.");
+        throwError(ESP_NOW_SEND_ERROR);
     }
 }
 
 // Callback when data is received
 void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
+    if (data == nullptr || dataLen <= 0) {
+        Serial.println("Received invalid data.");
+        return;
+    }
+
     if (dataLen == sizeof(ControlPacket)) {
-        control = *reinterpret_cast<const ControlPacket*>(data);
-        Serial.print("Joystick X: "); Serial.println(control.joystickX);
-        Serial.print("Joystick Y: "); Serial.println(control.joystickY);
-        Serial.print("Throttle: "); Serial.println(control.throttle);
-        Serial.print("Yaw: "); Serial.println(control.yaw);
+        controlPacket = *reinterpret_cast<const ControlPacket*>(data);
     } 
-    else if (dataLen == sizeof(FirstConnectionRequestPacket)) {
-        firstConnection = *reinterpret_cast<const FirstConnectionRequestPacket*>(data);
-        Serial.println("First connection packet received.");
-        Serial.print("Status: "); Serial.println(firstConnection.status);
-        if (firstConnection.status == START_CONNECTION) {
-            Serial.println("Remote is ready.");
+    else if (dataLen == sizeof(DroneStatePacket)) {
+        droneStatePacket = *reinterpret_cast<const DroneStatePacket*>(data);
+        Serial.print("Drone status packet received: ");
+
+        if (droneStatePacket.droneState.status == START_CONNECTION) {
             sendDroneReady();
         }
-    }
-    else if (dataLen == sizeof(FlightModeChangePacket)) {
-        FlightModeChangePacket packet = *reinterpret_cast<const FlightModeChangePacket*>(data);
-        Serial.print("Flight mode change packet received. New mode: ");
-        Serial.println(packet.mode);
-        setFlightMode(packet.mode);
+        else if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == MANUAL) {
+            setStatus(READY);
+            setFlightMode(MANUAL);
+            isConnectedToRemote = true;
+        }
     }
     else {
         Serial.println("Unknown packet received.");
+        Serial.print("Data length: ");
+        Serial.println(dataLen);
     }
 }
 
 void sendDroneReady() {
-    FirstConnectionRequestPacket packet;
-    packet.status = READY;
+    DroneStatePacket packet;
+    packet.droneState.status = READY;
+    packet.droneState.flightMode = GROUND;
 
-    esp_err_t result = esp_now_send(remoteMAC, reinterpret_cast<uint8_t*>(&packet), sizeof(packet));
+    esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&packet, sizeof(packet));
     if (result == ESP_OK) {
         Serial.println("Drone ready sent.");
         setStatus(READY);
-    } else {
-        Serial.println("Error sending drone ready.");
-        throwError(ESP_NOW_SEND_ERROR);
+        setFlightMode(GROUND);
+    }
+}
+
+void sendTelemetry() {
+    TelemetryPacket telemetryPacket;
+
+    telemetryPacket.status = droneState.status;
+    telemetryPacket.accX = accX;
+    telemetryPacket.accY = accY;
+    telemetryPacket.accZ = accZ;
+    telemetryPacket.gyroX = gyroX;
+    telemetryPacket.gyroY = gyroY;
+    telemetryPacket.gyroZ = gyroZ;
+    telemetryPacket.height = lidarHeight;
+    telemetryPacket.gpsLat = gpsLat;
+    telemetryPacket.gpsLng = gpsLng;
+    telemetryPacket.gpsAlt = gpsAlt;
+    telemetryPacket.gpsSpeed = gpsSpeed;
+    telemetryPacket.gpsSatellites = gpsSatellites;
+    telemetryPacket.gpsTime = gpsTime;
+    telemetryPacket.gpsDate = gpsDate;
+
+    esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&telemetryPacket, sizeof(telemetryPacket));
+    if (result == ESP_OK) {
+        Serial.println("Telemetry sent.");
     }
 }

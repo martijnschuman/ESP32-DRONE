@@ -75,3 +75,11 @@ void displayClear() {
     shiftOut(SHIFT_REGISTER_DS_PIN, SHIFT_REGISTER_SHCP_PIN, MSBFIRST, 0);
     digitalWrite(SHIFT_REGISTER_STCP_PIN, HIGH);
 }
+
+StatusEnum getStatus() {
+    return droneState.status;
+}
+
+FlightMode getFlightMode() {
+    return droneState.flightMode;
+}
