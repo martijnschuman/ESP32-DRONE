@@ -53,10 +53,10 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
 
     if (dataLen == sizeof(TelemetryPacket)) {
         telemetryPacket = *reinterpret_cast<const TelemetryPacket *>(data);
-        // Serial.println("Telemetry packet received.");
+        Serial.println("Telemetry packet received.");
     } else if (dataLen == sizeof(DroneStatePacket)) {
         droneStatePacket = *reinterpret_cast<const DroneStatePacket *>(data);
-        // Serial.println("Drone state packet received.");
+        Serial.println("Drone state packet received.");
 
         if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == GROUND) {
             Serial.println("Drone is ready.");
