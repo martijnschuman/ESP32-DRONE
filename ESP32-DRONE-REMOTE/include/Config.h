@@ -9,10 +9,12 @@
 // Transmission interval
 #define TRANSMISSION_INTERVAL 500						// Interval for sending telemetry data
 #define FIRST_CONNECTION_INTERVAL 5000					// Interval for first connection attempt
+#define CAMERA_CONNECTION_INTERVAL 5000					// Interval for camera first connection attempt
+#define CAMERA_PICTURE_INTERVAL 3000					// Interval for taking pictures
 
 // Button pins  
-#define BUTTON_OK 23									// 
-#define BUTTON_ALT 15									// 
+#define BUTTON_OK 15									// 
+#define BUTTON_ALT 14									// 
 #define DEBOUNCE_DELAY 50								// Debounce delay for buttons
 
 // I2C Multiplexer
@@ -46,10 +48,6 @@
 
 // ESPNow
 #define DRONE_MAC_ADDRESS {0xD0, 0xEF, 0x76, 0x34, 0x97, 0x44}
-#define REMOTE_MAC_ADDRESS {0xCC, 0xDB, 0xA7, 0x3E, 0x66, 0x84}
-#define CAMERA_MAC_ADDRESS {0xA0, 0xA3, 0xB3, 0xEC, 0x3C, 0x54}
-
-#define CAMERA_KEEP_ALIVE_INTERVAL 5000
-#define DRONE_KEEP_ALIVE_INTERVAL 1000
+#define CAMERA_MAC_ADDRESS {0xA0, 0xA3, 0xB3, 0xEC, 0xEC, 0x54}
 
 #endif // CONFIG_H

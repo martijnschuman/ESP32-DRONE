@@ -12,7 +12,7 @@ enum LEDStatusEnum {
     LED_FILE_SAVED,
 };
 
-void setStatus(CommandStatusEnum newStatus);
+void setStatus(CameraMode newStatus);
 void reportStatus();
 void showLEDStatus(LEDStatusEnum ledStatus);
 

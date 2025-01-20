@@ -1,6 +1,7 @@
 #include "ESPNow.h"
 
 uint8_t droneMAC[] = DRONE_MAC_ADDRESS;
+uint8_t cameraMAC[] = CAMERA_MAC_ADDRESS;
 
 void setupESPNow() {
     WiFi.mode(WIFI_STA);
@@ -14,6 +15,7 @@ void setupESPNow() {
     esp_now_register_recv_cb(onDataReceived);
 
     addPeer(droneMAC);
+    addPeer(cameraMAC);
 }
 
 void addPeer(uint8_t *peerMAC) {
@@ -51,10 +53,10 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
 
     if (dataLen == sizeof(TelemetryPacket)) {
         telemetryPacket = *reinterpret_cast<const TelemetryPacket *>(data);
-        Serial.println("Telemetry packet received.");
+        // Serial.println("Telemetry packet received.");
     } else if (dataLen == sizeof(DroneStatePacket)) {
         droneStatePacket = *reinterpret_cast<const DroneStatePacket *>(data);
-        Serial.println("Drone state packet received.");
+        // Serial.println("Drone state packet received.");
 
         if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == GROUND) {
             Serial.println("Drone is ready.");
@@ -62,7 +64,20 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
             setStatus(READY);
             setFlightMode(GROUND);	
         }
-    } else {
+    } else if (dataLen == sizeof(CameraPacket)) {
+        cameraPacket = *reinterpret_cast<const CameraPacket *>(data);
+        Serial.println("Camera packet received.");
+        Serial.println(cameraPacket.cameraMode);
+
+        if (cameraPacket.cameraMode == CAM_READY) {
+            Serial.println("Camera is ready.");
+            isConnectedToCam = true;
+        } else if (cameraPacket.cameraMode == CAM_PICTURE_SAVED) {
+            Serial.println("Picture saved.");
+            takenPictureCount++;
+        }
+    }
+    else {
         Serial.println("Unknown packet received.");
         Serial.print("Data length: ");
         Serial.println(dataLen);
@@ -80,6 +95,16 @@ void connectToDrone() {
     }
 }
 
+void connectToCamera() {
+    CameraPacket packet;
+    packet.cameraMode = CAM_BOOT;
+
+    esp_err_t result = esp_now_send(cameraMAC, (uint8_t*)&packet, sizeof(packet));
+    if (result == ESP_OK) {
+        Serial.println("Camera connection request sent.");
+    }
+}
+
 void sendFlightModeToDrone(FlightMode mode) {
     DroneStatePacket packet;
     packet.droneState.status = READY;
@@ -90,5 +115,16 @@ void sendFlightModeToDrone(FlightMode mode) {
         Serial.print("Mode change request sent, mode: ");
         Serial.println(mode);
         setFlightMode(mode);
+    }
+}
+
+void sendCameraCommandToDrone(CameraMode mode) {
+    CameraPacket packet;
+    packet.cameraMode = mode;
+
+    esp_err_t result = esp_now_send(cameraMAC, (uint8_t*)&packet, sizeof(packet));
+    if (result == ESP_OK) {
+        Serial.print("Camera mode change request sent, mode: ");
+        Serial.println(mode);
     }
 }

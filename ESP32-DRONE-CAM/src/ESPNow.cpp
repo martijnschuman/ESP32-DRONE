@@ -2,7 +2,7 @@
 #include "ESPNow.h"
 #include "cam.h"
 
-uint8_t mainMAC[] = MAIN_MAC_ADDRESS;
+uint8_t remoteMAC[] = REMOTE_MAC_ADDRESS;
 
 void setupESPNow() {
     // Initialize Wi-Fi in STA mode
@@ -11,7 +11,7 @@ void setupESPNow() {
 
     // Initialize ESP-NOW
     if (esp_now_init() != ESP_OK) {
-        setStatus(ESP_NOW_INIT_ERROR);
+        setStatus(CAM_ESP_NOW_INIT_ERROR);
         return;
     }
 
@@ -19,40 +19,45 @@ void setupESPNow() {
     esp_now_register_recv_cb(onDataReceived);
 
     // Add master as a peer
-    esp_now_peer_info_t peerInfo;
-    memcpy(peerInfo.peer_addr, mainMAC, 6);
+    addPeer(remoteMAC);
+
+    Serial.println("ESP-NOW setup complete.");
+}
+
+void addPeer(uint8_t *peerMAC) {
+    esp_now_peer_info_t peerInfo = {};
+    memcpy(peerInfo.peer_addr, peerMAC, 6);
     peerInfo.channel = 0;
     peerInfo.encrypt = false;
 
     if (esp_now_add_peer(&peerInfo) != ESP_OK) {
-        Serial.println("Failed to add peer.");
-        setStatus(ESP_NOW_ADD_PEER_ERROR);
-        return;
+        Serial.println("Error adding peer.");
     }
 }
 
 // Callback when data is received
 void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
-    if (dataLen == sizeof(CommandPacket)) {
-        CommandPacket command = *reinterpret_cast<const CommandPacket*>(data);
-        switch (command.body) {
-            case KEEP_ALIVE: {
-                Serial.println("Keep-alive packet received from master.");
+    Serial.println("Data received.");
 
-                // Prepare is-alive packet
-                CommandPacket isAlivePacket;
-                isAlivePacket.body = IS_ALIVE;
+    if (dataLen == sizeof(CameraMode)) {
+        CameraPacket command = *reinterpret_cast<const CameraPacket*>(data);
+        switch (command.cameraMode) {
+            case CAM_BOOT: {
+                Serial.println("Boot command received.");
 
-                // Send is-alive packet
-                esp_err_t result = esp_now_send(macAddr, (uint8_t*)&isAlivePacket, sizeof(isAlivePacket));
+                // Send status back to master
+                setStatus(CAM_READY);
+                sendResponseToRemote();
+
                 break;
             }
-            case TAKE_PICTURE: {
+            case CAM_TAKE_PICTURE: {
                 Serial.println("Take picture command received.");
                 takePicture();
 
                 // Send status back to master
-                sendCommandToMaster();
+                sendResponseToRemote();
+                setStatus(CAM_READY);
                 break;
             }
             default: {
@@ -64,12 +69,16 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
 }
 
 // Function to send a CommandPacket with status to the master
-void sendCommandToMaster() {
-    CommandPacket packet;
-    packet.body = status;  // Set the status in the CommandPacket
+void sendResponseToRemote() {
+    CameraPacket packet;
+    packet.cameraMode = status;  // Set the status in the CommandPacket
 
-    if (esp_now_send(mainMAC, (uint8_t*)&packet, sizeof(packet)) != ESP_OK) {
+    Serial.println("Sending response to remote.");
+    Serial.print("Status: ");
+    Serial.println(packet.cameraMode);
+
+    if (esp_now_send(remoteMAC, (uint8_t*)&packet, sizeof(packet)) != ESP_OK) {
         Serial.println("Error sending command to master.");
-        setStatus(ESP_NOW_SEND_ERROR);
+        setStatus(CAM_ESP_NOW_SEND_ERROR);
     }
 }

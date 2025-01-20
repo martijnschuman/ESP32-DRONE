@@ -1,8 +1,6 @@
 //cam.cpp
 #include "Cam.h"
 
-unsigned int pictureNumber = 0;
-
 //Stores the camera configuration parameters
 camera_config_t config;
 
@@ -42,7 +40,7 @@ void setupCamera(){
     // Initialize the Camera
     esp_err_t err = esp_camera_init(&config);
     if (err != ESP_OK) {
-        setStatus(CAMERA_INIT_ERROR);
+        setStatus(CAM_INIT_ERROR);
         return;
     }
 
@@ -82,6 +80,9 @@ void setupSDCard(){
         setStatus(SD_INIT_ERROR);
         return;
     }
+    Serial.printf("Card type: %s\n", (cardType == CARD_MMC ? "MMC" :
+                                      cardType == CARD_SD ? "SDSC" :
+                                      cardType == CARD_SDHC ? "SDHC" : "UNKNOWN"));
 }
 
 void takePicture(){
@@ -104,12 +105,19 @@ void takePicture(){
     } 
     else {
         file.write(fb->buf, fb->len); // payload (image), payload length
-        setStatus(FILE_SAVED);
+        setStatus(CAM_PICTURE_SAVED);
+        Serial.printf("Saved file to path: %s\n", path.c_str());
     }
     file.close();
 
+    // Increment and save pictureNumber to EEPROM
     pictureNumber++;
+    EEPROM.writeUInt(PICTURE_NUMBER_ADDR, pictureNumber);
+    EEPROM.commit(); // Save changes to EEPROM
+
+    Serial.print("Saved pictureNumber to EEPROM: ");
+    Serial.println(pictureNumber);
     
     //return the frame buffer back to the driver for reuse
-    esp_camera_fb_return(fb); 
+    esp_camera_fb_return(fb);
 }

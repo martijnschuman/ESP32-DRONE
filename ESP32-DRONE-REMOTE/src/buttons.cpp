@@ -1,8 +1,8 @@
 #include "buttons.h"
 
 void setupButtons() {
-    pinMode(BUTTON_OK, INPUT);
-    pinMode(BUTTON_ALT, INPUT);
+    pinMode(BUTTON_OK, INPUT_PULLDOWN);
+    pinMode(BUTTON_ALT, INPUT_PULLDOWN);
 }
 
 bool checkOKButton() {

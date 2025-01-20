@@ -22,7 +22,7 @@ void sendControl() {
 
     esp_err_t result = esp_now_send(droneMAC, reinterpret_cast<uint8_t*>(&controlPacket), sizeof(controlPacket));
     if (result == ESP_OK) {
-        Serial.println("Control package sent.");
+        // Serial.println("Control package sent.");
     } else {
         Serial.println("Error sending control packet.");
         displayLEDErrorStatus();

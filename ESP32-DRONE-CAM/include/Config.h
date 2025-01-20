@@ -2,17 +2,15 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "command.h"
+#include "global.h"
 #include <Arduino.h>
 #include "status.h"
 
-// ESPNow
-#define MAIN_MAC_ADDRESS {0xD0, 0xEF, 0x76, 0x34, 0x97, 0x44}
-#define CAMERA_MAC_ADDRESS {0xA0, 0xA3, 0xB3, 0xEC, 0xEC, 0x54}
+#define EEPROM_SIZE 64                          // Allocate 64 bytes for EEPROM
+#define PICTURE_NUMBER_ADDR 0                   // Starting address for pictureNumber
 
-// Ensure CommandType is consistent
-extern CommandPacket command;
-extern CommandStatusEnum status;
+// ESPNow
+#define REMOTE_MAC_ADDRESS {0xCC, 0xDB, 0xA7, 0x3E, 0x66, 0x84}
 
 // Status LED
 #define STATUS_LED_PIN 33                       // Pin used to show the status of the system

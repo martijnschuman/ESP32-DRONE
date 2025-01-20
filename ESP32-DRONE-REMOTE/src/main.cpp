@@ -14,8 +14,13 @@ DroneState droneState = {CALIBRATING, BOOT};
 TelemetryPacket telemetryPacket = {};
 ControlPacket controlPacket = {};
 DroneStatePacket droneStatePacket = {};
+CameraPacket cameraPacket = {};
+
+int takenPictureCount;
+long lastPictureTaken;
 
 bool isConnectedToDrone = false;
+bool isConnectedToCam = false;
 
 void setup() {
 	serialSetup();
@@ -37,10 +42,39 @@ void setup() {
 	setStatus(CALIBRATING);
 }
 
+// Flow
+// 1. Calibrate joysticks
+// 2. Connect to drone
+// 3. Send flight mode to drone, flight mode is set to MANUAL
+// 4. Send control data to drone
+
 void loop() {
     unsigned long currentTime = millis();
 
     if (isConnectedToDrone) {
+        if (isConnectedToCam) {
+            if(checkAltButton()) {
+
+                if (currentTime - lastPictureTaken >= CAMERA_PICTURE_INTERVAL) {
+                    lastPictureTaken = millis();
+                    sendCameraCommandToDrone(CAM_TAKE_PICTURE);
+                }
+            }
+        }
+        else {
+            static unsigned long lastConnectionAttempt = 0;
+
+            if (currentTime - lastConnectionAttempt >= CAMERA_CONNECTION_INTERVAL) {
+                displayStartCameraConnection();
+
+                Serial.println("Attempting to connect to camera.");
+
+                connectToCamera();
+                lastConnectionAttempt = currentTime;
+                return;
+            }
+        }
+
         if (getStatus() == READY) {
             if (getFlightMode() == GROUND) {
                 if (checkOKButton()) {
@@ -51,7 +85,6 @@ void loop() {
                 displayReadyToFly();
             }
             else if (getFlightMode() == MANUAL) {
-                displayLEDErrorStatus();
                 static unsigned long lastControlTime = 0;
 
                 if (currentTime - lastControlTime >= TRANSMISSION_INTERVAL) {

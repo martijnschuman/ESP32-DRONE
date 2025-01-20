@@ -70,6 +70,18 @@ void displayStartDroneConnection() {
     display.display();
 }
 
+void displayStartCameraConnection() {
+    display.clearDisplay();
+
+    displayTitel("Camera Connection");
+
+    display.setCursor(0, 11);
+
+    display.println("Attempting to connect to camera.");
+
+    display.display();
+}
+
 void displayReadyToFly() {
     display.clearDisplay();
 
@@ -119,14 +131,31 @@ void displayTelemetry() {
 
     // Display left joystick values
     display.setCursor(0, 18);
-    display.print("LJ ");
+    display.print("TY ");
     display.print(controlPacket.throttle);
     display.print(", ");
     display.print(controlPacket.yaw);
 
+    // Display picture count
+    const uint8_t cameraIcon[8] = {
+        0b00111100,
+        0b01000010,  
+        0b10111101,
+        0b10100101, 
+        0b10111101,
+        0b10000001, 
+        0b01000010,  
+        0b00111100 
+    };
+
+    display.drawBitmap(106, 18, cameraIcon, 8, 8, 1);
+    display.setCursor(116, 18);
+    display.print(takenPictureCount);
+    display.setCursor(90, 18);
+
     // Display right joystick values
     display.setCursor(0, 26);
-    display.print("RJ ");
+    display.print("XY ");
     display.print(controlPacket.joystickX);
     display.print(", ");
     display.print(controlPacket.joystickY);
@@ -135,25 +164,25 @@ void displayTelemetry() {
     display.setCursor(0, 36);
     display.print("GYR ");
     display.print(telemetryPacket.gyroX, 2);
-    display.print(", ");
+    display.print(",");
     display.print(telemetryPacket.gyroY, 2);
-    display.print(", ");
+    display.print(",");
     display.print(telemetryPacket.gyroZ, 2);
 
     // Display ACC data
     display.setCursor(0, 46);
     display.print("ACC ");
     display.print(telemetryPacket.accX, 2);
-    display.print(", ");
+    display.print(",");
     display.print(telemetryPacket.accY, 2);
-    display.print(", ");
+    display.print(",");
     display.print(telemetryPacket.accZ, 2);
 
     // Display GPS data
     display.setCursor(0, 56);
     display.print("GPS ");
     display.print(telemetryPacket.gpsLat, 5);
-    display.print(", ");
+    display.print(",");
     display.print(telemetryPacket.gpsLng, 5);
 
     display.display();

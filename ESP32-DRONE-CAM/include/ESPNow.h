@@ -8,11 +8,11 @@
 #include <WiFi.h>
 #include <esp_now.h>
 
-extern bool cameraConnected;
-extern uint8_t mainMAC[];
+extern uint8_t remoteMAC[];
 
 void setupESPNow();
+void addPeer(uint8_t *peerMAC);
 void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen);
-void sendCommandToMaster();
+void sendResponseToRemote();
 
 #endif

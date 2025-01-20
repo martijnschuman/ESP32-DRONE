@@ -1,7 +1,6 @@
 // status.cpp
 #include "status.h"
 
-CommandStatusEnum status = READY;           // Set initial status
 unsigned long currentMillis = 0;            // Stores the current time
 unsigned long previousMillis = 0;           // Stores the last time the LED was updated
 
@@ -11,37 +10,30 @@ int blinkStep = 0;                          // Step for blink pattern (0 for on,
 
 
 // Observer function to set the status
-void setStatus(CommandStatusEnum newStatus) {
+void setStatus(CameraMode newStatus) {
     status = newStatus;
+    Serial.print("Status changed to: ");
+    Serial.println(status);
     reportStatus();
-    sendCommandToMaster();
 }
 
 // Function to report status
 void reportStatus() {
     switch (status) {
-        case READY:
+        case CAM_READY:
             showLEDStatus(LED_READY);
             break;
-        case FILE_SAVED:
+        case CAM_PICTURE_SAVED:
             showLEDStatus(LED_FILE_SAVED);
             break;
         case SD_INIT_ERROR:
-            showLEDStatus(LED_SYSTEM_ERROR);
-            break;
         case SD_SAVE_ERROR:
-            showLEDStatus(LED_SYSTEM_ERROR);
-            break;
-        case CAMERA_INIT_ERROR:
-            showLEDStatus(LED_SYSTEM_ERROR);
-            break;
+        case CAM_INIT_ERROR:
         case CAMERA_TAKE_ERROR:
             showLEDStatus(LED_SYSTEM_ERROR);
             break;
-        case ESP_NOW_INIT_ERROR:
-            showLEDStatus(LED_ESP_NOW_ERROR);
-            break;
-        case ESP_NOW_ADD_PEER_ERROR:
+        case CAM_ESP_NOW_INIT_ERROR:
+        case CAM_ESP_NOW_SEND_ERROR:
             showLEDStatus(LED_ESP_NOW_ERROR);
             break;
     }
@@ -62,12 +54,11 @@ void showLEDStatus(LEDStatusEnum ledStatus) {
             if (currentMillis - blinkStartMillis >= (blinkStep == 0 ? SYSTEM_ERROR_LED_ON_DURATION : SYSTEM_ERROR_LED_OFF_DURATION)) {
                 // Toggle LED state
                 ledState = (blinkStep == 0) ? LOW : HIGH;  // ON for 150 ms, OFF for 50 ms
-                digitalWrite(STATUS_LED_PIN, ledState);  // Apply the LED state
+                digitalWrite(STATUS_LED_PIN, ledState);
 
                 // Move to the next blink step (0 = ON, 1 = OFF)
                 blinkStep = (blinkStep + 1) % 2;  // Alternate between 0 and 1
 
-                // Reset the blink start time
                 blinkStartMillis = currentMillis;
             }
             break;
@@ -77,7 +68,7 @@ void showLEDStatus(LEDStatusEnum ledStatus) {
             if (currentMillis - blinkStartMillis >= (blinkStep == 0 ? ESP_NOW_ERROR_LED_ON_DURATION : ESP_NOW_ERROR_LED_OFF_DURATION)) {
                 // Toggle LED state
                 ledState = (blinkStep == 0) ? LOW : HIGH;  // ON for 500 ms, OFF for 50 ms
-                digitalWrite(STATUS_LED_PIN, ledState);  // Apply the LED state
+                digitalWrite(STATUS_LED_PIN, ledState);
 
                 // Move to the next blink step (0 = ON, 1 = OFF)
                 blinkStep = (blinkStep + 1) % 2;  // Alternate between 0 and 1
@@ -89,13 +80,12 @@ void showLEDStatus(LEDStatusEnum ledStatus) {
         
         case LED_FILE_SAVED:
             digitalWrite(STATUS_LED_PIN, HIGH);  // FILE_SAVED: Turn LED off
-            for (int i = 0; i < FILE_SAVE_BLINK_COUNT; i++) {  // Send FILE_SAVE_BLINK_COUNT low/high pulses
+            for (int i = 0; i < FILE_SAVE_BLINK_COUNT; i++) {
                 digitalWrite(STATUS_LED_PIN, LOW);
-                delay(50); // ugh delay... it's not nice but it's a simple way to blink the LED, we'll fix this later ™
+                delay(50);
                 digitalWrite(STATUS_LED_PIN, HIGH);
                 delay(50);
             }
-            setStatus(READY);  // Report the status
             break;
     }
 }
