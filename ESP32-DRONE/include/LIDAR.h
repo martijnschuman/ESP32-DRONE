@@ -5,7 +5,7 @@
 
 #include "config.h"
 #include <DFRobot_LIDAR07.h>
-#include "I2CMultiplexer.h"
+#include "status.h"
 
 extern DFRobot_LIDAR07_IIC lidar;
 

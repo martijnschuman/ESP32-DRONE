@@ -20,11 +20,6 @@
 #define REMOTE_MAC_ADDRESS {0xCC, 0xDB, 0xA7, 0x3E, 0x66, 0x84}
 #define CONNECTION_TEST_INTERVAL 5000
 
-// I2C Multiplexer
-#define TCA9548A_ADDRESS 0x75                       // I2C address of the multiplexer
-#define MPU6050_CHANNEL 0                           // Multiplexer channel for the MPU6050
-#define LIDAR_CHANNEL 1                             // Multiplexer channel for the LIDAR
-
 // LIDAR
 #define LIDAR_MEASUREMENT_INTERVAL 250              // Interval between LIDAR measurements in milliseconds
 

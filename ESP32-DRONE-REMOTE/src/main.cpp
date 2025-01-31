@@ -2,7 +2,6 @@
 #include "config.h"
 #include "status.h"
 #include "serial.h"
-#include "I2CMultiplexer.h"
 #include "ADC.h"
 #include "joystick.h"
 #include "display.h"
@@ -28,10 +27,6 @@ void setup() {
 
 	setupESPNow();
 
-    setupI2CMultiplexer();
-    enableI2CChannel(ADC_CHANNEL);
-    enableI2CChannel(DISPLAY_CHANNEL);
-
     setupADC();
 
     setupJoysticks();
@@ -51,10 +46,9 @@ void setup() {
 void loop() {
     unsigned long currentTime = millis();
 
-    if (isConnectedToDrone) {
+    if (isConnectedToDrone && (leftCalibrated && rightCalibrated)) {
         if (isConnectedToCam) {
             if(checkAltButton()) {
-
                 if (currentTime - lastPictureTaken >= CAMERA_PICTURE_INTERVAL) {
                     lastPictureTaken = millis();
                     sendCameraCommandToDrone(CAM_TAKE_PICTURE);

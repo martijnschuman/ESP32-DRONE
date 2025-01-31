@@ -12,6 +12,7 @@
 extern bool leftCalibrated;
 extern bool rightCalibrated;
 
+
 void setupJoysticks();
 
 bool getLeftJoystickButton();

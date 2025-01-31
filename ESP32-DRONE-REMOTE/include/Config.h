@@ -17,11 +17,6 @@
 #define BUTTON_ALT 14									// 
 #define DEBOUNCE_DELAY 50								// Debounce delay for buttons
 
-// I2C Multiplexer
-#define TCA9548A_ADDRESS 0x75							// I2C address of the multiplexer
-#define ADC_CHANNEL 1									// Multiplexer channel for the MPU6050
-#define DISPLAY_CHANNEL 0 								// Multiplexer channel for the LIDAR
-
 // ADC
 #define ADC_ADDRESS 0x48								// ADS1115 I2C address
 #define ADC_GAIN GAIN_ONE								// ADC gain

@@ -4,7 +4,6 @@
 #include "global.h"
 #include "status.h"
 #include "serial.h"
-#include "I2CMultiplexer.h"
 #include "GPS.h"
 #include "LIDAR.h"
 #include "IMU.h"
@@ -33,10 +32,6 @@ void setup(void) {
     setupSerial();
     setupStatusDisplay();
     displayClear();
-
-    setupI2CMultiplexer();
-    enableI2CChannel(MPU6050_CHANNEL);
-    enableI2CChannel(LIDAR_CHANNEL);
 
     setupIMU();
     setupLIDAR();
