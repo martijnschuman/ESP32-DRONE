@@ -8,12 +8,24 @@
 #include "global.h"
 
 // Loop intervals in milliseconds
-#define BUFFER_SIZE 10
-#define IMU_INTERVAL 100
-#define LIDAR_INTERVAL 250
-#define LIDAR_ALLOWED_FAIL_COUNT 5
-#define TRANSMIT_INTERVAL 500
-#define SERIAL_DEBUG_INTERVAL 500
+#define BUFFER_SIZE 10                              // Buffer size for IMU and LIDAR data
+#define IMU_INTERVAL 100                            // Interval between IMU measurements in milliseconds
+#define LIDAR_INTERVAL 250                          // Interval between LIDAR measurements in milliseconds
+#define LIDAR_ALLOWED_FAIL_COUNT 5                  // Number of consecutive LIDAR failures allowed before setting status to LIDAR_ERROR
+#define TRANSMIT_INTERVAL 500                       // Interval to transmit telemetry data in milliseconds
+#define SERIAL_DEBUG_INTERVAL 500                   // Interval to print debug information in milliseconds
+#define BATTERY_MONITOR_INTERVAL 1000               // Interval to monitor battery voltage in milliseconds
+
+// Battery
+#define BATTERY_VOLTAGE_PIN 15                      // Pin to read battery voltage
+#define BATTERY_DIVIDER_RATIO 4.0                   // Voltage divider ratio
+#define BATTERY_FULL_VOLTAGE 12.6                   // Full battery voltage
+#define BATTERY_LOW_VOLTAGE 10.4                    // Low battery voltage
+#define BATTERY_CRITICAL_VOLTAGE 9.9                // Critical battery voltage
+#define BATTERY_EMPTY_VOLTAGE 9.0                   // Empty battery voltage
+#define BATTERY_SETUP_READINGS 10                   // Number of readings to average for battery voltage during setup
+#define BATTERY_SETUP_INTERVAL 10                   // Interval between battery voltage readings during setup in milliseconds
+#define BATTERY_MONITOR_READINGS 10                 // Number of readings to average for battery voltage during monitoring
 
 // ESPNow
 #define DRONE_MAC_ADDRESS {0xD0, 0xEF, 0x76, 0x34, 0x97, 0x44}

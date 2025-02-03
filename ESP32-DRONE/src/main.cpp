@@ -4,6 +4,7 @@
 #include "global.h"
 #include "status.h"
 #include "serial.h"
+#include "battery.h"
 #include "GPS.h"
 #include "LIDAR.h"
 #include "IMU.h"
@@ -18,6 +19,7 @@ unsigned long lastLIDARUpdate = 0;
 unsigned long lastDisplayUpdate = 0;
 unsigned long lastTransmitUpdate = 0;
 unsigned long lastConnectionCheck = 0;
+unsigned long lastBatteryMonitor = 0;
 
 bool isConnectedToRemote = false;
 
@@ -28,6 +30,11 @@ DroneStatePacket droneStatePacket = {};
 
 void setup(void) {
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+
+    setupBatteryMonitor();
+    if (!isBatteryVoltageGoodForSetup()) {
+        return;
+    }
 
     setupSerial();
     setupStatusDisplay();
@@ -46,8 +53,17 @@ void setup(void) {
 void loop() {
     static unsigned long lastStatusReport = 0;
     static unsigned long lastConnectionTest = 0;
+    static unsigned long lastBatteryMonitor = 0;
 
     currentMillis = millis();
+
+    // Check battery voltage
+    if (currentMillis - lastBatteryMonitor >= BATTERY_MONITOR_INTERVAL) {
+        lastBatteryMonitor = currentMillis;
+        if (!isBatteryVoltageGoodForFlight()) {
+            return;
+        }
+    }
 
     // Report status
     if (currentMillis - lastStatusReport >= STATUS_REPORT_INTERVAL) {
