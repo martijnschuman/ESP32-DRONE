@@ -28,11 +28,6 @@ void setup() {
   escServo.writeMicroseconds(MIN_THROTTLE);  // Zero throttle
   delay(1000);  // Allow ESC to register the zero throttle
 
-  // Optionally, send max throttle to test the motor at full speed
-  // Serial.println("Sending maximum throttle to test full speed...");
-  // escServo.writeMicroseconds(MAX_THROTTLE_20_PERCENT);  // Max throttle (20% of full throttle)
-  // delay(2000);  // Allow the motor to run at full speed
-
   // Send zero throttle again (or fail-safe throttle if desired)
   Serial.println("Sending zero throttle again.");
   escServo.writeMicroseconds(MIN_THROTTLE);  // Zero throttle again

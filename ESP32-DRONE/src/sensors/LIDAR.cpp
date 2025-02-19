@@ -41,7 +41,11 @@ void updateLIDAR() {
         lidarIndex = (lidarIndex + 1) % BUFFER_SIZE;
 
         // Calculate and return the rolling average
-        lidarHeight = lidarSum / BUFFER_SIZE;
+        lidarHeight = (lidarSum / BUFFER_SIZE) - LIDAR_DEFAULT_HEIGHT;
+
+        if (lidarHeight < 0) {
+            lidarHeight = 0;
+        }
     } else {
         Serial.println("Failed to get distance data. Failed attempts: " + String(failCount));
         failCount++;

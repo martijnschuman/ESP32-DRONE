@@ -9,7 +9,7 @@ void setStatus(StatusEnum newStatus);
 void setFlightMode(FlightMode newMode);
 void throwError(StatusEnum error);
 void reportStatus();
-void displayNumber(int number);
+void displayStatusOnLED(int number);
 void displayDecimalPoint();
 void displayClear();
 

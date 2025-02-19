@@ -18,6 +18,7 @@ enum StatusEnum {
     DISPLAY_ERROR = 0x09,
     BATTERY_LOW = 0x0A,
     BATTERY_CRITICAL = 0x0B,
+    ESC_INIT_ERROR = 0x0C,
 };
 
 enum FlightMode {

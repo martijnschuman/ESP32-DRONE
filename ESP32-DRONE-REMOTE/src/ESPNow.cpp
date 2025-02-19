@@ -59,7 +59,7 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         Serial.println("Drone state packet received.");
 
         if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == GROUND) {
-            Serial.println("Drone is ready.");
+            Serial.println("Drone connection is ready.");
             isConnectedToDrone = true;
             setStatus(READY);
             setFlightMode(GROUND);	
@@ -118,7 +118,7 @@ void sendFlightModeToDrone(FlightMode mode) {
     }
 }
 
-void sendCameraCommandToDrone(CameraMode mode) {
+void sendCameraCommand(CameraMode mode) {
     CameraPacket packet;
     packet.cameraMode = mode;
 

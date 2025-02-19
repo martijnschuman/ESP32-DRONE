@@ -42,7 +42,6 @@ void setup() {
 // 2. Connect to drone
 // 3. Send flight mode to drone, flight mode is set to MANUAL
 // 4. Send control data to drone
-
 void loop() {
     unsigned long currentTime = millis();
 
@@ -51,14 +50,14 @@ void loop() {
             if(checkAltButton()) {
                 if (currentTime - lastPictureTaken >= CAMERA_PICTURE_INTERVAL) {
                     lastPictureTaken = millis();
-                    sendCameraCommandToDrone(CAM_TAKE_PICTURE);
+                    sendCameraCommand(CAM_TAKE_PICTURE);
                 }
             }
         }
         else {
             static unsigned long lastConnectionAttempt = 0;
-
             if (currentTime - lastConnectionAttempt >= CAMERA_CONNECTION_INTERVAL) {
+                // todo this is only shown really quickly
                 displayStartCameraConnection();
 
                 Serial.println("Attempting to connect to camera.");
@@ -69,10 +68,12 @@ void loop() {
             }
         }
 
+        // If the remote is ready to fly
         if (getStatus() == READY) {
+            // If the remote is in manual mode
             if (getFlightMode() == GROUND) {
                 if (checkOKButton()) {
-                    sendFlightModeToDrone(MANUAL);
+                    sendFlightModeToDrone(GROUND);
                 }
 
                 displayLEDOKStatus();

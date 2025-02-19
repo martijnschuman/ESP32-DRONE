@@ -54,11 +54,11 @@ void reportStatus() {
     if (droneState.status == READY) {
         displayDecimalPoint();
     } else {
-        displayNumber(droneState.status);
+        displayStatusOnLED(droneState.status);
     }
 }
 
-void displayNumber(int number) {
+void displayStatusOnLED(int number) {
     digitalWrite(SHIFT_REGISTER_STCP_PIN, LOW);
     shiftOut(SHIFT_REGISTER_DS_PIN, SHIFT_REGISTER_SHCP_PIN, MSBFIRST, dec_digits[number]);
     digitalWrite(SHIFT_REGISTER_STCP_PIN, HIGH);

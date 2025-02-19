@@ -18,6 +18,6 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen);
 void connectToDrone();
 void connectToCamera();
 void sendFlightModeToDrone(FlightMode mode);
-void sendCameraCommandToDrone(CameraMode mode);
+void sendCameraCommand(CameraMode mode);
 
 #endif

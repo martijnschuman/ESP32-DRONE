@@ -65,13 +65,17 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         droneStatePacket = *reinterpret_cast<const DroneStatePacket*>(data);
         Serial.println("Drone status packet received");
 
-        if (droneStatePacket.droneState.status == START_CONNECTION) {
-            sendDroneReady();
+        if (droneStatePacket.droneState.status == START_CONNECTION && droneStatePacket.droneState.flightMode == BOOT) {
+            sendDroneConnectionReady();
+        }
+        else if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == GROUND) {
+            setStatus(READY);
+            setFlightMode(GROUND);
+            isConnectedToRemote = true;
         }
         else if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == MANUAL) {
             setStatus(READY);
             setFlightMode(MANUAL);
-            isConnectedToRemote = true;
         }
     }
     else {
@@ -81,16 +85,29 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     }
 }
 
-void sendDroneReady() {
+void sendDroneConnectionReady() {
     DroneStatePacket packet;
     packet.droneState.status = READY;
     packet.droneState.flightMode = GROUND;
 
     esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&packet, sizeof(packet));
     if (result == ESP_OK) {
-        Serial.println("Drone ready sent.");
+        Serial.println("Drone connection ready sent.");
         setStatus(READY);
         setFlightMode(GROUND);
+    }
+}
+
+void sendDroneFlightReady() {
+    DroneStatePacket packet;
+    packet.droneState.status = READY;
+    packet.droneState.flightMode = MANUAL;
+
+    esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&packet, sizeof(packet));
+    if (result == ESP_OK) {
+        Serial.println("Drone flight ready sent.");
+        setStatus(READY);
+        setFlightMode(MANUAL);
     }
 }
 
