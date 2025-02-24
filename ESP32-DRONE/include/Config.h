@@ -17,7 +17,7 @@
 #define BATTERY_MONITOR_INTERVAL 1000               // Interval to monitor battery voltage in milliseconds
 
 // Battery
-#define BATTERY_VOLTAGE_PIN 15                      // Pin to read battery voltage
+#define BATTERY_VOLTAGE_PIN 34                      // Pin to read battery voltage
 #define BATTERY_DIVIDER_RATIO 4.0                   // Voltage divider ratio
 #define BATTERY_FULL_VOLTAGE 12.6                   // Full battery voltage
 #define BATTERY_LOW_VOLTAGE 10.4                    // Low battery voltage
@@ -61,7 +61,8 @@
 #define ESC_FOUR_PIN 27                             // Pin for ESC 4
 
 #define ESC_MIN_THROTTLE 1000                       // Minimum throttle value
-#define ESC_MAX_THROTTLE 2000                       // Maximum throttle value
+// #define ESC_MAX_THROTTLE 2000                       // Maximum throttle value
+#define ESC_MAX_THROTTLE 1500                       // Maximum throttle value
 #define ESC_FREQUENCY 50                            // ESC frequency in Hz
 
 #endif // CONFIG_H

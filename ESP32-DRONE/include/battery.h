@@ -6,7 +6,10 @@
 #include "config.h"
 #include "status.h"
 
+extern float batteryVoltage;
+
 void setupBatteryMonitor();
+float readBatteryVoltage();
 bool isBatteryVoltageGoodForSetup();
 bool isBatteryVoltageGoodForFlight();
 

@@ -64,6 +64,13 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
             setStatus(READY);
             setFlightMode(GROUND);	
         }
+
+        if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == MANUAL) {
+            Serial.println("Drone ready for flight.");
+            setStatus(READY);
+            setFlightMode(MANUAL);
+        }
+
     } else if (dataLen == sizeof(CameraPacket)) {
         cameraPacket = *reinterpret_cast<const CameraPacket *>(data);
         Serial.println("Camera packet received.");

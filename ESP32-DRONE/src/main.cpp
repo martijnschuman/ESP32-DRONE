@@ -11,6 +11,7 @@
 #include "ESPNow.h"
 #include "telemetry.h"
 #include "ESC.h"
+#include "current.h"
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
 
@@ -23,11 +24,6 @@ unsigned long lastConnectionCheck = 0;
 unsigned long lastBatteryMonitor = 0;
 
 bool isConnectedToRemote = false;
-
-bool isESCOneInitialized = false;
-bool isESCTwoInitialized = true;
-bool isESCThreeInitialized = true;
-bool isESCFourInitialized = true;
 
 bool isESCOneArmed = false;
 bool isESCTwoArmed = true;
@@ -51,15 +47,30 @@ void setup(void) {
         return;
     }
 
+    Serial.println("Battery voltage is critical: " + String(readBatteryVoltage()) + "V");
+    Serial.println("Raw ADC value: " + String(analogRead(BATTERY_VOLTAGE_PIN)));
+
+    setupCurrentMonitor();
+
     setupIMU();
     setupLIDAR();
-    setupGPS();
+    // setupGPS();
 
     setupESPNow();
 
     Serial.println("Setup complete.");
     setStatus(START_CONNECTION);
 }
+
+// void loop(){
+//     Serial.print("Battery voltage: ");
+//     Serial.println(readBatteryVoltage());
+//     Serial.print("Current: ");
+//     Serial.println(readCurrent());
+//     Serial.print("Voltage: ");
+//     Serial.println(readVoltage());
+//     delay(1000);
+// }
 
 void loop() {
     static unsigned long lastStatusReport = 0;
@@ -89,26 +100,14 @@ void loop() {
 
     // Arm ESCs
     if (getStatus() == READY && getFlightMode() == GROUND) {
-        if(isESCOneInitialized && isESCTwoInitialized && isESCThreeInitialized && isESCFourInitialized) {
-            if (!isESCOneArmed) {
-                armESC(ESCOne);
-                isESCOneArmed = true;
-            }
-            // if (!isESCTwoArmed) {
-            //     armESC(ESCTwo);
-            //     isESCTwoArmed = true;
-            // }
-            // if (!isESCThreeArmed) {
-            //     armESC(ESCThree);
-            //     isESCThreeArmed = true;
-            // }
-            // if (!isESCFourArmed) {
-            //     armESC(ESCFour);
-            //     isESCFourArmed = true;
-            // }
-
-            sendDroneFlightReady();
+        Serial.println("Arming ESCs...");
+        if (!isESCOneArmed) {
+            setupESC(ESCOne, ESC_ONE_PIN);
+            delay(1000);
+            armESC(ESCOne);
+            isESCOneArmed = true;
         }
+        sendDroneFlightReady();
     }
 
     if (getStatus() == READY && getFlightMode() == MANUAL) {

@@ -7,6 +7,7 @@
 #include <esp_now.h>
 #include <WiFi.h>
 #include "telemetry.h"
+#include "battery.h"
 
 extern uint8_t remoteMAC[];
 
