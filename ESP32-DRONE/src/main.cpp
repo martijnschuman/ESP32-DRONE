@@ -100,7 +100,8 @@ void loop() {
 
     // Arm ESCs
     if (getStatus() == READY && getFlightMode() == GROUND) {
-        Serial.println("Arming ESCs...");
+        Serial.println("Starting ESC arming...");
+        delay(4000);
         if (!isESCOneArmed) {
             setupESC(ESCOne, ESC_ONE_PIN);
             delay(1000);

@@ -8,36 +8,22 @@ Servo ESCThree;
 Servo ESCFour;
 
 
-void setupESC(Servo ESC, int ESC_PIN) {
+void setupESC(Servo& ESC, int ESC_PIN) {
+    Serial.println("Setting up ESC...");
     ESC.setPeriodHertz(ESC_FREQUENCY);
     ESC.attach(ESC_PIN, ESC_MIN_THROTTLE, ESC_MAX_THROTTLE);
+    Serial.println("ESC setup complete.");
 }
 
-void armESC(Servo ESC) {
-    // Initial throttle setting (this will arm the ESC if it's idle)
-    Serial.println("Sending minimum throttle for arming sequence...");
-    ESC.writeMicroseconds(ESC_MIN_THROTTLE);  // Minimum throttle to arm the ESC
-    delay(2000);  // Wait for arming sequence
-
-    // Send zero throttle value to complete arming sequence
-    Serial.println("Sending zero throttle to complete the arming sequence...");
-    ESC.writeMicroseconds(ESC_MIN_THROTTLE);  // Zero throttle
-    delay(1000);  // Allow ESC to register the zero throttle
-
-    // Send zero throttle again (or fail-safe throttle if desired)
-    Serial.println("Sending zero throttle again.");
-    ESC.writeMicroseconds(ESC_MIN_THROTTLE);  // Zero throttle again
-}
-
-void disarmESC(Servo ESC) {
-    // Send zero throttle value to disarm the ESC
-    Serial.println("Disarming ESC...");
-    ESC.writeMicroseconds(ESC_MIN_THROTTLE);  // Zero throttle
-    delay(1000);  // Allow ESC to register the zero throttle
+void armESC(Servo& ESC) {
+    Serial.println("Arming ESC...");
+    ESC.writeMicroseconds(ESC_MIN_THROTTLE);  // Send low throttle
+    delay(6000);  // Wait for arming to complete
+    Serial.println("ESC armed.");
 }
 
 void setESC(int ESCPin, float amount) {
-    int throttle = map(amount, 0, 100, ESC_MIN_THROTTLE, ESC_MAX_THROTTLE);
+    int throttle = map(amount, 0, 100, ESC_MIN_THROTTLE, ESC_ALLOWED_MAX_THROTTLE);
     switch (ESCPin) {
         case ESC_ONE_PIN:
             ESCOne.writeMicroseconds(throttle);

@@ -11,7 +11,7 @@ void setupESPNow() {
         handleSetupError(ESP_NOW_INIT_ERROR, "Error initializing ESP-NOW");
     }
 
-    esp_now_register_send_cb(onDataSent);
+    // esp_now_register_send_cb(onDataSent);
     esp_now_register_recv_cb(onDataReceived);
 
     addPeer(droneMAC);

@@ -11,7 +11,6 @@
 #define BUFFER_SIZE 6                               // Buffer size for IMU and LIDAR data
 #define IMU_INTERVAL 100                            // Interval between IMU measurements in milliseconds
 #define LIDAR_INTERVAL 200                          // Interval between LIDAR measurements in milliseconds
-#define LIDAR_ALLOWED_FAIL_COUNT 5                  // Number of consecutive LIDAR failures allowed before setting status to LIDAR_ERROR
 #define TRANSMIT_INTERVAL 500                       // Interval to transmit telemetry data in milliseconds
 #define SERIAL_DEBUG_INTERVAL 500                   // Interval to print debug information in milliseconds
 #define BATTERY_MONITOR_INTERVAL 1000               // Interval to monitor battery voltage in milliseconds
@@ -35,6 +34,7 @@
 // LIDAR
 #define LIDAR_MEASUREMENT_INTERVAL 250              // Interval between LIDAR measurements in milliseconds
 #define LIDAR_DEFAULT_HEIGHT 45                     // Default distance value for LIDAR
+#define LIDAR_ALLOWED_FAIL_COUNT 5                  // Number of consecutive LIDAR failures allowed before setting status to LIDAR_ERROR
 
 // GPS
 #define GPS_RXD2 16                                 // GPS module RX pin
@@ -61,8 +61,8 @@
 #define ESC_FOUR_PIN 27                             // Pin for ESC 4
 
 #define ESC_MIN_THROTTLE 1000                       // Minimum throttle value
-// #define ESC_MAX_THROTTLE 2000                       // Maximum throttle value
-#define ESC_MAX_THROTTLE 1500                       // Maximum throttle value
+#define ESC_MAX_THROTTLE 2000                       // Maximum throttle value
+#define ESC_ALLOWED_MAX_THROTTLE 1500                // Maximum throttle value
 #define ESC_FREQUENCY 50                            // ESC frequency in Hz
 
 #endif // CONFIG_H

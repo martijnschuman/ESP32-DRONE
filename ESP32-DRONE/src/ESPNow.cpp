@@ -14,7 +14,7 @@ void setupESPNow() {
     }
 
     // Set up callbacks
-    esp_now_register_send_cb(onDataSent);
+    // esp_now_register_send_cb(onDataSent);
     esp_now_register_recv_cb(onDataReceived);
 
     addPeer(remoteMAC);

@@ -5,8 +5,8 @@
 int getThrottleValue() {
     int throttleValue = 0;
 
-    if (getRightJoystickY() > 0) {
-        throttleValue = getRightJoystickY();
+    if (getLeftJoystickY() > 0) {
+        throttleValue = getLeftJoystickY();
     } else {
         throttleValue = 0;
     }
@@ -15,14 +15,14 @@ int getThrottleValue() {
 }
 
 void sendControl() {
-    controlPacket.joystickX = getLeftJoystickX();
-    controlPacket.joystickY = getLeftJoystickY();
+    controlPacket.joystickX = getRightJoystickX();
+    controlPacket.joystickY = getRightJoystickY();
     controlPacket.throttle = getThrottleValue();
-    controlPacket.yaw = getRightJoystickX();
+    controlPacket.yaw = getLeftJoystickX();
 
     esp_err_t result = esp_now_send(droneMAC, reinterpret_cast<uint8_t*>(&controlPacket), sizeof(controlPacket));
     if (result == ESP_OK) {
-        // Serial.println("Control package sent.");
+        Serial.println("Control package sent.");
     } else {
         Serial.println("Error sending control packet.");
         displayLEDErrorStatus();

@@ -21,9 +21,8 @@ extern bool isESCTwoArmed;
 extern bool isESCThreeArmed;
 extern bool isESCFourArmed;
 
-void setupESC(Servo ESC, int ESC_PIN);
-void armESC(Servo ESC);
-void disarmESC(Servo ESC);
+void setupESC(Servo& ESC, int ESC_PIN);
+void armESC(Servo& ESC);
 void setESC(int ESCPin, float amount);
 
 #endif
