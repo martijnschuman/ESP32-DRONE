@@ -179,11 +179,25 @@ void displayTelemetry() {
     display.print(telemetryPacket.accZ, 2);
 
     // Display GPS data
+    // display.setCursor(0, 56);
+    // display.print("GPS ");
+    // display.print(telemetryPacket.gpsLat, 5);
+    // display.print(",");
+    // display.print(telemetryPacket.gpsLng, 5);
+
+    // Display battery voltage
     display.setCursor(0, 56);
-    display.print("GPS ");
-    display.print(telemetryPacket.gpsLat, 5);
-    display.print(",");
-    display.print(telemetryPacket.gpsLng, 5);
+    display.print("V ");
+    display.print(telemetryPacket.voltage, 2);
+    display.print("v C ");
+    display.print(telemetryPacket.current, 2);
+    display.print("mA");
+
+    // display.setCursor(0, 56);
+    // display.print("GPS ");
+    // display.print(telemetryPacket.gpsLat, 5);
+    // display.print(",");
+    // display.print(telemetryPacket.gpsLng, 5);
 
     display.display();
 }

@@ -14,11 +14,10 @@ void setupLIDAR(){
     Wire.begin();
 
     if (!lidar.begin()) {
-        Serial.println("LIDAR initialization failed!");
+        //Serial.println("LIDAR initialization failed!");
         throwError(LIDAR_ERROR);
-        while (1);
     }
-    Serial.println("LIDAR initialized successfully.");
+    //Serial.println("LIDAR initialized successfully.");
 }
 
 void updateLIDAR() {
@@ -47,7 +46,7 @@ void updateLIDAR() {
             lidarHeight = 0;
         }
     } else {
-        Serial.println("Failed to get distance data. Failed attempts: " + String(failCount));
+        //Serial.println("Failed to get distance data. Failed attempts: " + String(failCount));
         failCount++;
 
         if (failCount >= LIDAR_ALLOWED_FAIL_COUNT) {

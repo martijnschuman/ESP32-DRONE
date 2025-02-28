@@ -17,5 +17,5 @@ void printTelemetry() {
     Serial.print(gyroZ);
 
     Serial.print("LIDAR: ");
-    Serial.println(lidarHeight);
+    //Serial.println(lidarHeight);
 }

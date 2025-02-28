@@ -38,17 +38,14 @@ DroneStatePacket droneStatePacket = {};
 void setup(void) {
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
 
-    setupSerial();
+    // setupSerial();
     setupStatusDisplay();
     displayClear();
 
-    setupBatteryMonitor();
-    if (!isBatteryVoltageGoodForSetup()) {
-        return;
-    }
-
-    Serial.println("Battery voltage is critical: " + String(readBatteryVoltage()) + "V");
-    Serial.println("Raw ADC value: " + String(analogRead(BATTERY_VOLTAGE_PIN)));
+    // setupBatteryMonitor();    
+    // if (!getBatteryStatus()) {
+    //     return;
+    // }
 
     setupCurrentMonitor();
 
@@ -58,19 +55,9 @@ void setup(void) {
 
     setupESPNow();
 
-    Serial.println("Setup complete.");
+    //Serial.println("Setup complete.");
     setStatus(START_CONNECTION);
 }
-
-// void loop(){
-//     Serial.print("Battery voltage: ");
-//     Serial.println(readBatteryVoltage());
-//     Serial.print("Current: ");
-//     Serial.println(readCurrent());
-//     Serial.print("Voltage: ");
-//     Serial.println(readVoltage());
-//     delay(1000);
-// }
 
 void loop() {
     static unsigned long lastStatusReport = 0;
@@ -80,12 +67,12 @@ void loop() {
     currentMillis = millis();
 
     // Check battery voltage
-    if (currentMillis - lastBatteryMonitor >= BATTERY_MONITOR_INTERVAL) {
-        lastBatteryMonitor = currentMillis;
-        if (!isBatteryVoltageGoodForFlight()) {
-            return;
-        }
-    }
+    // if (currentMillis - lastBatteryMonitor >= BATTERY_MONITOR_INTERVAL) {
+    //     lastBatteryMonitor = currentMillis;
+    //     if (!getBatteryStatus()) {
+    //         return;
+    //     }
+    // }
 
     // Report status
     if (currentMillis - lastStatusReport >= STATUS_REPORT_INTERVAL) {
@@ -100,7 +87,7 @@ void loop() {
 
     // Arm ESCs
     if (getStatus() == READY && getFlightMode() == GROUND) {
-        Serial.println("Starting ESC arming...");
+        //Serial.println("Starting ESC arming...");
         delay(4000);
         if (!isESCOneArmed) {
             setupESC(ESCOne, ESC_ONE_PIN);

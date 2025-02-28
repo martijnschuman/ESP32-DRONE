@@ -5,12 +5,12 @@
 
 #include "config.h"
 #include "status.h"
+#include <SPI.h>
 
 extern float batteryVoltage;
 
 void setupBatteryMonitor();
 float readBatteryVoltage();
-bool isBatteryVoltageGoodForSetup();
-bool isBatteryVoltageGoodForFlight();
+bool getBatteryStatus();
 
 #endif

@@ -9,9 +9,8 @@ float voltage;
 
 void setupCurrentMonitor() {
     if (!ina219.begin()) {
-        Serial.println("Failed to find INA219 chip");
+        //Serial.println("Failed to find INA219 chip");
         droneState.status = ADC_ERROR;
-        return;
     }
 }
 

@@ -1,8 +1,7 @@
 // src/serial.cpp
 #include <Arduino.h>
 
-bool setupSerial()
-{
+bool setupSerial() {
 	Serial.begin(115200);
 	unsigned long startTime = millis();
 	while (!Serial)
@@ -13,6 +12,6 @@ bool setupSerial()
 		}
 		delay(10);
 	}
-	Serial.println("Serial communication initialized");
+	//Serial.println("Serial communication initialized");
 	return true;
 }

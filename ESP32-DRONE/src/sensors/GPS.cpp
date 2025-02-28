@@ -13,12 +13,11 @@ void setupGPS() {
     GPSModule.begin(9600, SERIAL_8N1, GPS_RXD2, GPS_TXD2); // GPS module at 9600 baud, RX2 = GPIO16, TX2 = GPIO17
 
     if (!GPSModule) {
-        Serial.println("Failed to initialize GPS Serial communication!");
+        //Serial.println("Failed to initialize GPS Serial communication!");
         throwError(GPS_ERROR);
-        while (true);
     }
 
-    Serial.println("GPS Module Initialized");
+    //Serial.println("GPS Module Initialized");
 }
 
 String formatTime(TinyGPSTime& time) {
