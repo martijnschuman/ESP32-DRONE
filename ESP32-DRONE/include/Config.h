@@ -8,12 +8,12 @@
 #include "global.h"
 
 // Loop intervals in milliseconds
-#define BUFFER_SIZE 6                               // Buffer size for IMU and LIDAR data
+#define BUFFER_SIZE 5                               // Buffer size for IMU and LIDAR data
 #define IMU_INTERVAL 100                            // Interval between IMU measurements in milliseconds
 #define LIDAR_INTERVAL 200                          // Interval between LIDAR measurements in milliseconds
 #define TRANSMIT_INTERVAL 500                       // Interval to transmit telemetry data in milliseconds
-#define SERIAL_DEBUG_INTERVAL 500                   // Interval to print debug information in milliseconds
 #define BATTERY_MONITOR_INTERVAL 1000               // Interval to monitor battery voltage in milliseconds
+#define POWER_MONITOR_INTERVAL 750                  // Interval to monitor power in milliseconds
 
 // Battery
 #define BATTERY_VOLTAGE_PIN 34                      // Pin to read battery voltage

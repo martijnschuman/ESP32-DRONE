@@ -7,12 +7,15 @@
 #include <Adafruit_INA219.h>
 
 extern float current;
-extern float voltage;
+extern float busVoltage;
+extern float shuntVoltage;
 
 void setupCurrentMonitor();
 float readCurrent();
-float readVoltage();
+float readBusVoltage();
+float readShuntVoltage();
 float updateCurrent();
-float updateVoltage();
+float updateBusVoltage();
+float updateShuntVoltage();
 
 #endif

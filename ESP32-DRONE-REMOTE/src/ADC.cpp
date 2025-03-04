@@ -10,6 +10,8 @@ void setupADC() {
     if (!ads.begin(ADC_ADDRESS)) {
         handleSetupError(ADC_ERROR, "Error initializing ADC.");
     }
+
+    Serial.println("ADC setup complete.");
 }
 
 float readADCChannel(int channel) {

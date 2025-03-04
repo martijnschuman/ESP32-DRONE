@@ -21,6 +21,8 @@ long lastPictureTaken;
 bool isConnectedToDrone = false;
 bool isConnectedToCam = false;
 
+bool isArming = false;
+
 void setup() {
 	serialSetup();
 	setupStatusLEDs();
@@ -74,13 +76,20 @@ void loop() {
             if (getFlightMode() == GROUND) {
                 if (checkOKButton()) {
                     sendFlightModeToDrone(GROUND);
+                    isArming = true;
                 }
 
                 displayLEDOKStatus();
-                displayReadyToFly();
+
+                if (isArming) {
+                    displayArmingDrone();
+                } else {
+                    displayReadyToFly();
+                }
             }
             else if (getFlightMode() == MANUAL) {
                 static unsigned long lastControlTime = 0;
+                isArming = false;
 
                 if (currentTime - lastControlTime >= TRANSMISSION_INTERVAL) {
                     lastControlTime = currentTime;

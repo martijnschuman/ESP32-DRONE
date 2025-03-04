@@ -5,6 +5,7 @@
 void setupStatusLEDs() {
     pinMode(STATUS_RED_LED, OUTPUT);
     pinMode(STATUS_GREEN_LED, OUTPUT);
+    Serial.println("Status LEDs setup complete.");
 }
 
 void displayLEDOKStatus() {

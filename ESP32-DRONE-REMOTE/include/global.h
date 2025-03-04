@@ -56,9 +56,9 @@ struct TelemetryPacket {
     float gpsLat, gpsLng, gpsAlt;
     float gpsSpeed;
     int gpsSatellites;
-    float batteryVoltage;
     float current;
-    float voltage;
+    float busVoltage;
+    float shuntVoltage;
 };
 
 // Struct for control packet

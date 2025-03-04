@@ -3,6 +3,7 @@
 void setupButtons() {
     pinMode(BUTTON_OK, INPUT_PULLDOWN);
     pinMode(BUTTON_ALT, INPUT_PULLDOWN);
+    Serial.println("Button setup complete.");
 }
 
 bool checkOKButton() {

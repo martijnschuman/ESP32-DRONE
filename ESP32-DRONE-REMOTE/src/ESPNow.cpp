@@ -16,6 +16,7 @@ void setupESPNow() {
 
     addPeer(droneMAC);
     addPeer(cameraMAC);
+    Serial.println("ESP-NOW setup complete.");
 }
 
 void addPeer(uint8_t *peerMAC) {

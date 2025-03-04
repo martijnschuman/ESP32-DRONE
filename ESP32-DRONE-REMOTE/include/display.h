@@ -17,6 +17,7 @@ void displayCalibration(int stage, const char* joystickName);
 void displayStartDroneConnection();
 void displayStartCameraConnection();
 void displayReadyToFly();
+void displayArmingDrone();
 void displayTelemetry();
 
 #endif

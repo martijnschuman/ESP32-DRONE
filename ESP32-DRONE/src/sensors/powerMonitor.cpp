@@ -1,11 +1,12 @@
-//current.cpp
+//powerMonitor.cpp
 
-#include "current.h"
+#include "powerMonitor.h"
 
 Adafruit_INA219 ina219;
 
 float current;
-float voltage;
+float busVoltage;
+float shuntVoltage;
 
 void setupCurrentMonitor() {
     if (!ina219.begin()) {
@@ -18,14 +19,22 @@ float readCurrent() {
     return ina219.getCurrent_mA();
 }
 
-float readVoltage() {
+float readBusVoltage() {
     return ina219.getBusVoltage_V();
+}
+
+float readShuntVoltage() {
+    return ina219.getShuntVoltage_mV();
 }
 
 float updateCurrent() {
     return current = readCurrent();
 }
 
-float updateVoltage() {
-    return voltage = readVoltage();
+float updateBusVoltage() {
+    return busVoltage= readBusVoltage();
+}
+
+float updateShuntVoltage() {
+    return shuntVoltage = readShuntVoltage();
 }

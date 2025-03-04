@@ -15,6 +15,7 @@ void setupDisplay() {
     delay(1000);
 
     display.clearDisplay();
+    Serial.println("Display setup complete.");
 }
 
 void displayTitel(String title) {
@@ -95,6 +96,18 @@ void displayReadyToFly() {
     display.display();
 }
 
+void displayArmingDrone() {
+    display.clearDisplay();
+
+    displayTitel("Arming Drone");
+
+    display.setCursor(0, 11);
+
+    display.println("Arming drone for flight.");
+
+    display.display();
+}
+
 void displayTelemetry() {
     display.clearDisplay();
 
@@ -102,39 +115,6 @@ void displayTelemetry() {
     display.setCursor(0, 0);
     display.print("Hgt ");
     display.print(telemetryPacket.height);
-
-    // Display battery
-    display.setCursor(90, 0);
-    display.print("B ");
-    display.setCursor(98, 0);
-    display.print(telemetryPacket.batteryVoltage, 2);
-
-    // Display GPS speed
-    display.setCursor(0, 9);
-    display.print("Spd ");
-    display.print(telemetryPacket.gpsSpeed);
-
-    // Display GPS satellites
-    const uint8_t gpsAntenna[] = {
-        0b00011000, //    **
-        0b00111100, //   ****
-        0b01100110, //  **  **
-        0b01100110, //  **  **
-        0b00111100, //   ****
-        0b00011000, //    **
-        0b00011000, //    **
-        0b00011000  //    **
-    };
-    display.drawBitmap(106, 9, gpsAntenna, 8, 8, 1);
-    display.setCursor(116, 9);
-    display.print(telemetryPacket.gpsSatellites);
-
-    // Display left joystick values
-    display.setCursor(0, 18);
-    display.print("TY ");
-    display.print(controlPacket.throttle);
-    display.print(", ");
-    display.print(controlPacket.yaw);
 
     // Display picture count
     const uint8_t cameraIcon[8] = {
@@ -148,20 +128,27 @@ void displayTelemetry() {
         0b00111100 
     };
 
-    display.drawBitmap(106, 18, cameraIcon, 8, 8, 1);
-    display.setCursor(116, 18);
+    display.drawBitmap(106, 0, cameraIcon, 8, 8, 1);
+    display.setCursor(116, 0);
     display.print(takenPictureCount);
-    display.setCursor(90, 18);
+    display.setCursor(90, 0);
+
+    // Display left joystick values
+    display.setCursor(0, 9);
+    display.print("TY ");
+    display.print(controlPacket.throttle);
+    display.print(", ");
+    display.print(controlPacket.yaw);
 
     // Display right joystick values
-    display.setCursor(0, 26);
+    display.setCursor(0, 18);
     display.print("XY ");
     display.print(controlPacket.joystickX);
     display.print(", ");
     display.print(controlPacket.joystickY);
 
     // Display Gyro data
-    display.setCursor(0, 36);
+    display.setCursor(0, 27);
     display.print("GYR ");
     display.print(telemetryPacket.gyroX, 2);
     display.print(",");
@@ -170,7 +157,7 @@ void displayTelemetry() {
     display.print(telemetryPacket.gyroZ, 2);
 
     // Display ACC data
-    display.setCursor(0, 46);
+    display.setCursor(0, 36);
     display.print("ACC ");
     display.print(telemetryPacket.accX, 2);
     display.print(",");
@@ -178,26 +165,18 @@ void displayTelemetry() {
     display.print(",");
     display.print(telemetryPacket.accZ, 2);
 
-    // Display GPS data
-    // display.setCursor(0, 56);
-    // display.print("GPS ");
-    // display.print(telemetryPacket.gpsLat, 5);
-    // display.print(",");
-    // display.print(telemetryPacket.gpsLng, 5);
+    // Display battery info
+    display.setCursor(0, 50);
+    display.print("busV ");
+    display.print(telemetryPacket.busVoltage, 2);
+    display.print("v shuntV ");
+    display.print(telemetryPacket.shuntVoltage, 2);
+    display.print("v");
 
-    // Display battery voltage
-    display.setCursor(0, 56);
-    display.print("V ");
-    display.print(telemetryPacket.voltage, 2);
-    display.print("v C ");
+    display.setCursor(0, 59);
+    display.print("Cur");
     display.print(telemetryPacket.current, 2);
     display.print("mA");
-
-    // display.setCursor(0, 56);
-    // display.print("GPS ");
-    // display.print(telemetryPacket.gpsLat, 5);
-    // display.print(",");
-    // display.print(telemetryPacket.gpsLng, 5);
 
     display.display();
 }

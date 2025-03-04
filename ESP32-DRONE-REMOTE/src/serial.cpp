@@ -22,5 +22,7 @@ void printTelemetry(){
     Serial.print("GPS Alt: "); Serial.println(telemetryPacket.gpsAlt);
     Serial.print("GPS Speed: "); Serial.println(telemetryPacket.gpsSpeed);
     Serial.print("GPS Satellites: "); Serial.println(telemetryPacket.gpsSatellites);
-    Serial.print("Battery Voltage: "); Serial.println(telemetryPacket.batteryVoltage);
+    Serial.print("Battery Voltage: "); Serial.println(telemetryPacket.busVoltage);
+    Serial.print("Battery Current: "); Serial.println(telemetryPacket.current);
+    Serial.print("Shunt Voltage: "); Serial.println(telemetryPacket.shuntVoltage);
 }

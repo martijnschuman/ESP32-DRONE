@@ -11,7 +11,7 @@
 #include "ESPNow.h"
 #include "telemetry.h"
 #include "ESC.h"
-#include "current.h"
+#include "powerMonitor.h"
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
 
@@ -22,6 +22,7 @@ unsigned long lastDisplayUpdate = 0;
 unsigned long lastTransmitUpdate = 0;
 unsigned long lastConnectionCheck = 0;
 unsigned long lastBatteryMonitor = 0;
+unsigned long lastPowerMonitor = 0;
 
 bool isConnectedToRemote = false;
 
@@ -102,19 +103,27 @@ void loop() {
         // Update IMU
         if (currentMillis - lastIMUUpdate >= IMU_INTERVAL) {
             lastIMUUpdate = currentMillis;
-            updateIMU(); // Function for averaging IMU data
+            updateIMU();
         }
 
         // Update LIDAR
         if (currentMillis - lastLIDARUpdate >= LIDAR_INTERVAL) {
             lastLIDARUpdate = currentMillis;
-            updateLIDAR(); // Function for averaging LIDAR data
+            updateLIDAR();
         }
 
         // Transmit telemetry to the remote
         if (currentMillis - lastTransmitUpdate >= TRANSMIT_INTERVAL) {
             lastTransmitUpdate = currentMillis;
             sendTelemetry();
+        }
+
+        // Update powerMonitor
+        if (currentMillis - lastPowerMonitor >= POWER_MONITOR_INTERVAL) {
+            lastPowerMonitor = currentMillis;
+            updateCurrent();
+            updateBusVoltage();
+            updateShuntVoltage();
         }
 
         // Apply throttle to ESCs

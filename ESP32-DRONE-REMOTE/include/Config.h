@@ -22,10 +22,10 @@
 #define ADC_GAIN GAIN_ONE								// ADC gain
 
 // Joystick
-#define JOYSTICK_LEFT_X_CHANNEL 0						// Left joystick X-axis channel
-#define JOYSTICK_LEFT_Y_CHANNEL 1						// Left joystick Y-axis channel
-#define JOYSTICK_RIGHT_X_CHANNEL 2						// Right joystick X-axis channel
-#define JOYSTICK_RIGHT_Y_CHANNEL 3						// Right joystick Y-axis channel
+#define JOYSTICK_LEFT_X_CHANNEL 2						// Left joystick X-axis channel
+#define JOYSTICK_LEFT_Y_CHANNEL 3						// Left joystick Y-axis channel
+#define JOYSTICK_RIGHT_X_CHANNEL 0						// Right joystick X-axis channel
+#define JOYSTICK_RIGHT_Y_CHANNEL 1						// Right joystick Y-axis channel
 #define JOYSTICK_LEFT_BUTTON 12							// Left joystick button pin
 #define JOYSTICK_RIGHT_BUTTON 13						// Right joystick button pin
 
@@ -38,8 +38,8 @@
 #define Y_PIXELS 64										// Number of pixels in the Y-axis
 
 // Status LEDs
-#define STATUS_RED_LED 19
-#define STATUS_GREEN_LED 18
+#define STATUS_RED_LED 32
+#define STATUS_GREEN_LED 23
 
 // ESPNow
 #define DRONE_MAC_ADDRESS {0xD0, 0xEF, 0x76, 0x34, 0x97, 0x44}

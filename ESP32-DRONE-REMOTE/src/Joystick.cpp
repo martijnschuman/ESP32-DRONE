@@ -14,6 +14,7 @@ bool rightCalibrated = false;
 void setupJoysticks() {
     pinMode(JOYSTICK_LEFT_BUTTON, INPUT_PULLUP);
     pinMode(JOYSTICK_RIGHT_BUTTON, INPUT_PULLUP);
+    Serial.println("Joystick setup complete.");
 }
 
 bool getLeftJoystickButton() {

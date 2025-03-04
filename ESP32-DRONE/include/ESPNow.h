@@ -8,6 +8,7 @@
 #include <WiFi.h>
 #include "telemetry.h"
 #include "battery.h"
+#include "powerMonitor.h"
 
 extern uint8_t remoteMAC[];
 

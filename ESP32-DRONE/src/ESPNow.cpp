@@ -128,7 +128,10 @@ void sendTelemetry() {
     telemetryPacket.gpsAlt = gpsAlt;
     telemetryPacket.gpsSpeed = gpsSpeed;
     telemetryPacket.gpsSatellites = gpsSatellites;
-    telemetryPacket.batteryVoltage = batteryVoltage;
+    telemetryPacket.current = current;
+    telemetryPacket.busVoltage = busVoltage;
+    telemetryPacket.shuntVoltage = shuntVoltage;
+    // telemetryPacket.batteryVoltage = batteryVoltage;
 
     esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&telemetryPacket, sizeof(telemetryPacket));
     if (result == ESP_OK) {
