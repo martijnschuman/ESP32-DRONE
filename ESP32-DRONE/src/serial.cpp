@@ -12,6 +12,6 @@ bool setupSerial() {
 		}
 		delay(10);
 	}
-	//Serial.println("Serial communication initialized");
+	Serial.println("Serial communication initialized");
 	return true;
 }

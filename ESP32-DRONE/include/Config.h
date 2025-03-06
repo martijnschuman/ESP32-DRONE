@@ -10,7 +10,7 @@
 // Loop intervals in milliseconds
 #define BUFFER_SIZE 5                               // Buffer size for IMU and LIDAR data
 #define IMU_INTERVAL 100                            // Interval between IMU measurements in milliseconds
-#define LIDAR_INTERVAL 200                          // Interval between LIDAR measurements in milliseconds
+#define ECHO_INTERVAL 200                           // Echo between LIDAR measurements in milliseconds
 #define TRANSMIT_INTERVAL 500                       // Interval to transmit telemetry data in milliseconds
 #define BATTERY_MONITOR_INTERVAL 1000               // Interval to monitor battery voltage in milliseconds
 #define POWER_MONITOR_INTERVAL 750                  // Interval to monitor power in milliseconds
@@ -31,10 +31,12 @@
 #define REMOTE_MAC_ADDRESS {0xCC, 0xDB, 0xA7, 0x3E, 0x66, 0x84}
 #define CONNECTION_TEST_INTERVAL 5000
 
-// LIDAR
-#define LIDAR_MEASUREMENT_INTERVAL 250              // Interval between LIDAR measurements in milliseconds
-#define LIDAR_DEFAULT_HEIGHT 45                     // Default distance value for LIDAR
-#define LIDAR_ALLOWED_FAIL_COUNT 5                  // Number of consecutive LIDAR failures allowed before setting status to LIDAR_ERROR
+// Echo
+#define ECHO_MEASUREMENT_INTERVAL 250              // Interval between echo measurements in milliseconds
+#define ECHO_SETUP_INTERVAL 1000                    // Interval between echo setup readings in milliseconds
+#define ECHO_SETUP_READINGS 5                      // Number of consecutive echo failures allowed before setting status to echo
+#define ECHO_TRIGGER_PIN 19                        // Pin to send the trigger signal to the echo sensor
+#define ECHO_ECHO_PIN 18                           // Pin to receive the echo signal from the echo sensor
 
 // GPS
 #define GPS_RXD2 16                                 // GPS module RX pin
@@ -62,7 +64,7 @@
 
 #define ESC_MIN_THROTTLE 1000                       // Minimum throttle value
 #define ESC_MAX_THROTTLE 2000                       // Maximum throttle value
-#define ESC_ALLOWED_MAX_THROTTLE 1500                // Maximum throttle value
-#define ESC_FREQUENCY 50                            // ESC frequency in Hz
+#define ESC_ALLOWED_MAX_THROTTLE 1500               // Maximum throttle value
+#define ESC_FREQUENCY 100                           // ESC frequency in Hz
 
 #endif // CONFIG_H

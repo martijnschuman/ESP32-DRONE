@@ -4,6 +4,5 @@
 #define SERIAL_H
 
 void serialSetup();
-void printTelemetry();
 
 #endif // SERIAL_H

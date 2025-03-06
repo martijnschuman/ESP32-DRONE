@@ -166,15 +166,15 @@ void displayTelemetry() {
     display.print(telemetryPacket.accZ, 2);
 
     // Display battery info
-    display.setCursor(0, 50);
-    display.print("busV ");
+    display.setCursor(0, 45);
+    display.print("Bus ");
     display.print(telemetryPacket.busVoltage, 2);
-    display.print("v shuntV ");
+    display.print(" Shu");
     display.print(telemetryPacket.shuntVoltage, 2);
-    display.print("v");
+    display.print("mV");
 
-    display.setCursor(0, 59);
-    display.print("Cur");
+    display.setCursor(0, 54);
+    display.print("Cur ");
     display.print(telemetryPacket.current, 2);
     display.print("mA");
 

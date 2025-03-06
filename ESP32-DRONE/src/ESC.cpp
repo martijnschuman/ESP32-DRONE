@@ -9,17 +9,20 @@ Servo ESCFour;
 
 
 void setupESC(Servo& ESC, int ESC_PIN) {
-    //Serial.println("Setting up ESC...");
+    Serial.print("Setting up ESC pin ");
+    Serial.println(ESC_PIN);
     ESC.setPeriodHertz(ESC_FREQUENCY);
     ESC.attach(ESC_PIN, ESC_MIN_THROTTLE, ESC_MAX_THROTTLE);
-    //Serial.println("ESC setup complete.");
+    Serial.print("ESC ");
+    Serial.print(ESC_PIN);
+    Serial.println(" setup complete.");
 }
 
 void armESC(Servo& ESC) {
-    //Serial.println("Arming ESC...");
+    Serial.println("Arming ESC...");
     ESC.writeMicroseconds(ESC_MIN_THROTTLE);  // Send low throttle
     delay(6000);  // Wait for arming to complete
-    //Serial.println("ESC armed.");
+    Serial.println("ESC armed.");
 }
 
 void setESC(int ESCPin, float amount) {

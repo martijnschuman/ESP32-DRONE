@@ -27,13 +27,13 @@ bool getBatteryStatus() {
     calibratedVoltage /= BATTERY_SETUP_READINGS;
 
     if (calibratedVoltage <= BATTERY_CRITICAL_VOLTAGE) {
-        //Serial.println("Battery voltage is critical: " + String(calibratedVoltage) + "V");
-        //Serial.println("Raw ADC value: " + String(analogRead(BATTERY_VOLTAGE_PIN)));
+        Serial.println("Battery voltage is critical: " + String(calibratedVoltage) + "V");
+        Serial.println("Raw ADC value: " + String(analogRead(BATTERY_VOLTAGE_PIN)));
         setStatus(BATTERY_CRITICAL);
         return false;
     } else if (calibratedVoltage <= BATTERY_LOW_VOLTAGE) {
-        //Serial.println("Battery voltage is critical: " + String(calibratedVoltage) + "V");
-        //Serial.println("Raw ADC value: " + String(analogRead(BATTERY_VOLTAGE_PIN)));
+        Serial.println("Battery voltage is critical: " + String(calibratedVoltage) + "V");
+        Serial.println("Raw ADC value: " + String(analogRead(BATTERY_VOLTAGE_PIN)));
         setStatus(BATTERY_LOW);
         return false;
     }

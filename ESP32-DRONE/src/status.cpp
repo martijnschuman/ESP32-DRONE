@@ -38,7 +38,7 @@ void setStatus(StatusEnum newStatus) {
     if (droneState.status != newStatus) {
         droneState.status = newStatus;
         Serial.print("Status changed to: ");
-        //Serial.println(newStatus);
+        Serial.println(newStatus);
     }
 }
 
@@ -46,7 +46,7 @@ void setFlightMode(FlightMode newMode) {
     if (droneState.flightMode != newMode) {
         droneState.flightMode = newMode;
         Serial.print("Flight mode changed to: ");
-        //Serial.println(newMode);
+        Serial.println(newMode);
     }
 }
 

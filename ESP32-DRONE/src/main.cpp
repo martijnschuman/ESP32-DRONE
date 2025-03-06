@@ -6,10 +6,9 @@
 #include "serial.h"
 #include "battery.h"
 #include "GPS.h"
-#include "LIDAR.h"
+#include "echo.h"
 #include "IMU.h"
 #include "ESPNow.h"
-#include "telemetry.h"
 #include "ESC.h"
 #include "powerMonitor.h"
 #include "soc/soc.h"
@@ -17,7 +16,7 @@
 
 unsigned long currentMillis = 0;
 unsigned long lastIMUUpdate = 0;
-unsigned long lastLIDARUpdate = 0;
+unsigned long lastHEIGHTUpdate = 0;
 unsigned long lastDisplayUpdate = 0;
 unsigned long lastTransmitUpdate = 0;
 unsigned long lastConnectionCheck = 0;
@@ -28,7 +27,7 @@ bool isConnectedToRemote = false;
 
 bool isESCOneArmed = false;
 bool isESCTwoArmed = true;
-bool isESCThreeArmed = true;
+bool isESCThreeArmed = false;
 bool isESCFourArmed = true;
 
 DroneState droneState;
@@ -39,7 +38,7 @@ DroneStatePacket droneStatePacket = {};
 void setup(void) {
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
 
-    // setupSerial();
+    setupSerial();
     setupStatusDisplay();
     displayClear();
 
@@ -51,12 +50,13 @@ void setup(void) {
     setupCurrentMonitor();
 
     setupIMU();
-    setupLIDAR();
+    setupEcho();
     // setupGPS();
 
     setupESPNow();
 
-    //Serial.println("Setup complete.");
+
+    Serial.println("Setup complete.");
     setStatus(START_CONNECTION);
 }
 
@@ -88,7 +88,7 @@ void loop() {
 
     // Arm ESCs
     if (getStatus() == READY && getFlightMode() == GROUND) {
-        //Serial.println("Starting ESC arming...");
+        Serial.println("Starting ESC arming...");
         delay(4000);
         if (!isESCOneArmed) {
             setupESC(ESCOne, ESC_ONE_PIN);
@@ -96,7 +96,17 @@ void loop() {
             armESC(ESCOne);
             isESCOneArmed = true;
         }
-        sendDroneFlightReady();
+        if (!isESCThreeArmed) {
+            setupESC(ESCThree, ESC_THREE_PIN);
+            delay(1000);
+            armESC(ESCThree);
+            isESCThreeArmed = true;
+        }
+
+        if(isESCOneArmed && isESCThreeArmed) {
+            Serial.println("ESCs armed.");
+            sendDroneFlightReady();
+        }
     }
 
     if (getStatus() == READY && getFlightMode() == MANUAL) {
@@ -106,10 +116,10 @@ void loop() {
             updateIMU();
         }
 
-        // Update LIDAR
-        if (currentMillis - lastLIDARUpdate >= LIDAR_INTERVAL) {
-            lastLIDARUpdate = currentMillis;
-            updateLIDAR();
+        // Update ECHO
+        if (currentMillis - lastHEIGHTUpdate >= ECHO_INTERVAL) {
+            lastHEIGHTUpdate = currentMillis;
+            updateHeight();
         }
 
         // Transmit telemetry to the remote
@@ -129,7 +139,7 @@ void loop() {
         // Apply throttle to ESCs
         setESC(ESC_ONE_PIN, controlPacket.throttle);
         // setESC(ESC_TWO_PIN, controlPacket.throttle);
-        // setESC(ESC_THREE_PIN, controlPacket.throttle);
+        setESC(ESC_THREE_PIN, controlPacket.throttle);
         // setESC(ESC_FOUR_PIN, controlPacket.throttle);
     }
 }

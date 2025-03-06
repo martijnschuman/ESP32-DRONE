@@ -9,7 +9,7 @@ void setupESPNow() {
 
     // Init ESP-NOW
     if (esp_now_init() != ESP_OK) {
-        //Serial.println("Error initializing ESP-NOW");
+        Serial.println("Error initializing ESP-NOW");
         throwError(ESP_NOW_INIT_ERROR);
     }
 
@@ -28,7 +28,7 @@ void addPeer(uint8_t *peerMAC) {
     slaveInfo.encrypt = false;
 
     if (esp_now_add_peer(&slaveInfo) != ESP_OK) {
-        //Serial.println("Failed to add peer");
+        Serial.println("Failed to add peer");
         return;
     }
 }
@@ -43,9 +43,9 @@ void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
                 Serial.print(":");
             }
         }
-        //Serial.println();
+        Serial.println();
     } else {
-        //Serial.println("Error sending packet.");
+        Serial.println("Error sending packet.");
         throwError(ESP_NOW_SEND_ERROR);
     }
 }
@@ -53,17 +53,17 @@ void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
 // Callback when data is received
 void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     if (data == nullptr || dataLen <= 0) {
-        //Serial.println("Received invalid data.");
+        Serial.println("Received invalid data.");
         return;
     }
 
     if (dataLen == sizeof(ControlPacket)) {
         controlPacket = *reinterpret_cast<const ControlPacket*>(data);
-        //Serial.println("Control packet received");
+        Serial.println("Control packet received");
     } 
     else if (dataLen == sizeof(DroneStatePacket)) {
         droneStatePacket = *reinterpret_cast<const DroneStatePacket*>(data);
-        //Serial.println("Drone status packet received");
+        Serial.println("Drone status packet received");
 
         if (droneStatePacket.droneState.status == START_CONNECTION && droneStatePacket.droneState.flightMode == BOOT) {
             sendDroneConnectionReady();
@@ -79,9 +79,9 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         }
     }
     else {
-        //Serial.println("Unknown packet received.");
+        Serial.println("Unknown packet received.");
         Serial.print("Data length: ");
-        //Serial.println(dataLen);
+        Serial.println(dataLen);
     }
 }
 
@@ -92,7 +92,7 @@ void sendDroneConnectionReady() {
 
     esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&packet, sizeof(packet));
     if (result == ESP_OK) {
-        //Serial.println("Drone connection ready sent.");
+        Serial.println("Drone connection ready sent.");
         setStatus(READY);
         setFlightMode(GROUND);
     }
@@ -105,7 +105,7 @@ void sendDroneFlightReady() {
 
     esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&packet, sizeof(packet));
     if (result == ESP_OK) {
-        //Serial.println("Drone flight ready sent.");
+        Serial.println("Drone flight ready sent.");
         setStatus(READY);
         setFlightMode(MANUAL);
     }
@@ -122,19 +122,18 @@ void sendTelemetry() {
     telemetryPacket.gyroX = gyroX;
     telemetryPacket.gyroY = gyroY;
     telemetryPacket.gyroZ = gyroZ;
-    telemetryPacket.height = lidarHeight;
-    telemetryPacket.gpsLat = gpsLat;
-    telemetryPacket.gpsLng = gpsLng;
-    telemetryPacket.gpsAlt = gpsAlt;
-    telemetryPacket.gpsSpeed = gpsSpeed;
-    telemetryPacket.gpsSatellites = gpsSatellites;
+    telemetryPacket.height = height;
+    // telemetryPacket.gpsLat = gpsLat;
+    // telemetryPacket.gpsLng = gpsLng;
+    // telemetryPacket.gpsAlt = gpsAlt;
+    // telemetryPacket.gpsSpeed = gpsSpeed;
+    // telemetryPacket.gpsSatellites = gpsSatellites;
     telemetryPacket.current = current;
     telemetryPacket.busVoltage = busVoltage;
     telemetryPacket.shuntVoltage = shuntVoltage;
-    // telemetryPacket.batteryVoltage = batteryVoltage;
 
     esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&telemetryPacket, sizeof(telemetryPacket));
     if (result == ESP_OK) {
-        //Serial.println("Telemetry sent.");
+        Serial.println("Telemetry sent.");
     }
 }

@@ -10,7 +10,7 @@ enum StatusEnum {
     START_CONNECTION = 0x01,
     READY = 0x02,
     IMU_ERROR = 0x03,
-    LIDAR_ERROR = 0x04,
+    ECHO_ERROR = 0x04,
     GPS_ERROR = 0x05,
     ESP_NOW_INIT_ERROR = 0x06,
     ESP_NOW_SEND_ERROR = 0x07,
@@ -53,9 +53,9 @@ struct TelemetryPacket {
     float accX, accY, accZ;
     float gyroX, gyroY, gyroZ;
     float height;
-    float gpsLat, gpsLng, gpsAlt;
-    float gpsSpeed;
-    int gpsSatellites;
+    // float gpsLat, gpsLng, gpsAlt;
+    // float gpsSpeed;
+    // int gpsSatellites;
     float current;
     float busVoltage;
     float shuntVoltage;
