@@ -3,31 +3,58 @@
 
 Adafruit_MPU6050 mpu;
 
-// Circular buffer for IMU data
-float accXBuffer[BUFFER_SIZE], accYBuffer[BUFFER_SIZE], accZBuffer[BUFFER_SIZE];
-float gyroXBuffer[BUFFER_SIZE], gyroYBuffer[BUFFER_SIZE], gyroZBuffer[BUFFER_SIZE];
-
-// Index for circular buffer
-int imuIndex = 0;
-float accXSum = 0, accYSum = 0, accZSum = 0;
-float gyroXSum = 0, gyroYSum = 0, gyroZSum = 0;
+// Global variables for calibration
+float gyroXOffset = 0, gyroYOffset = 0, gyroZOffset = 0;
+float accelXOffset = 0, accelYOffset = 0, accelZOffset = 0;
 
 // Global variables for IMU data
 float accX = 0.0f, accY = 0.0f, accZ = 0.0f;
 float gyroX = 0.0f, gyroY = 0.0f, gyroZ = 0.0f;
 
-// Initialize MPU6050
+// Global variables for orientation angles
+float roll = 0.0f, pitch = 0.0f, yaw = 0.0f;
+
+void readMPU6050(sensors_event_t *a, sensors_event_t *g, sensors_event_t *temp) {
+    mpu.getEvent(a, g, temp);
+}
+
+void calibrateGyro() {
+    Serial.println("Calibrating gyro...");
+    
+    for (int i = 0; i < IMU_SETUP_CALIBRATION_COUNT; i++) {
+        sensors_event_t a, g, temp;
+        readMPU6050(&a, &g, &temp);
+        
+        gyroXOffset += g.gyro.x;
+        gyroYOffset += g.gyro.y;
+        gyroZOffset += g.gyro.z;
+        delay(5);
+    }
+
+    // Calculate average offsets
+    gyroXOffset /= IMU_SETUP_CALIBRATION_COUNT;
+    gyroYOffset /= IMU_SETUP_CALIBRATION_COUNT;
+    gyroZOffset /= IMU_SETUP_CALIBRATION_COUNT;
+
+    Serial.print("Gyro Offsets: ");
+    Serial.print(gyroXOffset);
+    Serial.print(", ");
+    Serial.print(gyroYOffset);
+    Serial.print(", ");
+    Serial.println(gyroZOffset);
+}
+
 void setupIMU() {
     if (!initializeMPU6050()) {
         Serial.println("MPU6050 initialization failed!");
         throwError(IMU_ERROR);
-        while (1) {
-            delay(10);
-        }
+        while (1) { delay(10); }
+    } else {
+        Serial.println("MPU6050 initialized!");
     }
-    else {
-        Serial.println("MPU6050 initialization successful!");
-    }
+
+    calibrateGyro();
+    Serial.println("IMU setup complete.");
 }
 
 bool initializeMPU6050() {
@@ -36,113 +63,43 @@ bool initializeMPU6050() {
         throwError(IMU_ERROR);
         return false;
     }
-    Serial.println("MPU6050 Found!");
 
-    mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-    Serial.print("Accelerometer range set to: ");
-    switch (mpu.getAccelerometerRange()) {
-    case MPU6050_RANGE_2_G:
-        Serial.println("+-2G");
-        break;
-    case MPU6050_RANGE_4_G:
-        Serial.println("+-4G");
-        break;
-    case MPU6050_RANGE_8_G:
-        Serial.println("+-8G");
-        break;
-    case MPU6050_RANGE_16_G:
-        Serial.println("+-16G");
-        break;
-    }
+    mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
+    Serial.println("IMU accelerometer range set");
 
     mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-    Serial.print("Gyro range set to: ");
-    switch (mpu.getGyroRange()) {
-    case MPU6050_RANGE_250_DEG:
-        Serial.println("+- 250 deg/s");
-        break;
-    case MPU6050_RANGE_500_DEG:
-        Serial.println("+- 500 deg/s");
-        break;
-    case MPU6050_RANGE_1000_DEG:
-        Serial.println("+- 1000 deg/s");
-        break;
-    case MPU6050_RANGE_2000_DEG:
-        Serial.println("+- 2000 deg/s");
-        break;
-    }
+    Serial.println("IMU gyro range set");
 
-    mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
-    Serial.print("Filter bandwidth set to: ");
-    switch (mpu.getFilterBandwidth()) {
-    case MPU6050_BAND_260_HZ:
-        Serial.println("260 Hz");
-        break;
-    case MPU6050_BAND_184_HZ:
-        Serial.println("184 Hz");
-        break;
-    case MPU6050_BAND_94_HZ:
-        Serial.println("94 Hz");
-        break;
-    case MPU6050_BAND_44_HZ:
-        Serial.println("44 Hz");
-        break;
-    case MPU6050_BAND_21_HZ:
-        Serial.println("21 Hz");
-        break;
-    case MPU6050_BAND_10_HZ:
-        Serial.println("10 Hz");
-        break;
-    case MPU6050_BAND_5_HZ:
-        Serial.println("5 Hz");
-        break;
-    }
+    mpu.setFilterBandwidth(MPU6050_BAND_10_HZ);
+    Serial.println("IMU filter bandwidth set");
 
     return true;
-}
-
-void readMPU6050(sensors_event_t *a, sensors_event_t *g, sensors_event_t *temp) {
-    mpu.getEvent(a, g, temp);
 }
 
 void updateIMU() {
     sensors_event_t a, g, tempEvent;
     readMPU6050(&a, &g, &tempEvent);
 
-    // Update acceleration rolling averages
-    accXSum -= accXBuffer[imuIndex];
-    accXBuffer[imuIndex] = a.acceleration.x;
-    accXSum += accXBuffer[imuIndex];
+    // Time difference (dt) in seconds
+    static unsigned long lastTime = 0;
+    unsigned long currentTime = millis();
+    float dt = (currentTime - lastTime) / 1000.0f;
+    lastTime = currentTime;
 
-    accYSum -= accYBuffer[imuIndex];
-    accYBuffer[imuIndex] = a.acceleration.y;
-    accYSum += accYBuffer[imuIndex];
+    // Update accelerometer data
+    accX = a.acceleration.x - accelXOffset;
+    accY = a.acceleration.y - accelYOffset;
+    accZ = a.acceleration.z;
 
-    accZSum -= accZBuffer[imuIndex];
-    accZBuffer[imuIndex] = a.acceleration.z;
-    accZSum += accZBuffer[imuIndex];
+    // Update gyroscope data
+    gyroX = g.gyro.x - gyroXOffset;
+    gyroY = g.gyro.y - gyroYOffset;
+    gyroZ = g.gyro.z - gyroZOffset;
 
-    accX = accXSum / BUFFER_SIZE;
-    accY = accYSum / BUFFER_SIZE;
-    accZ = accZSum / BUFFER_SIZE;
+    // Calculate roll and pitch angles
+    roll = atan2(accY, accZ) * RAD_TO_DEG;
+    pitch = atan2(-accX, sqrt(accY * accY + accZ * accZ)) * RAD_TO_DEG;
 
-    // Update gyro rolling averages
-    gyroXSum -= gyroXBuffer[imuIndex];
-    gyroXBuffer[imuIndex] = g.gyro.x;
-    gyroXSum += gyroXBuffer[imuIndex];
-
-    gyroYSum -= gyroYBuffer[imuIndex];
-    gyroYBuffer[imuIndex] = g.gyro.y;
-    gyroYSum += gyroYBuffer[imuIndex];
-
-    gyroZSum -= gyroZBuffer[imuIndex];
-    gyroZBuffer[imuIndex] = g.gyro.z;
-    gyroZSum += gyroZBuffer[imuIndex];
-
-    gyroX = gyroXSum / BUFFER_SIZE;
-    gyroY = gyroYSum / BUFFER_SIZE;
-    gyroZ = gyroZSum / BUFFER_SIZE;
-
-    // Advance index for circular buffer
-    imuIndex = (imuIndex + 1) % BUFFER_SIZE;
+    // Integrate gyroscope Z-axis data to calculate yaw
+    yaw += gyroZ * dt; // Ensure gyroZ is in degrees per second
 }

@@ -13,6 +13,8 @@ extern Adafruit_MPU6050 mpu;
 extern float accX, accY, accZ;
 extern float gyroX, gyroY, gyroZ;
 
+extern float roll, pitch, yaw;
+
 void setupIMU();
 bool initializeMPU6050();
 void updateIMU();

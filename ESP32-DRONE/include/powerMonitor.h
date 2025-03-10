@@ -11,11 +11,6 @@ extern float busVoltage;
 extern float shuntVoltage;
 
 void setupCurrentMonitor();
-float readCurrent();
-float readBusVoltage();
-float readShuntVoltage();
-float updateCurrent();
-float updateBusVoltage();
-float updateShuntVoltage();
+void updatePowerReadings();
 
 #endif

@@ -4,31 +4,28 @@
 #include "global.h"
 #include "status.h"
 #include "serial.h"
-#include "battery.h"
 #include "GPS.h"
 #include "echo.h"
 #include "IMU.h"
 #include "ESPNow.h"
 #include "ESC.h"
 #include "powerMonitor.h"
+#include "PIDControl.h"
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
 
 unsigned long currentMillis = 0;
+unsigned long lastStatusReport = 0;
 unsigned long lastIMUUpdate = 0;
-unsigned long lastHEIGHTUpdate = 0;
-unsigned long lastDisplayUpdate = 0;
+unsigned long lastHeightUpdate = 0;
 unsigned long lastTransmitUpdate = 0;
-unsigned long lastConnectionCheck = 0;
 unsigned long lastBatteryMonitor = 0;
 unsigned long lastPowerMonitor = 0;
 
-bool isConnectedToRemote = false;
+const unsigned long PID_UPDATE_INTERVAL = 10; // 10 ms for 100 Hz update rate
+unsigned long lastPIDUpdate = 0;
 
-bool isESCOneArmed = false;
-bool isESCTwoArmed = true;
-bool isESCThreeArmed = false;
-bool isESCFourArmed = true;
+bool isConnectedToRemote = false;
 
 DroneState droneState;
 
@@ -42,38 +39,21 @@ void setup(void) {
     setupStatusDisplay();
     displayClear();
 
-    // setupBatteryMonitor();    
-    // if (!getBatteryStatus()) {
-    //     return;
-    // }
-
     setupCurrentMonitor();
 
     setupIMU();
     setupEcho();
-    // setupGPS();
 
     setupESPNow();
 
+    setupPIDControl();
 
     Serial.println("Setup complete.");
     setStatus(START_CONNECTION);
 }
 
 void loop() {
-    static unsigned long lastStatusReport = 0;
-    static unsigned long lastConnectionTest = 0;
-    static unsigned long lastBatteryMonitor = 0;
-
     currentMillis = millis();
-
-    // Check battery voltage
-    // if (currentMillis - lastBatteryMonitor >= BATTERY_MONITOR_INTERVAL) {
-    //     lastBatteryMonitor = currentMillis;
-    //     if (!getBatteryStatus()) {
-    //         return;
-    //     }
-    // }
 
     // Report status
     if (currentMillis - lastStatusReport >= STATUS_REPORT_INTERVAL) {
@@ -88,22 +68,9 @@ void loop() {
 
     // Arm ESCs
     if (getStatus() == READY && getFlightMode() == GROUND) {
-        Serial.println("Starting ESC arming...");
-        delay(4000);
-        if (!isESCOneArmed) {
-            setupESC(ESCOne, ESC_ONE_PIN);
-            delay(1000);
-            armESC(ESCOne);
-            isESCOneArmed = true;
-        }
-        if (!isESCThreeArmed) {
-            setupESC(ESCThree, ESC_THREE_PIN);
-            delay(1000);
-            armESC(ESCThree);
-            isESCThreeArmed = true;
-        }
+        bool ESCsArmed = armAllESCs();
 
-        if(isESCOneArmed && isESCThreeArmed) {
+        if(ESCsArmed) {
             Serial.println("ESCs armed.");
             sendDroneFlightReady();
         }
@@ -117,8 +84,8 @@ void loop() {
         }
 
         // Update ECHO
-        if (currentMillis - lastHEIGHTUpdate >= ECHO_INTERVAL) {
-            lastHEIGHTUpdate = currentMillis;
+        if (currentMillis - lastHeightUpdate >= ECHO_INTERVAL) {
+            lastHeightUpdate = currentMillis;
             updateHeight();
         }
 
@@ -131,15 +98,18 @@ void loop() {
         // Update powerMonitor
         if (currentMillis - lastPowerMonitor >= POWER_MONITOR_INTERVAL) {
             lastPowerMonitor = currentMillis;
-            updateCurrent();
-            updateBusVoltage();
-            updateShuntVoltage();
+            updatePowerReadings();
         }
 
         // Apply throttle to ESCs
-        setESC(ESC_ONE_PIN, controlPacket.throttle);
+        // setESC(ESC_ONE_PIN, controlPacket.throttle);
         // setESC(ESC_TWO_PIN, controlPacket.throttle);
-        setESC(ESC_THREE_PIN, controlPacket.throttle);
+        // setESC(ESC_THREE_PIN, controlPacket.throttle);
         // setESC(ESC_FOUR_PIN, controlPacket.throttle);
+
+        if (currentMillis - lastPIDUpdate >= PID_UPDATE_INTERVAL) {
+            lastPIDUpdate = currentMillis;
+            updatePIDControl();
+        }
     }
 }

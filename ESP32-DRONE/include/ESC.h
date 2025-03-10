@@ -4,6 +4,7 @@
 #define ESC_H
 
 #include "config.h"
+#include "IMU.h"
 #include <ESP32Servo.h>
 
 extern Servo ESCOne;
@@ -23,6 +24,8 @@ extern bool isESCFourArmed;
 
 void setupESC(Servo& ESC, int ESC_PIN);
 void armESC(Servo& ESC);
+bool armAllESCs();
 void setESC(int ESCPin, float amount);
+void applyMotorAdjustments(float rollAdjust, float pitchAdjust, float yawAdjust);
 
 #endif

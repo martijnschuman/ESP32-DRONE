@@ -49,10 +49,10 @@ struct TelemetryPacket {
 
 // Struct for control packet
 struct ControlPacket {
-    float joystickX;
-    float joystickY;
     float throttle;
     float yaw;
+    float roll;
+    float pitch;
 };
 
 struct DroneStatePacket {

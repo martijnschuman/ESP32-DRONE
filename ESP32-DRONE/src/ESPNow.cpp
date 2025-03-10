@@ -13,8 +13,7 @@ void setupESPNow() {
         throwError(ESP_NOW_INIT_ERROR);
     }
 
-    // Set up callbacks
-    // esp_now_register_send_cb(onDataSent);
+    // Set up callback
     esp_now_register_recv_cb(onDataReceived);
 
     addPeer(remoteMAC);
@@ -33,23 +32,6 @@ void addPeer(uint8_t *peerMAC) {
     }
 }
 
-// Callback when data is sent
-void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
-    if (status == ESP_NOW_SEND_SUCCESS) {
-        Serial.print("Message sent to: ");
-        for (int i = 0; i < 6; i++) {
-            Serial.print(macAddr[i], HEX);
-            if (i < 5) {
-                Serial.print(":");
-            }
-        }
-        Serial.println();
-    } else {
-        Serial.println("Error sending packet.");
-        throwError(ESP_NOW_SEND_ERROR);
-    }
-}
-
 // Callback when data is received
 void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     if (data == nullptr || dataLen <= 0) {
@@ -57,31 +39,43 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         return;
     }
 
-    if (dataLen == sizeof(ControlPacket)) {
-        controlPacket = *reinterpret_cast<const ControlPacket*>(data);
-        Serial.println("Control packet received");
-    } 
-    else if (dataLen == sizeof(DroneStatePacket)) {
-        droneStatePacket = *reinterpret_cast<const DroneStatePacket*>(data);
-        Serial.println("Drone status packet received");
+    switch (dataLen) {
+        case sizeof(ControlPacket): {
+            controlPacket = *reinterpret_cast<const ControlPacket*>(data);
+            Serial.println("Control packet received");
+            break;
+        }
+        case sizeof(DroneStatePacket): {
+            droneStatePacket = *reinterpret_cast<const DroneStatePacket*>(data);
+            Serial.println("Drone status packet received");
 
-        if (droneStatePacket.droneState.status == START_CONNECTION && droneStatePacket.droneState.flightMode == BOOT) {
-            sendDroneConnectionReady();
+            switch (droneStatePacket.droneState.status) {
+                case START_CONNECTION:
+                    if (droneStatePacket.droneState.flightMode == BOOT) {
+                        sendDroneConnectionReady();
+                    }
+                    break;
+                case READY:
+                    if (droneStatePacket.droneState.flightMode == GROUND) {
+                        setStatus(READY);
+                        setFlightMode(GROUND);
+                        isConnectedToRemote = true;
+                    } else if (droneStatePacket.droneState.flightMode == MANUAL) {
+                        setStatus(READY);
+                        setFlightMode(MANUAL);
+                    }
+                    break;
+                default:
+                    Serial.println("Unknown drone state received.");
+                    break;
+            }
+            break;
         }
-        else if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == GROUND) {
-            setStatus(READY);
-            setFlightMode(GROUND);
-            isConnectedToRemote = true;
-        }
-        else if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == MANUAL) {
-            setStatus(READY);
-            setFlightMode(MANUAL);
-        }
-    }
-    else {
-        Serial.println("Unknown packet received.");
-        Serial.print("Data length: ");
-        Serial.println(dataLen);
+        default:
+            Serial.println("Unknown packet received.");
+            Serial.print("Data length: ");
+            Serial.println(dataLen);
+            break;
     }
 }
 

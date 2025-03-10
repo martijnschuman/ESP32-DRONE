@@ -15,16 +15,8 @@
 #define BATTERY_MONITOR_INTERVAL 1000               // Interval to monitor battery voltage in milliseconds
 #define POWER_MONITOR_INTERVAL 750                  // Interval to monitor power in milliseconds
 
-// Battery
-#define BATTERY_VOLTAGE_PIN 34                      // Pin to read battery voltage
-#define BATTERY_DIVIDER_RATIO 4.0                   // Voltage divider ratio
-#define BATTERY_FULL_VOLTAGE 12.6                   // Full battery voltage
-#define BATTERY_LOW_VOLTAGE 10.4                    // Low battery voltage
-#define BATTERY_CRITICAL_VOLTAGE 9.9                // Critical battery voltage
-#define BATTERY_EMPTY_VOLTAGE 9.0                   // Empty battery voltage
-#define BATTERY_SETUP_READINGS 10                   // Number of readings to average for battery voltage during setup
-#define BATTERY_SETUP_INTERVAL 10                   // Interval between battery voltage readings during setup in milliseconds
-#define BATTERY_MONITOR_READINGS 10                 // Number of readings to average for battery voltage during monitoring
+// IMU
+#define IMU_SETUP_CALIBRATION_COUNT 500             // Number of samples to calibrate the IMU
 
 // ESPNow
 #define DRONE_MAC_ADDRESS {0xD0, 0xEF, 0x76, 0x34, 0x97, 0x44}

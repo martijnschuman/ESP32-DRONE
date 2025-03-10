@@ -6,7 +6,6 @@
 #include "config.h"
 #include <esp_now.h>
 #include <WiFi.h>
-#include "battery.h"
 #include "powerMonitor.h"
 #include "IMU.h"
 #include "echo.h"

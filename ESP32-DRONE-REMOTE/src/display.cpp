@@ -142,10 +142,10 @@ void displayTelemetry() {
 
     // Display right joystick values
     display.setCursor(0, 18);
-    display.print("XY ");
-    display.print(controlPacket.joystickX);
+    display.print("RP ");
+    display.print(controlPacket.roll);
     display.print(", ");
-    display.print(controlPacket.joystickY);
+    display.print(controlPacket.pitch);
 
     // Display Gyro data
     display.setCursor(0, 27);

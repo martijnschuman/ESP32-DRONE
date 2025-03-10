@@ -27,14 +27,8 @@ float readShuntVoltage() {
     return ina219.getShuntVoltage_mV();
 }
 
-float updateCurrent() {
-    return current = readCurrent();
-}
-
-float updateBusVoltage() {
-    return busVoltage= readBusVoltage();
-}
-
-float updateShuntVoltage() {
-    return shuntVoltage = readShuntVoltage();
+void updatePowerReadings() {
+    current = readCurrent();
+    busVoltage = readBusVoltage();
+    shuntVoltage = readShuntVoltage();
 }

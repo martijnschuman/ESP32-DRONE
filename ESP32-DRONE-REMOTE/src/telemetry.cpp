@@ -15,10 +15,10 @@ int getThrottleValue() {
 }
 
 void sendControl() {
-    controlPacket.joystickX = getRightJoystickX();
-    controlPacket.joystickY = getRightJoystickY();
     controlPacket.throttle = getThrottleValue();
     controlPacket.yaw = getLeftJoystickX();
+    controlPacket.roll = getRightJoystickX();
+    controlPacket.pitch = getRightJoystickY();
 
     esp_err_t result = esp_now_send(droneMAC, reinterpret_cast<uint8_t*>(&controlPacket), sizeof(controlPacket));
     if (result == ESP_OK) {

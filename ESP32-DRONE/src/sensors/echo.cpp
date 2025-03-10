@@ -2,9 +2,7 @@
 
 #include "echo.h"
 
-float duration = 0;
 float height = 0;
-float baseHeight = 0;
 
 void setupEcho() {
     pinMode(ECHO_TRIGGER_PIN, OUTPUT);
@@ -18,10 +16,12 @@ void updateHeight() {
     delayMicroseconds(10);
     digitalWrite(ECHO_TRIGGER_PIN, LOW);
 
-    duration = pulseIn(ECHO_ECHO_PIN, HIGH);
+    float duration = pulseIn(ECHO_ECHO_PIN, HIGH);
     float raw_height = (duration * 0.034 / 2.0);
+
     if (raw_height < 0) {
         raw_height = 0;
     }
+    
     height = raw_height;
 }
