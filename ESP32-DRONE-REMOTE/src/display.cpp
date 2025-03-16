@@ -43,17 +43,22 @@ void displayCalibration(int stage, const char* joystickName) {
     displayTitel("Joystick Calibration");
 
     display.setCursor(0, 11);
-    if (stage == 0) {
-        display.println(String("Move the ") + joystickName + " joystick to the bottom-left corner and hold.");
-    }
-    else if (stage == 1) {
-        display.println(String("Move the ") + joystickName + " joystick the top-right corner and hold.");
-    }
-    else if (stage == 2) {
-        display.println(String("Release the ") + joystickName + " joystick to it's center position.");
-    }
-    else if (stage == 3) {
-        display.println(String(joystickName) + " calibration complete!");
+    switch (stage) {
+        case 0:
+            display.println(String("Move the ") + joystickName + " joystick to the bottom-left corner and hold.");
+            break;
+        case 1:
+            display.println(String("Move the ") + joystickName + " joystick to the top-right corner and hold.");
+            break;
+        case 2:
+            display.println(String("Release the ") + joystickName + " joystick to its center position.");
+            break;
+        case 3:
+            display.println(String(joystickName) + " calibration complete!");
+            break;
+        default:
+            display.println("Unknown calibration stage.");
+            break;
     }
 
     display.display();
@@ -149,34 +154,51 @@ void displayTelemetry() {
 
     // Display Gyro data
     display.setCursor(0, 27);
-    display.print("GYR ");
-    display.print(telemetryPacket.gyroX, 2);
+    display.print("RPY ");
+    display.print(telemetryPacket.roll, 2);
     display.print(",");
-    display.print(telemetryPacket.gyroY, 2);
+    display.print(telemetryPacket.pitch, 2);
     display.print(",");
-    display.print(telemetryPacket.gyroZ, 2);
-
-    // Display ACC data
-    display.setCursor(0, 36);
-    display.print("ACC ");
-    display.print(telemetryPacket.accX, 2);
-    display.print(",");
-    display.print(telemetryPacket.accY, 2);
-    display.print(",");
-    display.print(telemetryPacket.accZ, 2);
+    display.print(telemetryPacket.yaw, 2);
 
     // Display battery info
-    display.setCursor(0, 45);
+    display.setCursor(0, 36);
     display.print("Bus ");
     display.print(telemetryPacket.busVoltage, 2);
-    display.print(" Shu");
-    display.print(telemetryPacket.shuntVoltage, 2);
-    display.print("mV");
+
+    // display.setCursor(0, 45);
+    // display.print("Shu ");
+    // display.print(telemetryPacket.shuntVoltage, 2);
+    // display.print("mV");
+
+    // display.setCursor(0, 54);
+    // display.print("Cur ");
+    // display.print(telemetryPacket.current, 2);
+    // display.print("mA");
+
+    display.setCursor(0, 45);
+    display.print("ESC1 ");
+    display.print(telemetryPacket.ESCOneThrottle, 2);
+    display.print(" ESC2 ");
+    display.print(telemetryPacket.ESCTwoThrottle, 2);
 
     display.setCursor(0, 54);
-    display.print("Cur ");
-    display.print(telemetryPacket.current, 2);
-    display.print("mA");
+    display.print("ESC3 ");
+    display.print(telemetryPacket.ESCThreeThrottle, 2);
+    display.print(" ESC4 ");
+    display.print(telemetryPacket.ESCFourThrottle, 2);
+
+    display.display();
+}
+
+void displayESPNowError() {
+    display.clearDisplay();
+
+    displayTitel("ESPNow Error");
+
+    display.setCursor(0, 11);
+
+    display.println("Error sending data via ESPNow.");
 
     display.display();
 }

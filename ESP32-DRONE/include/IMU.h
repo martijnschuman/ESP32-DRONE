@@ -1,22 +1,16 @@
-// include/IMU.h
-
-#ifndef MPU6050_H
-#define MPU6050_H
+#ifndef IMU_H
+#define IMU_H
 
 #include "config.h"
-#include <Adafruit_MPU6050.h>
-#include <Adafruit_Sensor.h>
+#include <Arduino.h>
+#include <I2Cdev.h>
+#include "MPU6050_6Axis_MotionApps20.h"
 #include "status.h"
 
-extern Adafruit_MPU6050 mpu;
-
-extern float accX, accY, accZ;
-extern float gyroX, gyroY, gyroZ;
-
+// Global orientation angles (in degrees) for PID control:
 extern float roll, pitch, yaw;
 
 void setupIMU();
-bool initializeMPU6050();
 void updateIMU();
 
-#endif // MPU6050_H
+#endif // IMU_H

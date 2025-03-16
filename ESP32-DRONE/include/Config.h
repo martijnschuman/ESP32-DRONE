@@ -8,11 +8,9 @@
 #include "global.h"
 
 // Loop intervals in milliseconds
-#define BUFFER_SIZE 5                               // Buffer size for IMU and LIDAR data
 #define IMU_INTERVAL 100                            // Interval between IMU measurements in milliseconds
 #define ECHO_INTERVAL 200                           // Echo between LIDAR measurements in milliseconds
-#define TRANSMIT_INTERVAL 500                       // Interval to transmit telemetry data in milliseconds
-#define BATTERY_MONITOR_INTERVAL 1000               // Interval to monitor battery voltage in milliseconds
+#define TRANSMIT_INTERVAL 250                       // Interval to transmit telemetry data in milliseconds
 #define POWER_MONITOR_INTERVAL 750                  // Interval to monitor power in milliseconds
 
 // IMU
@@ -22,6 +20,7 @@
 #define DRONE_MAC_ADDRESS {0xD0, 0xEF, 0x76, 0x34, 0x97, 0x44}
 #define REMOTE_MAC_ADDRESS {0xCC, 0xDB, 0xA7, 0x3E, 0x66, 0x84}
 #define CONNECTION_TEST_INTERVAL 5000
+#define CONNECTION_TIMEOUT 1500
 
 // Echo
 #define ECHO_MEASUREMENT_INTERVAL 250              // Interval between echo measurements in milliseconds
@@ -56,7 +55,7 @@
 
 #define ESC_MIN_THROTTLE 1000                       // Minimum throttle value
 #define ESC_MAX_THROTTLE 2000                       // Maximum throttle value
-#define ESC_ALLOWED_MAX_THROTTLE 1500               // Maximum throttle value
-#define ESC_FREQUENCY 100                           // ESC frequency in Hz
+#define ESC_ALLOWED_MAX_THROTTLE 1600               // Maximum throttle value
+#define ESC_FREQUENCY 50                            // ESC frequency in Hz
 
 #endif // CONFIG_H

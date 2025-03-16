@@ -12,6 +12,13 @@
 
 extern uint8_t remoteMAC[];
 
+extern unsigned long lastCommunicationTime;
+
+extern float ESCONE_THROTTLE;
+extern float ESCTWO_THROTTLE;
+extern float ESCTHREE_THROTTLE;
+extern float ESCFOUR_THROTTLE;
+
 void setupESPNow();
 void addPeer(uint8_t *peerMAC);
 void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status);

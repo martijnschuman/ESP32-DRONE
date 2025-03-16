@@ -11,20 +11,18 @@ enum StatusEnum {
     READY = 0x02,
     IMU_ERROR = 0x03,
     ECHO_ERROR = 0x04,
-    GPS_ERROR = 0x05,
-    ESP_NOW_INIT_ERROR = 0x06,
-    ESP_NOW_SEND_ERROR = 0x07,
-    ADC_ERROR = 0x08,
-    DISPLAY_ERROR = 0x09,
-    BATTERY_LOW = 0x0A,
-    BATTERY_CRITICAL = 0x0B,
-    ESC_INIT_ERROR = 0x0C,
+    ESP_NOW_INIT_ERROR = 0x05,
+    ESP_COMMS_ERROR = 0x06,
+    ADC_ERROR = 0x07,
+    DISPLAY_ERROR = 0x08,
+    EMERGENCY = 0x09,
 };
 
 enum FlightMode {
     BOOT = 0x00,
     GROUND = 0x01,
     MANUAL = 0x02,
+    EMERGENCY_DECENT = 0x03,
 };
 
 struct DroneState {
@@ -36,15 +34,12 @@ struct DroneState {
 struct TelemetryPacket {
     StatusEnum status;
     FlightMode flightMode;
-    float accX, accY, accZ;
-    float gyroX, gyroY, gyroZ;
+    float roll, pitch, yaw;
     float height;
-    // float gpsLat, gpsLng, gpsAlt;
-    // float gpsSpeed;
-    // int gpsSatellites;
     float current;
     float busVoltage;
     float shuntVoltage;
+    float ESCOneThrottle, ESCTwoThrottle, ESCThreeThrottle, ESCFourThrottle;
 };
 
 // Struct for control packet

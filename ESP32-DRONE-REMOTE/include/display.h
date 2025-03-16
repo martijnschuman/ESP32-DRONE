@@ -19,5 +19,6 @@ void displayStartCameraConnection();
 void displayReadyToFly();
 void displayArmingDrone();
 void displayTelemetry();
+void displayESPNowError();
 
 #endif

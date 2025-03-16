@@ -7,7 +7,7 @@
 #include "global.h"
 
 // Transmission interval
-#define TRANSMISSION_INTERVAL 500						// Interval for sending telemetry data
+#define TRANSMISSION_INTERVAL 250						// Interval for sending telemetry data
 #define FIRST_CONNECTION_INTERVAL 5000					// Interval for first connection attempt
 #define CAMERA_CONNECTION_INTERVAL 5000					// Interval for camera first connection attempt
 #define CAMERA_PICTURE_INTERVAL 3000					// Interval for taking pictures

@@ -2,6 +2,8 @@
 
 uint8_t remoteMAC[] = REMOTE_MAC_ADDRESS;
 
+unsigned long lastCommunicationTime = 0;
+
 // Set up ESP-NOW
 void setupESPNow() {
     WiFi.mode(WIFI_STA);
@@ -39,6 +41,8 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         return;
     }
 
+    lastCommunicationTime = millis();
+
     switch (dataLen) {
         case sizeof(ControlPacket): {
             controlPacket = *reinterpret_cast<const ControlPacket*>(data);
@@ -75,6 +79,8 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
             Serial.println("Unknown packet received.");
             Serial.print("Data length: ");
             Serial.println(dataLen);
+            setStatus(ESP_COMMS_ERROR);
+            setFlightMode(EMERGENCY_DECENT);
             break;
     }
 }
@@ -110,21 +116,17 @@ void sendTelemetry() {
 
     telemetryPacket.status = droneState.status;
     telemetryPacket.flightMode = droneState.flightMode;
-    telemetryPacket.accX = accX;
-    telemetryPacket.accY = accY;
-    telemetryPacket.accZ = accZ;
-    telemetryPacket.gyroX = gyroX;
-    telemetryPacket.gyroY = gyroY;
-    telemetryPacket.gyroZ = gyroZ;
+    telemetryPacket.roll = roll;
+    telemetryPacket.pitch = pitch;
+    telemetryPacket.yaw = yaw;
     telemetryPacket.height = height;
-    // telemetryPacket.gpsLat = gpsLat;
-    // telemetryPacket.gpsLng = gpsLng;
-    // telemetryPacket.gpsAlt = gpsAlt;
-    // telemetryPacket.gpsSpeed = gpsSpeed;
-    // telemetryPacket.gpsSatellites = gpsSatellites;
     telemetryPacket.current = current;
     telemetryPacket.busVoltage = busVoltage;
     telemetryPacket.shuntVoltage = shuntVoltage;
+    telemetryPacket.ESCOneThrottle = ESCONE_THROTTLE;
+    telemetryPacket.ESCTwoThrottle = ESCTWO_THROTTLE;
+    telemetryPacket.ESCThreeThrottle = ESCTHREE_THROTTLE;
+    telemetryPacket.ESCFourThrottle = ESCFOUR_THROTTLE;
 
     esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&telemetryPacket, sizeof(telemetryPacket));
     if (result == ESP_OK) {

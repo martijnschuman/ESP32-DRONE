@@ -5,7 +5,6 @@
 
 #include "config.h"
 
-extern float duration;
 extern float height;
 
 void setupEcho();

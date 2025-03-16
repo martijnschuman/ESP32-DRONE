@@ -98,6 +98,10 @@ void loop() {
                 }
             }
         }
+
+        if (getStatus() == ESP_COMMS_ERROR) {
+            displayESPNowError();
+        }
     }
     else {
         if (getStatus() == CALIBRATING) {

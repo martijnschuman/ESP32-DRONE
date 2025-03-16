@@ -4,7 +4,6 @@
 #include "global.h"
 #include "status.h"
 #include "serial.h"
-#include "GPS.h"
 #include "echo.h"
 #include "IMU.h"
 #include "ESPNow.h"
@@ -61,6 +60,12 @@ void loop() {
         reportStatus();
     }
 
+    // Handle emergency descent if active
+    if (getFlightMode() == EMERGENCY_DECENT && getStatus() == EMERGENCY) {
+        emergencyDescent();
+        return;
+    }
+
     // Check if the remote is connected
     if (!isConnectedToRemote) {
         return;
@@ -77,6 +82,15 @@ void loop() {
     }
 
     if (getStatus() == READY && getFlightMode() == MANUAL) {
+        // Safety check: if no message has been received within CONNECTION_TIMEOUT, switch to emergency descent
+        if ((controlPacket.throttle > 0 && (ESCONE_THROTTLE > 0 || ESCTWO_THROTTLE > 0 || ESCTHREE_THROTTLE > 0 || ESCFOUR_THROTTLE > 0)) && (currentMillis - lastCommunicationTime >= CONNECTION_TIMEOUT)) {
+            Serial.println("Communication lost. Switching to emergency descent mode.");
+            setFlightMode(EMERGENCY_DECENT);
+            setStatus(EMERGENCY);
+            isConnectedToRemote = false;
+            return;
+        }
+
         // Update IMU
         if (currentMillis - lastIMUUpdate >= IMU_INTERVAL) {
             lastIMUUpdate = currentMillis;

@@ -52,43 +52,52 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         return;
     }
 
-    if (dataLen == sizeof(TelemetryPacket)) {
-        telemetryPacket = *reinterpret_cast<const TelemetryPacket *>(data);
-        Serial.println("Telemetry packet received.");
-    } else if (dataLen == sizeof(DroneStatePacket)) {
-        droneStatePacket = *reinterpret_cast<const DroneStatePacket *>(data);
-        Serial.println("Drone state packet received.");
-
-        if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == GROUND) {
-            Serial.println("Drone connection is ready.");
-            isConnectedToDrone = true;
-            setStatus(READY);
-            setFlightMode(GROUND);	
+    switch (dataLen) {
+        case sizeof(TelemetryPacket): {
+            telemetryPacket = *reinterpret_cast<const TelemetryPacket *>(data);
+            Serial.println("Telemetry packet received.");
+            break;
         }
+        case sizeof(DroneStatePacket): {
+            droneStatePacket = *reinterpret_cast<const DroneStatePacket *>(data);
+            Serial.println("Drone state packet received.");
 
-        if (droneStatePacket.droneState.status == READY && droneStatePacket.droneState.flightMode == MANUAL) {
-            Serial.println("Drone ready for flight.");
-            setStatus(READY);
-            setFlightMode(MANUAL);
+            if (droneStatePacket.droneState.status == READY) {
+                if (droneStatePacket.droneState.flightMode == GROUND) {
+                    Serial.println("Drone connection is ready.");
+                    isConnectedToDrone = true;
+                    setStatus(READY);
+                    setFlightMode(GROUND);
+                } else if (droneStatePacket.droneState.flightMode == MANUAL) {
+                    Serial.println("Drone ready for flight.");
+                    setStatus(READY);
+                    setFlightMode(MANUAL);
+                }
+            }
+            break;
         }
+        case sizeof(CameraPacket): {
+            cameraPacket = *reinterpret_cast<const CameraPacket *>(data);
+            Serial.println("Camera packet received.");
+            Serial.println(cameraPacket.cameraMode);
 
-    } else if (dataLen == sizeof(CameraPacket)) {
-        cameraPacket = *reinterpret_cast<const CameraPacket *>(data);
-        Serial.println("Camera packet received.");
-        Serial.println(cameraPacket.cameraMode);
-
-        if (cameraPacket.cameraMode == CAM_READY) {
-            Serial.println("Camera is ready.");
-            isConnectedToCam = true;
-        } else if (cameraPacket.cameraMode == CAM_PICTURE_SAVED) {
-            Serial.println("Picture saved.");
-            takenPictureCount++;
+            if (cameraPacket.cameraMode == CAM_READY) {
+                Serial.println("Camera is ready.");
+                isConnectedToCam = true;
+            } else if (cameraPacket.cameraMode == CAM_PICTURE_SAVED) {
+                Serial.println("Picture saved.");
+                takenPictureCount++;
+            }
+            break;
         }
-    }
-    else {
-        Serial.println("Unknown packet received.");
-        Serial.print("Data length: ");
-        Serial.println(dataLen);
+        default: {
+            Serial.println("Unknown packet received.");
+            Serial.print("Data length: ");
+            Serial.println(dataLen);
+            setStatus(ESP_COMMS_ERROR);
+            setFlightMode(EMERGENCY_DECENT);
+            break;
+        }
     }
 }
 

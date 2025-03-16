@@ -1,105 +1,112 @@
-// src/sensors/IMU.cpp
 #include "IMU.h"
+#include <Wire.h>
 
-Adafruit_MPU6050 mpu;
+// Define the MPU interrupt pin (adjust for your board if needed)
+#define INTERRUPT_PIN 34
 
-// Global variables for calibration
-float gyroXOffset = 0, gyroYOffset = 0, gyroZOffset = 0;
-float accelXOffset = 0, accelYOffset = 0, accelZOffset = 0;
+// Create an MPU6050 instance using the DMP library
+MPU6050 mpu;
 
-// Global variables for IMU data
-float accX = 0.0f, accY = 0.0f, accZ = 0.0f;
-float gyroX = 0.0f, gyroY = 0.0f, gyroZ = 0.0f;
+// MPU control/status variables
+bool dmpReady = false;          // set true if DMP init was successful
+uint8_t mpuIntStatus;           // holds actual interrupt status from MPU
+uint8_t devStatus;              // return status after each device operation (0 = success, !0 = error)
+uint16_t packetSize;            // expected DMP packet size (default is 42 bytes)
+uint8_t fifoBuffer[64];         // FIFO storage buffer
 
-// Global variables for orientation angles
+// Orientation/motion variables from DMP
+Quaternion q;                 // [w, x, y, z] quaternion container
+VectorFloat gravity;          // [x, y, z] gravity vector
+float ypr[3];                 // [yaw, pitch, roll] (radians)
+
+// Global orientation angles (in degrees) for PID control
 float roll = 0.0f, pitch = 0.0f, yaw = 0.0f;
 
-void readMPU6050(sensors_event_t *a, sensors_event_t *g, sensors_event_t *temp) {
-    mpu.getEvent(a, g, temp);
-}
+// Interrupt flag to indicate when DMP data is ready
+volatile bool mpuInterrupt = false;
 
-void calibrateGyro() {
-    Serial.println("Calibrating gyro...");
-    
-    for (int i = 0; i < IMU_SETUP_CALIBRATION_COUNT; i++) {
-        sensors_event_t a, g, temp;
-        readMPU6050(&a, &g, &temp);
-        
-        gyroXOffset += g.gyro.x;
-        gyroYOffset += g.gyro.y;
-        gyroZOffset += g.gyro.z;
-        delay(5);
-    }
-
-    // Calculate average offsets
-    gyroXOffset /= IMU_SETUP_CALIBRATION_COUNT;
-    gyroYOffset /= IMU_SETUP_CALIBRATION_COUNT;
-    gyroZOffset /= IMU_SETUP_CALIBRATION_COUNT;
-
-    Serial.print("Gyro Offsets: ");
-    Serial.print(gyroXOffset);
-    Serial.print(", ");
-    Serial.print(gyroYOffset);
-    Serial.print(", ");
-    Serial.println(gyroZOffset);
+// Interrupt service routine – sets the flag when new data is ready
+void dmpDataReady() {
+    mpuInterrupt = true;
 }
 
 void setupIMU() {
-    if (!initializeMPU6050()) {
-        Serial.println("MPU6050 initialization failed!");
+    // Initialize I2C communication
+    Wire.begin();
+    Wire.setClock(400000); // Use 400kHz I2C clock for faster communication
+
+    // Initialize the MPU6050 device
+    mpu.initialize();
+    if (!mpu.testConnection()) {
+        Serial.println(F("MPU6050 connection failed"));
         throwError(IMU_ERROR);
         while (1) { delay(10); }
+    }
+    Serial.println(F("MPU6050 connection successful"));
+
+    // Initialize DMP
+    devStatus = mpu.dmpInitialize();
+    if (devStatus == 0) {
+        // Calibrate accelerometer and gyroscope offsets
+        mpu.CalibrateAccel(6);
+        mpu.CalibrateGyro(6);
+        mpu.PrintActiveOffsets();
+
+        // Enable the DMP
+        mpu.setDMPEnabled(true);
+
+        // Setup interrupt to capture DMP data ready events
+        pinMode(INTERRUPT_PIN, INPUT);
+        attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
+        mpuIntStatus = mpu.getIntStatus();
+
+        // Mark DMP as ready
+        dmpReady = true;
+        // Retrieve expected DMP packet size for later processing
+        packetSize = mpu.dmpGetFIFOPacketSize();
+
+        Serial.println(F("MPU6050 DMP initialized and ready!"));
     } else {
-        Serial.println("MPU6050 initialized!");
-    }
-
-    calibrateGyro();
-    Serial.println("IMU setup complete.");
-}
-
-bool initializeMPU6050() {
-    if (!mpu.begin()) {
-        Serial.println("Failed to find MPU6050 chip");
+        // Handle DMP initialization error
+        Serial.print(F("DMP Initialization failed (code "));
+        Serial.print(devStatus);
+        Serial.println(F(")"));
         throwError(IMU_ERROR);
-        return false;
+        while (1) { delay(10); }
     }
-
-    mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
-    Serial.println("IMU accelerometer range set");
-
-    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-    Serial.println("IMU gyro range set");
-
-    mpu.setFilterBandwidth(MPU6050_BAND_10_HZ);
-    Serial.println("IMU filter bandwidth set");
-
-    return true;
 }
 
 void updateIMU() {
-    sensors_event_t a, g, tempEvent;
-    readMPU6050(&a, &g, &tempEvent);
+    if (!dmpReady) return;
 
-    // Time difference (dt) in seconds
-    static unsigned long lastTime = 0;
-    unsigned long currentTime = millis();
-    float dt = (currentTime - lastTime) / 1000.0f;
-    lastTime = currentTime;
+    // If an interrupt has been signaled or a packet is ready in FIFO,
+    // then process the available data.
+    if (mpuInterrupt || mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) {
+        mpuInterrupt = false;
+        if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) {
+            // Retrieve quaternion from FIFO packet
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            // Compute gravity vector based on current quaternion
+            mpu.dmpGetGravity(&gravity, &q);
+            // Compute yaw, pitch, and roll (in radians)
+            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
 
-    // Update accelerometer data
-    accX = a.acceleration.x - accelXOffset;
-    accY = a.acceleration.y - accelYOffset;
-    accZ = a.acceleration.z;
+            // Convert from radians to degrees
+            float newYaw   = -ypr[0] * 180 / M_PI;
+            float newPitch = -ypr[1] * 180 / M_PI;
+            float newRoll  = ypr[2] * 180 / M_PI;
 
-    // Update gyroscope data
-    gyroX = g.gyro.x - gyroXOffset;
-    gyroY = g.gyro.y - gyroYOffset;
-    gyroZ = g.gyro.z - gyroZOffset;
+            // Apply low pass filtering for pitch and yaw
+            static float filteredPitch = newPitch;
+            static float filteredYaw = newYaw;
+            const float alpha = 0.1; // Adjust this coefficient as needed
+            filteredPitch = alpha * newPitch + (1 - alpha) * filteredPitch;
+            filteredYaw   = alpha * newYaw   + (1 - alpha) * filteredYaw;
 
-    // Calculate roll and pitch angles
-    roll = atan2(accY, accZ) * RAD_TO_DEG;
-    pitch = atan2(-accX, sqrt(accY * accY + accZ * accZ)) * RAD_TO_DEG;
-
-    // Integrate gyroscope Z-axis data to calculate yaw
-    yaw += gyroZ * dt; // Ensure gyroZ is in degrees per second
+            // Update global variables (using filtered values for pitch and yaw)
+            pitch = filteredPitch;
+            yaw   = filteredYaw;
+            roll  = newRoll; // Roll remains unfiltered (modify if needed)
+        }
+    }
 }
