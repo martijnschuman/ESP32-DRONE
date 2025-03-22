@@ -7,11 +7,14 @@
 #include <Wire.h>
 #include "global.h"
 
+#define STICK_SENSITIVITY 0.5f
+
 // Loop intervals in milliseconds
 #define IMU_INTERVAL 100                            // Interval between IMU measurements in milliseconds
-#define ECHO_INTERVAL 200                           // Echo between LIDAR measurements in milliseconds
-#define TRANSMIT_INTERVAL 250                       // Interval to transmit telemetry data in milliseconds
+#define ECHO_INTERVAL 150                           // Echo between LIDAR measurements in milliseconds
+#define TRANSMIT_INTERVAL 150                       // Interval to transmit telemetry data in milliseconds
 #define POWER_MONITOR_INTERVAL 750                  // Interval to monitor power in milliseconds
+#define PID_UPDATE_INTERVAL 20                      // Interval to update PID control in milliseconds
 
 // IMU
 #define IMU_SETUP_CALIBRATION_COUNT 500             // Number of samples to calibrate the IMU
@@ -20,7 +23,7 @@
 #define DRONE_MAC_ADDRESS {0xD0, 0xEF, 0x76, 0x34, 0x97, 0x44}
 #define REMOTE_MAC_ADDRESS {0xCC, 0xDB, 0xA7, 0x3E, 0x66, 0x84}
 #define CONNECTION_TEST_INTERVAL 5000
-#define CONNECTION_TIMEOUT 1500
+#define CONNECTION_TIMEOUT 1000
 
 // Echo
 #define ECHO_MEASUREMENT_INTERVAL 250              // Interval between echo measurements in milliseconds
@@ -53,9 +56,10 @@
 #define ESC_THREE_PIN 25                            // Pin for ESC 3
 #define ESC_FOUR_PIN 27                             // Pin for ESC 4
 
+#define MIN_MOTOR_OUTPUT 10                       // Minimum throttle value during flight
 #define ESC_MIN_THROTTLE 1000                       // Minimum throttle value
 #define ESC_MAX_THROTTLE 2000                       // Maximum throttle value
-#define ESC_ALLOWED_MAX_THROTTLE 1600               // Maximum throttle value
+#define ESC_ALLOWED_MAX_THROTTLE 1400               // Maximum throttle value
 #define ESC_FREQUENCY 50                            // ESC frequency in Hz
 
 #endif // CONFIG_H

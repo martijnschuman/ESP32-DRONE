@@ -60,5 +60,6 @@ extern ControlPacket controlPacket;
 extern DroneStatePacket droneStatePacket;
 
 extern bool isConnectedToRemote;
+extern bool hasBeenThrottled;
 
 #endif // MAIN_H

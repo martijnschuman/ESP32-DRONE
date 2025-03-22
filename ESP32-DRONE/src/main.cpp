@@ -20,10 +20,9 @@ unsigned long lastHeightUpdate = 0;
 unsigned long lastTransmitUpdate = 0;
 unsigned long lastBatteryMonitor = 0;
 unsigned long lastPowerMonitor = 0;
-
-const unsigned long PID_UPDATE_INTERVAL = 10; // 10 ms for 100 Hz update rate
 unsigned long lastPIDUpdate = 0;
 
+bool hasBeenThrottled = false;
 bool isConnectedToRemote = false;
 
 DroneState droneState;
@@ -44,8 +43,6 @@ void setup(void) {
     setupEcho();
 
     setupESPNow();
-
-    setupPIDControl();
 
     Serial.println("Setup complete.");
     setStatus(START_CONNECTION);
@@ -83,7 +80,7 @@ void loop() {
 
     if (getStatus() == READY && getFlightMode() == MANUAL) {
         // Safety check: if no message has been received within CONNECTION_TIMEOUT, switch to emergency descent
-        if ((controlPacket.throttle > 0 && (ESCONE_THROTTLE > 0 || ESCTWO_THROTTLE > 0 || ESCTHREE_THROTTLE > 0 || ESCFOUR_THROTTLE > 0)) && (currentMillis - lastCommunicationTime >= CONNECTION_TIMEOUT)) {
+        if ((currentMillis - lastCommunicationTime >= CONNECTION_TIMEOUT) && hasBeenThrottled) {
             Serial.println("Communication lost. Switching to emergency descent mode.");
             setFlightMode(EMERGENCY_DECENT);
             setStatus(EMERGENCY);

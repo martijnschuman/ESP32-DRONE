@@ -1,69 +1,45 @@
+// PIDControl.cpp
 #include "PIDControl.h"
 
-// PID constants (tune these values)
-float Kp = 1.0f, Ki = 0.02f, Kd = 0.5f;
+// PID structure for each axis
+struct PID {
+    float kp;
+    float ki;
+    float kd;
+    float previousError;
+    float integral;
+};
 
-// Variables for roll axis
-float rollIntegral = 0.0f;
-float prevRollError = 0.0f;
-float rollOutput = 0.0f;
+// Initialize PID controllers for pitch, roll, and yaw (tune these gains as needed)
+PID pidPitch = { 1.0, 0.0, 0.1, 0.0, 0.0 };
+PID pidRoll  = { 1.0, 0.0, 0.1, 0.0, 0.0 };
+PID pidYaw   = { 1.0, 0.0, 0.1, 0.0, 0.0 };
 
-// Variables for pitch axis
-float pitchIntegral = 0.0f;
-float prevPitchError = 0.0f;
-float pitchOutput = 0.0f;
-
-// Variables for yaw axis
-float yawIntegral = 0.0f;
-float prevYawError = 0.0f;
-float yawOutput = 0.0f;
-
-// Helper function for PID computation for one axis
-float computePID(float setpoint, float measurement, float dt, float &integral, float &prevError) {
-    float error = setpoint - measurement;
-    integral += error * dt;
-    float derivative = (error - prevError) / dt;
-    float output = Kp * error + Ki * integral + Kd * derivative;
-    prevError = error;
+// Compute PID output given a setpoint and measurement.
+float computePID(PID &pid, float setpoint, float measured, float dt) {
+    float error = setpoint - measured;
+    pid.integral += error * dt;
+    float derivative = (error - pid.previousError) / dt;
+    float output = pid.kp * error + pid.ki * pid.integral + pid.kd * derivative;
+    pid.previousError = error;
     return output;
 }
 
-void setupPIDControl() {
-    // Initialize integrals and previous errors
-    rollIntegral = 0.0f;
-    prevRollError = 0.0f;
-    
-    pitchIntegral = 0.0f;
-    prevPitchError = 0.0f;
-    
-    yawIntegral = 0.0f;
-    prevYawError = 0.0f;
-}
-
+// This function should be called every PID_UPDATE_INTERVAL (e.g., 50ms)
 void updatePIDControl() {
-    // Compute the time delta (dt) in seconds
-    // Assuming a fixed PID update interval (e.g., 10ms)
-    float dt = 0.01f;  // 10 ms
+    // Convert the interval from milliseconds to seconds.
+    float dt = PID_UPDATE_INTERVAL / 1000.0;
 
-    // Compute PID outputs for each axis
-    rollOutput  = computePID(controlPacket.roll,  roll,  dt, rollIntegral,  prevRollError);
-    pitchOutput = computePID(controlPacket.pitch, pitch, dt, pitchIntegral, prevPitchError);
-    yawOutput   = computePID(controlPacket.yaw,   yaw,   dt, yawIntegral,   prevYawError);
-    
-    // Debug printing
-    Serial.print("Roll Input: "); Serial.print(roll);
-    Serial.print(", Roll Setpoint: "); Serial.println(controlPacket.roll);
-    
-    Serial.print("Pitch Input: "); Serial.print(pitch);
-    Serial.print(", Pitch Setpoint: "); Serial.println(controlPacket.pitch);
-    
-    Serial.print("Yaw Input: "); Serial.print(yaw);
-    Serial.print(", Yaw Setpoint: "); Serial.println(controlPacket.yaw);
-    
-    Serial.print("Roll Output: "); Serial.print(rollOutput);
-    Serial.print(", Pitch Output: "); Serial.print(pitchOutput);
-    Serial.print(", Yaw Output: "); Serial.println(yawOutput);
-    
-    // Mix and apply motor adjustments based on PID outputs
-    applyMotorAdjustments(rollOutput, pitchOutput, yawOutput);
+    float desiredPitch = STICK_SENSITIVITY * controlPacket.pitch;
+    float desiredRoll  = STICK_SENSITIVITY * controlPacket.roll;
+    float desiredYaw   = STICK_SENSITIVITY * controlPacket.yaw;
+
+    // Compute PID corrections for each axis
+    float pitchCorrection = computePID(pidPitch, desiredPitch, pitch, dt);
+    float rollCorrection  = computePID(pidRoll,  desiredRoll,  roll,  dt);
+    float yawCorrection   = computePID(pidYaw,   desiredYaw,   yaw,   dt);
+
+    // Mix the corrections into the motor outputs.
+    // (The mixing function will add these to the base throttle and distribute them to the ESCs.)
+    applyMotorAdjustments(pitchCorrection, rollCorrection, yawCorrection);
 }

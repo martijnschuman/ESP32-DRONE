@@ -13,11 +13,6 @@ extern Servo ESCTwo;
 extern Servo ESCThree;
 extern Servo ESCFour;
 
-extern bool isESCOneInitialized;
-extern bool isESCTwoInitialized;
-extern bool isESCThreeInitialized;
-extern bool isESCFourInitialized;
-
 extern bool isESCOneArmed;
 extern bool isESCTwoArmed;
 extern bool isESCThreeArmed;

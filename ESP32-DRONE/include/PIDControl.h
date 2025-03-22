@@ -8,7 +8,6 @@
 #include <QuickPID.h>
 #include "ESC.h"
 
-void setupPIDControl();
 void updatePIDControl();
 
 #endif // PIDControl_H

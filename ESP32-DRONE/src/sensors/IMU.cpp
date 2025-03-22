@@ -99,7 +99,7 @@ void updateIMU() {
             // Apply low pass filtering for pitch and yaw
             static float filteredPitch = newPitch;
             static float filteredYaw = newYaw;
-            const float alpha = 0.1; // Adjust this coefficient as needed
+            const float alpha = 0.15; // Adjust this coefficient as needed
             filteredPitch = alpha * newPitch + (1 - alpha) * filteredPitch;
             filteredYaw   = alpha * newYaw   + (1 - alpha) * filteredYaw;
 
