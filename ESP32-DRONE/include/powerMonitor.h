@@ -12,5 +12,6 @@ extern float shuntVoltage;
 
 void setupCurrentMonitor();
 void updatePowerReadings();
+bool isBatteryLow();
 
 #endif

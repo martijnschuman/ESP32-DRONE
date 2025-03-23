@@ -19,9 +19,5 @@ void updateHeight() {
     float duration = pulseIn(ECHO_ECHO_PIN, HIGH);
     float raw_height = (duration * 0.034 / 2.0);
 
-    if (raw_height < 0) {
-        raw_height = 0;
-    }
-    
-    height = raw_height;
+    height = max(raw_height, 0.0f);
 }

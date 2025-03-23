@@ -57,8 +57,21 @@ void loop() {
         reportStatus();
     }
 
+    // Check battery voltage
+    if (currentMillis - lastBatteryMonitor >= POWER_MONITOR_INTERVAL) {
+        lastBatteryMonitor = currentMillis;
+        updatePowerReadings();
+
+        if (isBatteryLow()) {
+            Serial.println("Battery low. Switching to emergency descent mode.");
+            setFlightMode(EMERGENCY_DECENT);
+            setStatus(EMERGENCY);
+            return;
+        }
+    }
+
     // Handle emergency descent if active
-    if (getFlightMode() == EMERGENCY_DECENT && getStatus() == EMERGENCY) {
+    if ((getFlightMode() == EMERGENCY_DECENT && getStatus() == EMERGENCY)) {
         emergencyDescent();
         return;
     }
@@ -104,12 +117,6 @@ void loop() {
         if (currentMillis - lastTransmitUpdate >= TRANSMIT_INTERVAL) {
             lastTransmitUpdate = currentMillis;
             sendTelemetry();
-        }
-
-        // Update powerMonitor
-        if (currentMillis - lastPowerMonitor >= POWER_MONITOR_INTERVAL) {
-            lastPowerMonitor = currentMillis;
-            updatePowerReadings();
         }
 
         // Apply throttle to ESCs

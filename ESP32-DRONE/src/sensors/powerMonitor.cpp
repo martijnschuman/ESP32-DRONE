@@ -32,3 +32,7 @@ void updatePowerReadings() {
     busVoltage = readBusVoltage();
     shuntVoltage = readShuntVoltage();
 }
+
+bool isBatteryLow() {
+    return busVoltage < BATTERY_MIN_VOLTAGE;
+}

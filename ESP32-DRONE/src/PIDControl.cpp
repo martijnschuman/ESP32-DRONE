@@ -11,9 +11,9 @@ struct PID {
 };
 
 // Initialize PID controllers for pitch, roll, and yaw (tune these gains as needed)
-PID pidPitch = { 1.0, 0.0, 0.1, 0.0, 0.0 };
-PID pidRoll  = { 1.0, 0.0, 0.1, 0.0, 0.0 };
-PID pidYaw   = { 1.0, 0.0, 0.1, 0.0, 0.0 };
+PID pidPitch = { 0.8, 0.0, 0.1, 0.0, 0.0 };
+PID pidRoll  = { 0.8, 0.0, 0.1, 0.0, 0.0 };
+PID pidYaw   = { 0.8, 0.0, 0.1, 0.0, 0.0 };
 
 // Compute PID output given a setpoint and measurement.
 float computePID(PID &pid, float setpoint, float measured, float dt) {

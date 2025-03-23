@@ -93,7 +93,7 @@ void updateIMU() {
 
             // Convert from radians to degrees
             float newYaw   = -ypr[0] * 180 / M_PI;
-            float newPitch = -ypr[1] * 180 / M_PI;
+            float newPitch = ypr[1] * 180 / M_PI;
             float newRoll  = ypr[2] * 180 / M_PI;
 
             // Apply low pass filtering for pitch and yaw
