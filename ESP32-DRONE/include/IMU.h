@@ -12,5 +12,6 @@ extern float roll, pitch, yaw;
 
 void setupIMU();
 void updateIMU();
+void calibrateIMUOffsets();
 
 #endif // IMU_H

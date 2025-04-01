@@ -19,14 +19,12 @@ void setupESC(Servo& ESC, int ESC_PIN) {
 void armESC(Servo& ESC) {
     Serial.println("Arming ESC...");
     ESC.writeMicroseconds(ESC_MIN_THROTTLE);  // Send low throttle
-    delay(6000);  // Wait for arming to complete
+    delay(4500);  // Wait for arming to complete
     Serial.println("ESC armed.");
 }
 
 bool armAllESCs(){
     Serial.println("Starting ESC arming...");
-
-    delay(2000);
 
     if (!isESCOneArmed) {
         setupESC(ESCOne, ESC_ONE_PIN);
@@ -62,8 +60,6 @@ bool armAllESCs(){
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-
-
 
 // Improved setESC that avoids sending a zero-throttle command during flight.
 void setESC(int escPin, float amount) {
@@ -181,7 +177,7 @@ void emergencyDescent() {
             if (controlPacket.throttle > throttleStep) {
                 controlPacket.throttle = max(controlPacket.throttle - throttleStep, throttleStep);
                 Serial.print("Emergency descent throttle: ");
-                Serial.println(controlPacket.throttle);
+                // Serial.println(controlPacket.throttle);
             }
         } else {
             // When the drone is near the ground, cut throttle instantly

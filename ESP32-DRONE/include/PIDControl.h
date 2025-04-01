@@ -9,5 +9,6 @@
 #include "ESC.h"
 
 void updatePIDControl();
+void processPIDCommand(const String& cmd);
 
 #endif // PIDControl_H

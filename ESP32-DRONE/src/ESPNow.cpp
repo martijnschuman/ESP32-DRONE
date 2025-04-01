@@ -46,12 +46,12 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
     switch (dataLen) {
         case sizeof(ControlPacket): {
             controlPacket = *reinterpret_cast<const ControlPacket*>(data);
-            Serial.println("Control packet received");
+            // Serial.println("Control packet received");
             break;
         }
         case sizeof(DroneStatePacket): {
             droneStatePacket = *reinterpret_cast<const DroneStatePacket*>(data);
-            Serial.println("Drone status packet received");
+            // Serial.println("Drone status packet received");
 
             switch (droneStatePacket.droneState.status) {
                 case START_CONNECTION:
@@ -130,6 +130,6 @@ void sendTelemetry() {
 
     esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&telemetryPacket, sizeof(telemetryPacket));
     if (result == ESP_OK) {
-        Serial.println("Telemetry sent.");
+        // Serial.println("Telemetry sent.");
     }
 }

@@ -57,7 +57,7 @@
 #define MIN_MOTOR_OUTPUT 8                          // Minimum throttle value during flight
 #define ESC_MIN_THROTTLE 1000                       // Minimum throttle value
 #define ESC_MAX_THROTTLE 2000                       // Maximum throttle value
-#define ESC_ALLOWED_MAX_THROTTLE 1450               // Maximum throttle value
+#define ESC_ALLOWED_MAX_THROTTLE 1425               // Maximum throttle value
 #define ESC_FREQUENCY 50                            // ESC frequency in Hz
 
 #endif // CONFIG_H

@@ -40,6 +40,7 @@ void setup(void) {
     setupCurrentMonitor();
 
     setupIMU();
+    calibrateIMUOffsets();
     setupEcho();
 
     setupESPNow();
@@ -128,6 +129,7 @@ void loop() {
         if (currentMillis - lastPIDUpdate >= PID_UPDATE_INTERVAL) {
             lastPIDUpdate = currentMillis;
             updatePIDControl();
+            checkSerialCommands();
         }
     }
 }

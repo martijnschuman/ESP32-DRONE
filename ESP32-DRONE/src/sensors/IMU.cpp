@@ -22,6 +22,12 @@ float ypr[3];                 // [yaw, pitch, roll] (radians)
 // Global orientation angles (in degrees) for PID control
 float roll = 0.0f, pitch = 0.0f, yaw = 0.0f;
 
+// Offsets for yaw, pitch, and roll
+// These offsets are used to calibrate the IMU readings to a known reference point
+float pitchOffset = 0.0f;
+float rollOffset = 0.0f;
+float yawOffset = 0.0f;
+
 // Interrupt flag to indicate when DMP data is ready
 volatile bool mpuInterrupt = false;
 
@@ -76,6 +82,18 @@ void setupIMU() {
     }
 }
 
+void calibrateIMUOffsets() {
+    // Assume the drone is flat and still
+    Serial.println("Calibrating IMU zero offsets...");
+    delay(2000); // Give time to stabilize
+    updateIMU(); // Make sure values are fresh
+
+    rollOffset = roll;
+    pitchOffset = pitch;
+    yawOffset = yaw;
+    Serial.printf("Offsets -> Roll: %.2f, Pitch: %.2f, Yaw: %.2f\n", rollOffset, pitchOffset, yawOffset);
+}
+
 void updateIMU() {
     if (!dmpReady) return;
 
@@ -92,21 +110,25 @@ void updateIMU() {
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
 
             // Convert from radians to degrees
-            float newYaw   = -ypr[0] * 180 / M_PI;
-            float newPitch = ypr[1] * 180 / M_PI;
-            float newRoll  = ypr[2] * 180 / M_PI;
+            float newYaw   = ypr[0] * 180 / M_PI;
+            float newPitch = -ypr[1] * 180 / M_PI;
+            float newRoll  = -ypr[2] * 180 / M_PI;
 
             // Apply low pass filtering for pitch and yaw
             static float filteredPitch = newPitch;
             static float filteredYaw = newYaw;
-            const float alpha = 0.15; // Adjust this coefficient as needed
+            const float alpha = 0.10; // Adjust this coefficient as needed
             filteredPitch = alpha * newPitch + (1 - alpha) * filteredPitch;
             filteredYaw   = alpha * newYaw   + (1 - alpha) * filteredYaw;
 
             // Update global variables (using filtered values for pitch and yaw)
-            pitch = filteredPitch;
             yaw   = filteredYaw;
+            pitch = filteredPitch;
             roll  = newRoll; // Roll remains unfiltered (modify if needed)
+
+            yaw   = filteredYaw - yawOffset;
+            pitch = filteredPitch - pitchOffset;
+            roll  = newRoll - rollOffset;
         }
     }
 }
