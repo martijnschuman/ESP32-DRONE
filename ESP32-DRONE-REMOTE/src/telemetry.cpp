@@ -3,15 +3,15 @@
 #include "telemetry.h"
 
 int getThrottleValue() {
-    int throttleValue = 0;
+    // int throttleValue = 0;
 
-    if (getLeftJoystickY() > 0) {
-        throttleValue = getLeftJoystickY();
-    } else {
-        throttleValue = 0;
-    }
+    // if (getLeftJoystickY() > 0) {
+    //     throttleValue = getLeftJoystickY();
+    // } else {
+    //     throttleValue = 0;
+    // }
 
-    return throttleValue;
+    return getLeftJoystickY();
 }
 
 void sendControl() {

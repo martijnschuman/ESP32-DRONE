@@ -16,6 +16,7 @@ enum StatusEnum {
     ADC_ERROR = 0x07,
     DISPLAY_ERROR = 0x08,
     EMERGENCY = 0x09,
+    MAG_ERROR = 0x0A
 };
 
 enum FlightMode {

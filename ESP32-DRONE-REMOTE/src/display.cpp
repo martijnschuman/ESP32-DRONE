@@ -177,15 +177,15 @@ void displayTelemetry() {
     // display.print("mA");
 
     display.setCursor(0, 45);
-    display.print("ESC1 ");
+    display.print("E1 ");
     display.print(telemetryPacket.ESCOneThrottle, 2);
-    display.print(" ESC2 ");
+    display.print(" E2 ");
     display.print(telemetryPacket.ESCTwoThrottle, 2);
 
     display.setCursor(0, 54);
-    display.print("ESC3 ");
+    display.print("E3 ");
     display.print(telemetryPacket.ESCThreeThrottle, 2);
-    display.print(" ESC4 ");
+    display.print(" E4 ");
     display.print(telemetryPacket.ESCFourThrottle, 2);
 
     display.display();

@@ -48,27 +48,27 @@ void loop() {
     unsigned long currentTime = millis();
 
     if (isConnectedToDrone && (leftCalibrated && rightCalibrated)) {
-        if (isConnectedToCam) {
-            if(checkAltButton()) {
-                if (currentTime - lastPictureTaken >= CAMERA_PICTURE_INTERVAL) {
-                    lastPictureTaken = millis();
-                    sendCameraCommand(CAM_TAKE_PICTURE);
-                }
-            }
-        }
-        else {
-            static unsigned long lastConnectionAttempt = 0;
-            if (currentTime - lastConnectionAttempt >= CAMERA_CONNECTION_INTERVAL) {
-                // todo this is only shown really quickly
-                displayStartCameraConnection();
+        // if (isConnectedToCam) {
+        //     if(checkAltButton()) {
+        //         if (currentTime - lastPictureTaken >= CAMERA_PICTURE_INTERVAL) {
+        //             lastPictureTaken = millis();
+        //             sendCameraCommand(CAM_TAKE_PICTURE);
+        //         }
+        //     }
+        // }
+        // else {
+        //     static unsigned long lastConnectionAttempt = 0;
+        //     if (currentTime - lastConnectionAttempt >= CAMERA_CONNECTION_INTERVAL) {
+        //         // todo this is only shown really quickly
+        //         displayStartCameraConnection();
 
-                Serial.println("Attempting to connect to camera.");
+        //         Serial.println("Attempting to connect to camera.");
 
-                connectToCamera();
-                lastConnectionAttempt = currentTime;
-                return;
-            }
-        }
+        //         connectToCamera();
+        //         lastConnectionAttempt = currentTime;
+        //         return;
+        //     }
+        // }
 
         // If the remote is ready to fly
         if (getStatus() == READY) {

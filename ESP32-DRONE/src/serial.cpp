@@ -13,17 +13,3 @@ bool setupSerial() {
 	Serial.println("Serial communication initialized");
 	return true;
 }
-
-void checkSerialCommands() {
-    static String cmd;
-    while (Serial.available()) {
-        char c = Serial.read();
-        if (c == '\n') {
-            cmd.trim();
-            processPIDCommand(cmd);
-            cmd = "";
-        } else {
-            cmd += c;
-        }
-    }
-}

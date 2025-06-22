@@ -49,6 +49,15 @@ void setup(void) {
     setStatus(START_CONNECTION);
 }
 
+// void loop() {
+//     static unsigned long lastUpdate = 0;
+//     unsigned long now = millis();
+//     if (now - lastUpdate >= 10) {
+//         lastUpdate = now;
+//         updateIMU();
+//     }
+// }
+
 void loop() {
     currentMillis = millis();
 
@@ -103,7 +112,7 @@ void loop() {
         }
 
         // Update IMU
-        if (currentMillis - lastIMUUpdate >= IMU_INTERVAL) {
+        if (currentMillis - lastIMUUpdate >= 10) {
             lastIMUUpdate = currentMillis;
             updateIMU();
         }
@@ -129,7 +138,6 @@ void loop() {
         if (currentMillis - lastPIDUpdate >= PID_UPDATE_INTERVAL) {
             lastPIDUpdate = currentMillis;
             updatePIDControl();
-            checkSerialCommands();
         }
     }
 }

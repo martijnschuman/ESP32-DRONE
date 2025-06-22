@@ -41,7 +41,7 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
         return;
     }
 
-    lastCommunicationTime = millis();
+    lastCommunicationTime = currentMillis;
 
     switch (dataLen) {
         case sizeof(ControlPacket): {
@@ -79,7 +79,7 @@ void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen) {
             Serial.println("Unknown packet received.");
             Serial.print("Data length: ");
             Serial.println(dataLen);
-            setStatus(ESP_COMMS_ERROR);
+            throwError(ESP_COMMS_ERROR);
             setFlightMode(EMERGENCY_DECENT);
             break;
     }
