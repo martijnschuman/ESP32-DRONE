@@ -19,9 +19,9 @@ struct PID {
 // pidRoll: Controls the roll axis (left/right tilt)
 // pidPitch: Controls the pitch axis (forward/backward tilt)
 // pidYaw: Controls the yaw axis (rotation around vertical axis)
-PID pidRoll  = { 0.08, 0.0, 0.0, 0.0, 0.0 };
-PID pidPitch = { 0.12, 0.0, 0.0, 0.0, 0.0 };
-PID pidYaw   = { 0.08, 0.0, 0.0, 0.0, 0.0 };
+PID pidRoll  = { 0.10, 0.0, 0.0, 0.0, 0.0 };
+PID pidPitch = { 0.18, 0.0, 0.0, 0.0, 0.0 };
+PID pidYaw   = { 0.10, 0.0, 0.0, 0.0, 0.0 };
 
 // Compute PID output given a setpoint and measurement.
 // setpoint: The desired value (target angle)

@@ -19,7 +19,7 @@
 #define STATUS_REPORT_INTERVAL 1000                 // Interval to report status in milliseconds
 
 // Battery Monitor
-#define BATTERY_MIN_VOLTAGE 12.8                     // Minimum battery voltage in volts
+#define BATTERY_MIN_VOLTAGE 13.25                     // Minimum battery voltage in volts
 
 // IMU
 #define IMU_SETUP_CALIBRATION_COUNT 500             // Number of samples to calibrate the IMU
@@ -48,10 +48,10 @@
 #define SHIFT_REGISTER_STCP_PIN 12                  // Storage register clock - RCLK pin
 
 // ESC
-#define ESC_ONE_PIN 32                              // Pin for ESC 1
-#define ESC_TWO_PIN 33                              // Pin for ESC 2
-#define ESC_THREE_PIN 25                            // Pin for ESC 3
-#define ESC_FOUR_PIN 27                             // Pin for ESC 4
+#define ESC_ONE_PIN 27                              // Pin for ESC 1
+#define ESC_TWO_PIN 25                              // Pin for ESC 2
+#define ESC_THREE_PIN 33                            // Pin for ESC 3
+#define ESC_FOUR_PIN 32                             // Pin for ESC 4
 
 #define MIN_MOTOR_OUTPUT 8                          // Minimum throttle value during flight
 #define ESC_MIN_THROTTLE 1000                       // Minimum throttle value

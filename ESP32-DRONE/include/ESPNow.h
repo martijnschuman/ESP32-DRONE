@@ -21,7 +21,6 @@ extern float ESCFOUR_THROTTLE;
 
 void setupESPNow();
 void addPeer(uint8_t *peerMAC);
-void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status);
 void onDataReceived(const uint8_t *macAddr, const uint8_t *data, int dataLen);
 void sendDroneConnectionReady();
 void sendDroneFlightReady();

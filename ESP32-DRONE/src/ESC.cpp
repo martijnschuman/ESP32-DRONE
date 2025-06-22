@@ -16,8 +16,9 @@ void setupESC(Servo& ESC, int ESC_PIN) {
     Serial.println(" setup complete.");
 }
 
-void armESC(Servo& ESC) {
-    Serial.println("Arming ESC...");
+void armESC(Servo& ESC, int ESC_PIN) {
+	Serial.print("Arming ESC on pin ");
+    Serial.println(ESC_PIN);
     ESC.writeMicroseconds(ESC_MIN_THROTTLE);  // Send low throttle
     delay(4500);  // Wait for arming to complete
     Serial.println("ESC armed.");
@@ -29,28 +30,28 @@ bool armAllESCs(){
     if (!isESCOneArmed) {
         setupESC(ESCOne, ESC_ONE_PIN);
         delay(1000);
-        armESC(ESCOne);
+        armESC(ESCOne, ESC_ONE_PIN);
         isESCOneArmed = true;
     }
 	delay(500);
     if (!isESCTwoArmed) {
         setupESC(ESCTwo, ESC_TWO_PIN);
         delay(1000);
-        armESC(ESCTwo);
+        armESC(ESCTwo, ESC_TWO_PIN);
         isESCTwoArmed = true;
     }
 	delay(500);
     if (!isESCThreeArmed) {
         setupESC(ESCThree, ESC_THREE_PIN);
         delay(1000);
-        armESC(ESCThree);
+        armESC(ESCThree, ESC_THREE_PIN);
         isESCThreeArmed = true;
     }
 	delay(500);
     if (!isESCFourArmed) {
         setupESC(ESCFour, ESC_FOUR_PIN);
         delay(1000);
-        armESC(ESCFour);
+        armESC(ESCFour, ESC_FOUR_PIN);
         isESCFourArmed = true;
     }
 
@@ -159,6 +160,17 @@ void applyMotorAdjustments(float pitchAdj, float rollAdj, float yawAdj) {
 	setESC(ESC_THREE_PIN, motor3);
 	setESC(ESC_FOUR_PIN, motor4);
 
+	// Print motor outputs for debugging.
+	Serial.print("Motor outputs: ");
+	Serial.print("ESC1: ");
+	Serial.print(motor1);
+	Serial.print(", ESC2: ");
+	Serial.print(motor2);
+	Serial.print(", ESC3: ");
+	Serial.print(motor3);
+	Serial.print(", ESC4: ");
+	Serial.print(motor4);
+	Serial.println();
 	hasBeenThrottled = true;
 }
 
