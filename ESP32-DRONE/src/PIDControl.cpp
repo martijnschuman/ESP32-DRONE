@@ -19,9 +19,9 @@ struct PID {
 // pidRoll: Controls the roll axis (left/right tilt)
 // pidPitch: Controls the pitch axis (forward/backward tilt)
 // pidYaw: Controls the yaw axis (rotation around vertical axis)
-PID pidRoll  = { 0.3, 0.0, 0.0, 0.0, 0.0 };
-PID pidPitch = { 0.3, 0.0, 0.0, 0.0, 0.0 };
-PID pidYaw   = { 0.3, 0.0, 0.0, 0.0, 0.0 };
+PID pidRoll  = { 0.2, 0.0, 0.0, 0.0, 0.0 };
+PID pidPitch = { 0.15, 0.0, 0.0, 0.0, 0.0 };
+PID pidYaw   = { 0.2, 0.0, 0.0, 0.0, 0.0 };
 
 // Compute PID output given a setpoint and measurement.
 // setpoint: The desired value (target angle)
@@ -59,15 +59,16 @@ void updatePIDControl() {
 
     // Calculate current angles from IMU
     float pitchCorr = computePID(pidPitch, desiredPitch, -pitch, dt);
-    float rollCorr  = computePID(pidRoll , desiredRoll , roll , dt);
+    // float rollCorr  = computePID(pidRoll , desiredRoll , roll , dt);
     // float yawCorr = computePID(pidYaw, desiredYawRate, currentYawRate, dt);
 
+    float rollCorr = 0;  // Disable roll control for now
     float yawCorr = 0;  // Disable yaw control for now
 
     // low-pass filter the corrections to smooth out the control signals
     static float filtredPitch=0, filtredRoll=0, filtredYaw=0;
 
-    const float alpha = 0.20f;
+    const float alpha = 0.25f;
     filtredPitch = alpha * filtredPitch + (1-alpha) * pitchCorr;
     filtredRoll  = alpha * filtredRoll  + (1-alpha) * rollCorr;
     filtredYaw   = alpha * filtredYaw   + (1-alpha) * yawCorr;
