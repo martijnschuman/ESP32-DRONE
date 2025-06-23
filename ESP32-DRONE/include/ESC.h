@@ -6,6 +6,7 @@
 #include "config.h"
 #include "IMU.h"
 #include "echo.h"
+#include <algorithm>
 #include <ESP32Servo.h>
 
 extern Servo ESCOne;

@@ -50,10 +50,9 @@ void setup(void) {
 }
 
 // void loop() {
-//     static unsigned long lastUpdate = 0;
-//     unsigned long now = millis();
-//     if (now - lastUpdate >= 10) {
-//         lastUpdate = now;
+//     currentMillis = millis();
+//     if (currentMillis - lastIMUUpdate >= 10) {
+//         lastIMUUpdate = currentMillis;
 //         updateIMU();
 //     }
 // }
@@ -93,10 +92,7 @@ void loop() {
 
     // Arm ESCs
     if (getStatus() == READY && getFlightMode() == GROUND) {
-        bool ESCsArmed = armAllESCs();
-
-        if(ESCsArmed) {
-            Serial.println("ESCs armed.");
+        if (armAllESCs()) {
             sendDroneFlightReady();
         }
     }
@@ -129,7 +125,7 @@ void loop() {
             sendTelemetry();
         }
 
-        // Apply throttle to ESCs
+        // Directly apply throttle to ESCs without PID control
         // setESC(ESC_ONE_PIN, controlPacket.throttle);
         // setESC(ESC_TWO_PIN, controlPacket.throttle);
         // setESC(ESC_THREE_PIN, controlPacket.throttle);

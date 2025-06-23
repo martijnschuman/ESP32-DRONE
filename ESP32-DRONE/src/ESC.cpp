@@ -7,19 +7,17 @@ bool isESCOneArmed, isESCTwoArmed, isESCThreeArmed, isESCFourArmed = false;
 float ESCONE_THROTTLE, ESCTWO_THROTTLE, ESCTHREE_THROTTLE, ESCFOUR_THROTTLE = 0;
 
 void setupESC(Servo& ESC, int ESC_PIN) {
-    Serial.print("Setting up ESC pin ");
-    Serial.println(ESC_PIN);
+    Serial.printf("Setting up ESC pin %d\n", ESC_PIN);
+
     ESC.setPeriodHertz(ESC_FREQUENCY);
-    ESC.attach(ESC_PIN, ESC_MIN_THROTTLE, ESC_MAX_THROTTLE);
-    Serial.print("ESC ");
-    Serial.print(ESC_PIN);
-    Serial.println(" setup complete.");
+    ESC.attach(ESC_PIN, ESC_MIN_THROTTLE_MS, ESC_MAX_THROTTLE_MS);
+
+    Serial.printf("ESC %d setup complete\n", ESC_PIN);
 }
 
 void armESC(Servo& ESC, int ESC_PIN) {
-	Serial.print("Arming ESC on pin ");
-    Serial.println(ESC_PIN);
-    ESC.writeMicroseconds(ESC_MIN_THROTTLE);  // Send low throttle
+	Serial.printf("Arming ESC on pin %d\n", ESC_PIN);
+    ESC.writeMicroseconds(ESC_MIN_THROTTLE_MS);  // Send low throttle
     delay(4500);  // Wait for arming to complete
     Serial.println("ESC armed.");
 }
@@ -55,6 +53,7 @@ bool armAllESCs(){
         isESCFourArmed = true;
     }
 
+	Serial.println("All ESCs armed successfully.");
     return true;
 }
 
@@ -69,10 +68,10 @@ void setESC(int escPin, float amount) {
 		return;
 	}
 
-	// Map amount (0-100) to pulse width range [ESC_MIN_THROTTLE, ESC_ALLOWED_MAX_THROTTLE]
-	int throttleVal = (int) mapFloat(amount, 0, 100, ESC_MIN_THROTTLE, ESC_ALLOWED_MAX_THROTTLE);
-	if (throttleVal < ESC_MIN_THROTTLE) throttleVal = ESC_MIN_THROTTLE;
-	if (throttleVal > ESC_ALLOWED_MAX_THROTTLE) throttleVal = ESC_ALLOWED_MAX_THROTTLE;
+	// Map amount (0-100) to pulse width range [ESC_MIN_THROTTLE_MS, ESC_ALLOWED_MAX_THROTTLE_MS]
+	int throttleVal = (int) mapFloat(amount, 0, 100, ESC_MIN_THROTTLE_MS, ESC_ALLOWED_MAX_THROTTLE_MS);
+	if (throttleVal < ESC_MIN_THROTTLE_MS) throttleVal = ESC_MIN_THROTTLE_MS;
+	if (throttleVal > ESC_ALLOWED_MAX_THROTTLE_MS) throttleVal = ESC_ALLOWED_MAX_THROTTLE_MS;
 
 	// Write the value to the appropriate ESC (via its Servo object)
 	if (escPin == ESC_ONE_PIN) {
@@ -107,41 +106,31 @@ void applyMotorAdjustments(float pitchAdj, float rollAdj, float yawAdj) {
 	float motor3 = baseThrottle + pitchAdj - rollAdj - yawAdj;
 	float motor4 = baseThrottle - pitchAdj - rollAdj + yawAdj;
 
-	// Constrain each output to the 0–100 range.
-	motor1 = constrain(motor1, 0, 100);
-	motor2 = constrain(motor2, 0, 100);
-	motor3 = constrain(motor3, 0, 100);
-	motor4 = constrain(motor4, 0, 100);
+	// Prevent motor saturation and ensure minimum output (Air Mode)
+    // This logic ensures we maintain control authority even at throttle extremes.
+    // If throttle is active, ensure no motor drops below the minimum required output.
+    // This is critical for maintaining stability during maneuvers at low throttle.
+    if (baseThrottle > 0 && getFlightMode() != EMERGENCY_DECENT) {
+        float minMotor = min(min(motor1, motor2), min(motor3, motor4));
 
-	// Determine the smallest motor value.
-	float minMotor = motor1;
-	if (motor2 < minMotor) minMotor = motor2;
-	if (motor3 < minMotor) minMotor = motor3;
-	if (motor4 < minMotor) minMotor = motor4;
+        if (minMotor < MIN_MOTOR_OUTPUT_PERCENTAGE) {
+            // This offset will bring the lowest motor up to the minimum.
+            float offset = MIN_MOTOR_OUTPUT_PERCENTAGE - minMotor;
 
-	// If any motor falls below the minimum output (and we're flying normally),
-	// add an offset to all motors (if possible) to raise the minimum.
-	if (baseThrottle > 0 && getFlightMode() != EMERGENCY_DECENT && minMotor < MIN_MOTOR_OUTPUT) {
-		float offset = MIN_MOTOR_OUTPUT - minMotor;
+            float maxMotor = max(max(motor1, motor2), max(motor3, motor4));
+            if (maxMotor + offset > 100) {
+                // Reduce the offset to prevent saturation.
+                offset = 100 - maxMotor;
+            }
 
-		// Check that adding offset does not push any motor above 100%.
-		float maxMotor = motor1;
-		if (motor2 > maxMotor) maxMotor = motor2;
-		if (motor3 > maxMotor) maxMotor = motor3;
-		if (motor4 > maxMotor) maxMotor = motor4;
-		if (maxMotor + offset <= 100) {
-			motor1 += offset;
-			motor2 += offset;
-			motor3 += offset;
-			motor4 += offset;
-		} else {
-			// Otherwise, clamp motors individually.
-			if (motor1 < MIN_MOTOR_OUTPUT) motor1 = MIN_MOTOR_OUTPUT;
-			if (motor2 < MIN_MOTOR_OUTPUT) motor2 = MIN_MOTOR_OUTPUT;
-			if (motor3 < MIN_MOTOR_OUTPUT) motor3 = MIN_MOTOR_OUTPUT;
-			if (motor4 < MIN_MOTOR_OUTPUT) motor4 = MIN_MOTOR_OUTPUT;
-		}
-	}
+            // Apply the calculated (and possibly reduced) offset to all motors.
+            // This preserves the relative differences in motor speeds, maintaining control.
+            motor1 += offset;
+            motor2 += offset;
+            motor3 += offset;
+            motor4 += offset;
+        }
+    }
 
 	// Final constrain to be sure.
 	motor1 = constrain(motor1, 0, 100);
@@ -160,17 +149,6 @@ void applyMotorAdjustments(float pitchAdj, float rollAdj, float yawAdj) {
 	setESC(ESC_THREE_PIN, motor3);
 	setESC(ESC_FOUR_PIN, motor4);
 
-	// Print motor outputs for debugging.
-	Serial.print("Motor outputs: ");
-	Serial.print("ESC1: ");
-	Serial.print(motor1);
-	Serial.print(", ESC2: ");
-	Serial.print(motor2);
-	Serial.print(", ESC3: ");
-	Serial.print(motor3);
-	Serial.print(", ESC4: ");
-	Serial.print(motor4);
-	Serial.println();
 	hasBeenThrottled = true;
 }
 
@@ -179,17 +157,16 @@ void emergencyDescent() {
     const unsigned long descentInterval = 200;      // milliseconds between throttle decrements
     const float throttleStep = 5;                   // throttle decrement step
 
-    // Check if it's time to update the throttle (avoid updating every loop iteration)
+    // Check if it's time to update the throttle
     if (millis() - lastDescentUpdate >= descentInterval) {
         lastDescentUpdate = millis();
 
-        // Assuming controlPacket.throttle holds the current throttle value (scale 0-100)
         if (height > 5) {
             // Gradually reduce throttle, but never below 20 while descending
             if (controlPacket.throttle > throttleStep) {
                 controlPacket.throttle = max(controlPacket.throttle - throttleStep, throttleStep);
                 Serial.print("Emergency descent throttle: ");
-                // Serial.println(controlPacket.throttle);
+                Serial.println(controlPacket.throttle);
             }
         } else {
             // When the drone is near the ground, cut throttle instantly

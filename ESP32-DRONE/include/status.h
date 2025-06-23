@@ -5,9 +5,9 @@
 #include "config.h"
 
 void setupStatusDisplay();
+void throwError(StatusEnum error);
 void setStatus(StatusEnum newStatus);
 void setFlightMode(FlightMode newMode);
-void throwError(StatusEnum error);
 void reportStatus();
 void displayStatusOnLED(int number);
 void displayDecimalPoint();

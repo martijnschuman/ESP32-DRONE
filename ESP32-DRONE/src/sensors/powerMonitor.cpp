@@ -1,4 +1,4 @@
-//powerMonitor.cpp
+// powerMonitor.cpp
 
 #include "powerMonitor.h"
 

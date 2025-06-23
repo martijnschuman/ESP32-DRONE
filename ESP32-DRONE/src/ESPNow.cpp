@@ -1,3 +1,4 @@
+// ESPNow.cpp
 #include "ESPNow.h"
 
 uint8_t remoteMAC[] = REMOTE_MAC_ADDRESS;
@@ -129,7 +130,8 @@ void sendTelemetry() {
     telemetryPacket.ESCFourThrottle = ESCFOUR_THROTTLE;
 
     esp_err_t result = esp_now_send(remoteMAC, (uint8_t*)&telemetryPacket, sizeof(telemetryPacket));
-    if (result == ESP_OK) {
-        // Serial.println("Telemetry sent.");
+    if (result != ESP_OK) {
+        Serial.println("Failed to send telemetry.");
+        throwError(ESP_COMMS_ERROR);
     }
 }

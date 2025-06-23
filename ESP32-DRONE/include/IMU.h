@@ -11,8 +11,7 @@
 
 // Global orientation angles (in degrees) for PID control:
 extern float roll, pitch, yaw;
-extern float gyroZBias;       // °/s  (set during bias calibration)
-extern float currentYawRate;  // °/s  (updated each IMU cycle)
+extern float currentYawRate;
 
 void setupIMU();
 void updateIMU();
