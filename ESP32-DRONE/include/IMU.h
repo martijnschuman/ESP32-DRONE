@@ -8,10 +8,15 @@
 #include <I2Cdev.h>
 #include <MadgwickAHRS.h>
 #include "MPU6050_6Axis_MotionApps20.h"
+#include "PIDControl.h"
 
 // Global orientation angles (in degrees) for PID control:
 extern float roll, pitch, yaw;
 extern float currentYawRate;
+
+extern float rollRate;
+extern float pitchRate;
+extern float yawRate;
 
 void setupIMU();
 void updateIMU();

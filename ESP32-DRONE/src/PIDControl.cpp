@@ -1,77 +1,56 @@
-// PIDControl.cpp
 #include "PIDControl.h"
 
-// PID structure for each axis
-// kp: Proportional gain - how strongly the controller reacts to the current error
-// ki: Integral gain - how strongly the controller reacts to the accumulation of past errors
-// kd: Derivative gain - how strongly the controller reacts to the rate of change of the error
-// previousError: Stores the last error value for derivative calculation
-// integral: Accumulates the error over time for the integral term
 struct PID {
     float kp;
     float ki;
     float kd;
-    float previousError;
     float integral;
+    float prevError;
 };
 
-// Initialize PID controllers for pitch, roll, and yaw
-// pidRoll: Controls the roll axis (left/right tilt)
-// pidPitch: Controls the pitch axis (forward/backward tilt)
-// pidYaw: Controls the yaw axis (rotation around vertical axis)
-PID pidRoll  = { 0.2, 0.0, 0.0, 0.0, 0.0 };
-PID pidPitch = { 0.15, 0.0, 0.0, 0.0, 0.0 };
-PID pidYaw   = { 0.2, 0.0, 0.0, 0.0, 0.0 };
+PID angleRoll  = {4.0f, 0.0f, 0.0f, 0,0};
+PID anglePitch = {2.0f, 0.0f, 0.0f, 0,0};
 
-// Compute PID output given a setpoint and measurement.
-// setpoint: The desired value (target angle)
-// measured: The current value (measured angle)
-// dt: Time since last update (in seconds)
-float computePID(PID &pid, float setpoint, float measured, float dt) {
-    float error = setpoint - measured;
+PID rateRoll  = {0.06f, 0.0f, 0.002f, 0,0};
+PID ratePitch = {0.04f, 0.0f, 0.001f, 0, 0};
+PID rateYaw   = {0.15f, 0.0f, 0.000f, 0,0};
 
-    // Deadband: ignore small errors to reduce jitter
-    // If the error is within the deadband, treat it as zero
-    const float deadband = 1.0;  // adjust as needed
-    if (fabs(error) < deadband) {
-        error = 0;
-    }
+float runPID(PID &pid, float setpoint, float measurement, float dt) {
+    float error = setpoint - measurement;
 
-    // Integral term: accumulate error over time
     pid.integral += error * dt;
-    // Derivative term: rate of change of error
-    float derivative = (error - pid.previousError) / dt;
-    // Store current error for next derivative calculation
-    pid.previousError = error;
-    // PID output: weighted sum of P, I, D terms
-    float output = pid.kp * error + pid.ki * pid.integral + pid.kd * derivative;
-    return output;
+    pid.integral = constrain(pid.integral, -100.0f, 100.0f);
+
+    float derivative = (error - pid.prevError) / dt;
+    pid.prevError = error;
+
+    return pid.kp*error + pid.ki*pid.integral + pid.kd*derivative;
 }
 
-// Apply motor adjustments based on PID corrections.
 void updatePIDControl() {
-    float dt = PID_UPDATE_INTERVAL / 1000.0f;
+    float dt = 0.005f;
 
-    // Stick → desired angles (roll/pitch)
-    float desiredPitch = STICK_SENSITIVITY * controlPacket.pitch;   // -1.0 to 1.0 range
-    float desiredRoll  = STICK_SENSITIVITY * controlPacket.roll;    // -1.0 to 1.0 range
-    float desiredYawRate = controlPacket.yaw * MAX_YAW_RATE_DPS;    // °/s
+    if(dt <= 0 || dt > 0.02f) return;
 
-    // Calculate current angles from IMU
-    float pitchCorr = computePID(pidPitch, desiredPitch, -pitch, dt);
-    // float rollCorr  = computePID(pidRoll , desiredRoll , roll , dt);
-    // float yawCorr = computePID(pidYaw, desiredYawRate, currentYawRate, dt);
+    float desiredRollAngle  = controlPacket.roll  * 30.0f;
+    float desiredPitchAngle = controlPacket.pitch * 15.0f;
+    float desiredYawRate    = controlPacket.yaw   * 150.0f;
 
-    float rollCorr = 0;  // Disable roll control for now
-    float yawCorr = 0;  // Disable yaw control for now
+    // --- OUTER LOOP (Angle → desired rate)
+    float desiredRollRate  = runPID(angleRoll,  desiredRollAngle,  roll,  dt);
+    float desiredPitchRate = runPID(anglePitch, desiredPitchAngle, -pitch, dt);
 
-    // low-pass filter the corrections to smooth out the control signals
-    static float filtredPitch=0, filtredRoll=0, filtredYaw=0;
+    desiredRollRate = constrain(desiredRollRate, -200.0f, 200.0f);
+    desiredPitchRate = constrain(desiredPitchRate, -200.0f, 200.0f);
 
-    const float alpha = 0.25f;
-    filtredPitch = alpha * filtredPitch + (1-alpha) * pitchCorr;
-    filtredRoll  = alpha * filtredRoll  + (1-alpha) * rollCorr;
-    filtredYaw   = alpha * filtredYaw   + (1-alpha) * yawCorr;
+    // --- INNER LOOP (Rate PID)
+    float rollOutput  = runPID(rateRoll,  desiredRollRate,  rollRate,  dt);
+    float pitchOutput = runPID(ratePitch, desiredPitchRate, pitchRate, dt);
+    float yawOutput   = runPID(rateYaw,   desiredYawRate,   yawRate,   dt);
 
-    applyMotorAdjustments(filtredPitch, filtredRoll, filtredYaw);
+    rollOutput  = constrain(rollOutput,  -25.0f, 25.0f);
+    pitchOutput = constrain(pitchOutput, -25.0f, 25.0f);
+    yawOutput   = constrain(yawOutput,   -25.0f, 25.0f);
+
+    applyMotorAdjustments(pitchOutput, rollOutput, yawOutput);
 }

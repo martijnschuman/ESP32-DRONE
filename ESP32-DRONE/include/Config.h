@@ -11,12 +11,11 @@
 #define MAX_YAW_RATE_DPS  200.0f   // full-stick → ±200 °/s
 
 // Loop intervals
-#define IMU_INTERVAL 100                            // Interval between IMU measurements in milliseconds
 #define ECHO_INTERVAL 150                           // Echo between LIDAR measurements in milliseconds
 #define TRANSMIT_INTERVAL 100                       // Interval to transmit telemetry data in milliseconds
 #define POWER_MONITOR_INTERVAL 500                  // Interval to monitor power in milliseconds
-#define PID_UPDATE_INTERVAL 20                      // Interval to update PID control in milliseconds
 #define STATUS_REPORT_INTERVAL 1000                 // Interval to report status in milliseconds
+#define CONTROL_PERIOD 5000                         // Control loop period in microseconds (200 Hz)
 
 // Battery Monitor
 #define BATTERY_MIN_VOLTAGE 13.25                   // Minimum battery voltage in volts

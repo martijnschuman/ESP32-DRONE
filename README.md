@@ -1,6 +1,10 @@
 # ESP32 Drone Project
 This repository contains the code for a drone built using ESP32 microcontrollers. The project is developed using PlatformIO and includes multiple sensors such as LIDAR, GPS, and IMU. The project is divided into three main components: the drone, the camera, and the remote controller.
 
+### SRC:
+- https://www.youtube.com/watch?v=rDjx8OswOoI&t=2s
+- https://www.instructables.com/The-Ultimate-Guide-to-Building-a-Quadcopter-From-S/
+
 ## Project Structure
 ```
 ESP32-DRONE/

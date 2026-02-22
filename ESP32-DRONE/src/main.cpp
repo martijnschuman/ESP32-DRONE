@@ -14,13 +14,14 @@
 #include "soc/rtc_cntl_reg.h"
 
 unsigned long currentMillis = 0;
+unsigned long currentMacros = 0;
+
 unsigned long lastStatusReport = 0;
-unsigned long lastIMUUpdate = 0;
 unsigned long lastHeightUpdate = 0;
 unsigned long lastTransmitUpdate = 0;
 unsigned long lastBatteryMonitor = 0;
 unsigned long lastPowerMonitor = 0;
-unsigned long lastPIDUpdate = 0;
+unsigned long lastControl = 0;
 
 bool hasBeenThrottled = false;
 bool isConnectedToRemote = false;
@@ -31,6 +32,7 @@ ControlPacket controlPacket = {};
 DroneStatePacket droneStatePacket = {};
 
 void setup(void) {
+    setCpuFrequencyMhz(240);
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
 
     setupSerial();
@@ -49,16 +51,9 @@ void setup(void) {
     setStatus(START_CONNECTION);
 }
 
-// void loop() {
-//     currentMillis = millis();
-//     if (currentMillis - lastIMUUpdate >= 10) {
-//         lastIMUUpdate = currentMillis;
-//         updateIMU();
-//     }
-// }
-
 void loop() {
     currentMillis = millis();
+    currentMacros = micros();
 
     // Report status
     if (currentMillis - lastStatusReport >= STATUS_REPORT_INTERVAL) {
@@ -107,12 +102,6 @@ void loop() {
             return;
         }
 
-        // Update IMU
-        if (currentMillis - lastIMUUpdate >= 10) {
-            lastIMUUpdate = currentMillis;
-            updateIMU();
-        }
-
         // Update ECHO
         if (currentMillis - lastHeightUpdate >= ECHO_INTERVAL) {
             lastHeightUpdate = currentMillis;
@@ -131,8 +120,10 @@ void loop() {
         // setESC(ESC_THREE_PIN, controlPacket.throttle);
         // setESC(ESC_FOUR_PIN, controlPacket.throttle);
 
-        if (currentMillis - lastPIDUpdate >= PID_UPDATE_INTERVAL) {
-            lastPIDUpdate = currentMillis;
+        if (currentMacros - lastControl >= CONTROL_PERIOD) {
+            lastControl += CONTROL_PERIOD;
+
+            updateIMU();
             updatePIDControl();
         }
     }

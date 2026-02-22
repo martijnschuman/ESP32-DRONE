@@ -12,7 +12,7 @@ void setupDisplay() {
     display.setTextColor(WHITE);
     
     display.display();
-    delay(1000);
+    delay(500);
 
     display.clearDisplay();
     Serial.println("Display setup complete.");

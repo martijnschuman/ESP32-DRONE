@@ -1,15 +1,24 @@
 #include <joystick.h>
 
 // Calibration data for left joystick
-float leftMeasuredMinX = 0, leftMeasuredMaxX = 3300.00, leftMeasuredCenterX = leftMeasuredMinX / 2;
-float leftMeasuredMinY = 3300.00, leftMeasuredMaxY = 0, leftMeasuredCenterY = leftMeasuredMinY / 2;
-bool leftCalibrated = false;
+// float leftMeasuredMinX = 0, leftMeasuredMaxX = 3300.00, leftMeasuredCenterX = leftMeasuredMinX / 2;
+// float leftMeasuredMinY = 3300.00, leftMeasuredMaxY = 0, leftMeasuredCenterY = leftMeasuredMinY / 2;
+// bool leftCalibrated = false;
+
+// // Calibration data for right joystick
+// float rightMeasuredMinX = 0, rightMeasuredMaxX = 3300.00, rightMeasuredCenterX = rightMeasuredMinX / 2;
+// float rightMeasuredMinY = 3300.00, rightMeasuredMaxY = 0, rightMeasuredCenterY = rightMeasuredMinY / 2;
+// bool rightCalibrated = false;
+
+// Calibration data for left joystick
+float leftMeasuredMinX = 0.66, leftMeasuredMaxX = 3295.97, leftMeasuredCenterX = 1652.07;
+float leftMeasuredMinY = 0.58, leftMeasuredMaxY = 3296.04, leftMeasuredCenterY = 1680.84;
+bool leftCalibrated = true;
 
 // Calibration data for right joystick
-float rightMeasuredMinX = 0, rightMeasuredMaxX = 3300.00, rightMeasuredCenterX = rightMeasuredMinX / 2;
-float rightMeasuredMinY = 3300.00, rightMeasuredMaxY = 0, rightMeasuredCenterY = rightMeasuredMinY / 2;
-bool rightCalibrated = false;
-
+float rightMeasuredMinX = 0.88, rightMeasuredMaxX = 3296.12, rightMeasuredCenterX = 1608.75;
+float rightMeasuredMinY = 1.64, rightMeasuredMaxY = 3296.64, rightMeasuredCenterY = 1669.48;
+bool rightCalibrated = true;
 
 void setupJoysticks() {
     pinMode(JOYSTICK_LEFT_BUTTON, INPUT_PULLUP);
