@@ -24,7 +24,7 @@ static float gyroBias[3] = {0,0,0};
 static float rollOffset = 0;
 static float pitchOffset = 0;
 
-static Madgwick filter;
+static Madgwick filter; // MadgwickAHRC.cpp -> beta -> 0.2f
 static unsigned long lastUpdateMicros = 0;
 
 static inline void writeReg(uint8_t reg, uint8_t val) {

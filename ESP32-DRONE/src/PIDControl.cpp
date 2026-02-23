@@ -8,12 +8,15 @@ struct PID {
     float prevError;
 };
 
-PID angleRoll  = {4.0f, 0.0f, 0.0f, 0,0};
-PID anglePitch = {2.0f, 0.0f, 0.0f, 0,0};
+PID angleRoll  = {1.5f, 0.0f, 0.0f, 0,0};
+PID anglePitch = {1.5f, 0.0f, 0.0f, 0,0};
 
-PID rateRoll  = {0.06f, 0.0f, 0.002f, 0,0};
-PID ratePitch = {0.04f, 0.0f, 0.001f, 0, 0};
-PID rateYaw   = {0.15f, 0.0f, 0.000f, 0,0};
+PID rateRoll  = {0.06f, 0.0f, 0.0f, 0, 0};
+PID ratePitch = {0.06f, 0.0f, 0.0f, 0, 0};
+PID rateYaw   = {0.06f, 0.0f, 0.0f, 0, 0};
+
+
+static float rollRateF = 0, pitchRateF = 0, yawRateF = 0;
 
 float runPID(PID &pid, float setpoint, float measurement, float dt) {
     float error = setpoint - measurement;
@@ -27,30 +30,54 @@ float runPID(PID &pid, float setpoint, float measurement, float dt) {
     return pid.kp*error + pid.ki*pid.integral + pid.kd*derivative;
 }
 
+static inline float clampf(float v, float lo, float hi) {
+    return (v < lo) ? lo : (v > hi) ? hi : v;
+}
+
+static inline float normStick(float v) {
+    // controlPacket.* expected in [-100 .. +100]
+    return clampf(v / 100.0f, -1.0f, 1.0f);
+}
+
 void updatePIDControl() {
-    float dt = 0.005f;
+    constexpr float dt = 0.005f;
+    constexpr float alpha = 0.2f;         // gyro LPF
+    constexpr float maxTiltDeg = 5.0f;    // stick -> desired angle
+    constexpr float maxYawRate = 5.0f;    // stick -> desired yaw rate (deg/s)
+    constexpr float maxRateCmd = 5.0f;    // outer loop output clamp (deg/s)
+    constexpr float maxAdjPct  = 5.0f;    // motor adjustment clamp (%)
 
-    if(dt <= 0 || dt > 0.02f) return;
+    // 1) Normalize stick inputs to [-1..+1]
+    const float rollIn  = normStick(controlPacket.roll);
+    const float pitchIn = normStick(controlPacket.pitch);
+    const float yawIn   = normStick(controlPacket.yaw);
 
-    float desiredRollAngle  = controlPacket.roll  * 30.0f;
-    float desiredPitchAngle = controlPacket.pitch * 15.0f;
-    float desiredYawRate    = controlPacket.yaw   * 150.0f;
+    // 2) Convert sticks to physical setpoints
+    const float desiredRollAngle  = rollIn  * maxTiltDeg;  // degrees
+    const float desiredPitchAngle = pitchIn * maxTiltDeg;  // degrees
+    const float desiredYawRate    = yawIn   * maxYawRate;  // deg/s
 
-    // --- OUTER LOOP (Angle → desired rate)
+    // 3) Filter gyro rates (used by rate loop)
+    rollRateF  += alpha * (rollRate  - rollRateF);
+    pitchRateF += alpha * (pitchRate - pitchRateF);
+    yawRateF   += alpha * (yawRate   - yawRateF);
+
+    // 4) Outer loop: angle -> desired rate
+    // IMPORTANT: measurement must be ANGLE (roll/pitch), not rate.
     float desiredRollRate  = runPID(angleRoll,  desiredRollAngle,  roll,  dt);
     float desiredPitchRate = runPID(anglePitch, desiredPitchAngle, -pitch, dt);
 
-    desiredRollRate = constrain(desiredRollRate, -200.0f, 200.0f);
-    desiredPitchRate = constrain(desiredPitchRate, -200.0f, 200.0f);
+    desiredRollRate  = clampf(desiredRollRate,  -maxRateCmd, maxRateCmd);
+    desiredPitchRate = clampf(desiredPitchRate, -maxRateCmd, maxRateCmd);
 
-    // --- INNER LOOP (Rate PID)
-    float rollOutput  = runPID(rateRoll,  desiredRollRate,  rollRate,  dt);
-    float pitchOutput = runPID(ratePitch, desiredPitchRate, pitchRate, dt);
-    float yawOutput   = runPID(rateYaw,   desiredYawRate,   yawRate,   dt);
+    // 5) Inner loop: rate -> motor adjustment
+    float rollAdj  = runPID(rateRoll,  desiredRollRate,  rollRateF,  dt);
+    float pitchAdj = runPID(ratePitch, desiredPitchRate, pitchRateF, dt);
+    float yawAdj   = runPID(rateYaw,   desiredYawRate,   yawRateF,   dt);
 
-    rollOutput  = constrain(rollOutput,  -25.0f, 25.0f);
-    pitchOutput = constrain(pitchOutput, -25.0f, 25.0f);
-    yawOutput   = constrain(yawOutput,   -25.0f, 25.0f);
+    rollAdj  = clampf(rollAdj,  -maxAdjPct, maxAdjPct);
+    pitchAdj = clampf(pitchAdj, -maxAdjPct, maxAdjPct);
+    yawAdj   = clampf(yawAdj,   -maxAdjPct, maxAdjPct);
 
-    applyMotorAdjustments(pitchOutput, rollOutput, yawOutput);
+    applyMotorAdjustments(pitchAdj, rollAdj, yawAdj);
 }
