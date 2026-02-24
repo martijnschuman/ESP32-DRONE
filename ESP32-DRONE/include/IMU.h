@@ -19,7 +19,7 @@ extern float pitchRate;
 extern float yawRate;
 
 void setupIMU();
-void updateIMU();
+void updateIMU(float dt);
 void calibrateIMUOffsets();
 
 #endif // IMU_H

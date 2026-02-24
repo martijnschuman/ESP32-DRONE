@@ -11,9 +11,11 @@ struct PID {
 PID angleRoll  = {1.5f, 0.0f, 0.0f, 0,0};
 PID anglePitch = {1.5f, 0.0f, 0.0f, 0,0};
 
-PID rateRoll  = {0.06f, 0.0f, 0.0f, 0, 0};
-PID ratePitch = {0.06f, 0.0f, 0.0f, 0, 0};
-PID rateYaw   = {0.06f, 0.0f, 0.0f, 0, 0};
+// 0.8 kp to much
+
+PID rateRoll  = {0.6f, 0.0f, 0.0f, 0, 0};
+PID ratePitch = {0.6f, 0.0f, 0.0f, 0, 0};
+PID rateYaw   = {0.6f, 0.0f, 0.0f, 0, 0};
 
 
 static float rollRateF = 0, pitchRateF = 0, yawRateF = 0;
@@ -39,8 +41,7 @@ static inline float normStick(float v) {
     return clampf(v / 100.0f, -1.0f, 1.0f);
 }
 
-void updatePIDControl() {
-    constexpr float dt = 0.005f;
+void updatePIDControl(float dt = 0.005f) {
     constexpr float alpha = 0.2f;         // gyro LPF
     constexpr float maxTiltDeg = 5.0f;    // stick -> desired angle
     constexpr float maxYawRate = 5.0f;    // stick -> desired yaw rate (deg/s)

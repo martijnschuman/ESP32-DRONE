@@ -14,7 +14,8 @@
 #include "soc/rtc_cntl_reg.h"
 
 unsigned long currentMillis = 0;
-unsigned long currentMacros = 0;
+unsigned long currentMicros = 0;
+static uint32_t lastUs = 0;
 
 unsigned long lastStatusReport = 0;
 unsigned long lastHeightUpdate = 0;
@@ -53,7 +54,7 @@ void setup(void) {
 
 void loop() {
     currentMillis = millis();
-    currentMacros = micros();
+    currentMicros = micros();
 
     // Report status
     if (currentMillis - lastStatusReport >= STATUS_REPORT_INTERVAL) {
@@ -120,11 +121,14 @@ void loop() {
         // setESC(ESC_THREE_PIN, controlPacket.throttle);
         // setESC(ESC_FOUR_PIN, controlPacket.throttle);
 
-        if (currentMacros - lastControl >= CONTROL_PERIOD) {
+        if (currentMicros - lastControl >= CONTROL_PERIOD) {
             lastControl += CONTROL_PERIOD;
 
-            updateIMU();
-            updatePIDControl();
+            float dt = (currentMicros - lastUs) * 1e-6f;
+            lastUs = currentMicros;
+
+            updateIMU(dt);
+            updatePIDControl(dt);
         }
     }
 }
